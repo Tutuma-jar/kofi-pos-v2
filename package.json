@@ -1,0 +1,8 @@
+{
+  "name": "kofi-pos",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

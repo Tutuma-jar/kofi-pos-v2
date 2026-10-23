@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+*.tsbuildinfo
+
+# Variables de entorno: solo se versiona .env.example
+.env*
+!.env.example
+
+# Copias generadas por npm install (skills y subagente del proyecto) y skills de terceros instaladas por error en el proyecto.
+.claude/skills/
+.claude/agents/
+.codex/agents/
+.agents/skills/impeccable/
+.agents/skills/emil-design-eng/
+.claude/settings.local.json
+.impeccable/config.local.json
