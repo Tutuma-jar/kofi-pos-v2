@@ -408,6 +408,8 @@ Decisiones técnicas tomadas por el agente al implementar Preparación y Base co
 | --- | --- | --- | --- | --- |
 | DD-13 | T021 | `buildApp` recibe `db`, `clock` y `production`; registra `authPlugin` cuando recibe la base. `server.ts` proporciona la base de PostgreSQL y cierra su pool al cerrar la API | Permite las pruebas de salud y errores comunes sin abrir una base, y probar las rutas reales con PGlite. La cookie `Secure` depende explícitamente del entorno de producción | Leer `DATABASE_URL` en `buildApp`: acopla las pruebas y la construcción de la API al entorno de producción |
 
+Decisión delegada DD-14 (T025): la CLI admite solo el comando (`create` o `list` en US1) y pide los datos de creación interactivamente. La contraseña usa el modo sin eco de Node, exige una terminal interactiva y restaura su modo al terminar o cancelar. Se descarta admitir contraseñas como argumentos o por entrada redirigida porque podrían quedar en el historial o en archivos. `runAccounts` recibe la entrada/salida para probar el flujo con datos simulados sin cuentas reales ni dependencias nuevas.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles

@@ -71,7 +71,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas comprueban `204` con la cookie borrada, que después la sesión da `SESSION_MISSING`, que otra sesión de la misma cuenta sigue válida y que sin sesión también responde `204`.
 - [x] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
   Hecho cuando: las pruebas de integración crean una cuenta válida, rechazan cada dato fuera de «Datos de una cuenta» indicando cuál, y rechazan `ana` si ya existe `Ana`.
-- [ ] **T025 [api] [P] [US1]** Escribir `accounts.cli.ts` y el script `npm run accounts -w @kofi/api` con `create` y `list`; la contraseña se pide sin mostrarla y nunca se recibe como argumento (RF-13). Depende de: T024
+- [x] **T025 [api] [P] [US1]** Escribir `accounts.cli.ts` y el script `npm run accounts -w @kofi/api` con `create` y `list`; la contraseña se pide sin mostrarla y nunca se recibe como argumento (RF-13). Depende de: T024
   Hecho cuando: las pruebas ejecutan `create` y `list` con una entrada simulada y comprueban los mensajes en español, incluido el de usuario repetido.
 - [ ] **T026 [web] [P] [US1]** Escribir `LoginForm.tsx`: contraseña oculta, `maxLength` de 30 y 64, aviso del campo faltante con el esquema del contrato sin enviar, mensaje de la API, usuario conservado y contraseña vaciada tras un error, «No hay conexión. Inténtalo de nuevo» ante `NETWORK_ERROR` y envío con Intro (RF-1, RF-2, RF-3, RF-14, RNF-5). Depende de: T018
   Hecho cuando: las pruebas de componente, contra el cliente simulado, cubren el éxito, las credenciales incorrectas, los campos vacíos o solo con espacios (sin llamar al cliente), los límites de largo, la falta de conexión y el uso solo con teclado.
