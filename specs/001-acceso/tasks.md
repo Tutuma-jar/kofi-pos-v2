@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común y US1 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1 y US2 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -106,7 +106,7 @@ Rama: `feat/001-acceso-us2`.
   Hecho cuando: las pruebas cubren, con una ruta de prueba: la misma cuenta, otra cuenta, una ruta desconocida, una ruta que el rol no puede ver, el vencimiento detectado al recargar (sin cuenta en memoria), que el dato se borra tras usarlo, al cerrar sesión y ante `SESSION_TERMINATED`, y que un `SESSION_MISSING` posterior no lo borra.
 - [x] **T039 [integración] [US2]** Añadir a `e2e-server.ts` las rutas de prueba `POST /api/__test/clock` y `POST /api/__test/accounts/:username`, que no existen en `app.ts` (RF-9, RF-10, RF-12). Depende de: T032, T033, T034, T035, T036, T037, T038
   Hecho cuando: una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y las rutas de prueba adelantan el reloj y cambian una cuenta en la API de E2E.
-- [ ] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
+- [x] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2 contra la API real de E2E.
 
 ## Fase 5 — Pulido
