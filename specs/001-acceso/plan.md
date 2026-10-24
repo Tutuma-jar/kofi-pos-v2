@@ -6,7 +6,7 @@ Es la primera especificación del proyecto: además del módulo `auth`, crea los
 
 ## 1. Versión de la constitución
 
-Se planifica con la **versión 1.0.0** de [`docs/constitution.md`](../../docs/constitution.md) (2026-10-23).
+Se planifica con la **versión 2.0.0** de [`docs/constitution.md`](../../docs/constitution.md) (2026-10-24). El plan se escribió con la versión 1.0.0 (2026-10-23); la enmienda del principio 2 solo permite delegar la aprobación, y el control de la constitución de este plan no cambia.
 
 ## 2. Control de la constitución
 
