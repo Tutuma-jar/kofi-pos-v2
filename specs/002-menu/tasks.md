@@ -7,7 +7,7 @@ Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y 
 - **Frentes:** `[contrato]`, `[api]`, `[web]` e `[integración]`. Las tareas que tocan la raíz del monorepo, la E2E o el despliegue usan `[integración]`.
 - **`[P]`:** se puede hacer en paralelo con las tareas del otro frente de su fase. En Base común, las tareas `[api]` y `[web]` avanzan en paralelo una vez escrito el contrato. En las fases de historia, ninguna tarea `[web]` depende de una `[api]` ni al revés: las dos dependen solo de Preparación, Base común y, donde se indica, de SPEC-001. Dentro de un mismo frente, las tareas se hacen en orden de ID y declaran sus dependencias.
 - **Ramas** (`AGENTS.md`): Preparación y Base común en `feat/002-menu-definicion`, como en SPEC-001; cada historia en `feat/002-menu-usN`; Pulido en `feat/002-menu-pulido`.
-- **Dependencia de SPEC-001** (plan, D-1): las historias de Menú necesitan piezas de la historia 1 de Acceso (`requireSession`, la sesión de la interfaz y la pantalla inicial). Se indican como «SPEC-001 T0NN». **Ninguna historia de Menú empieza antes de que se fusione `feat/001-acceso-us1`** en `develop`.
+- **Dependencia de SPEC-001** (plan, D-1): las historias de Menú necesitan piezas de la historia 1 de Acceso (`requireSession`, la sesión de la interfaz y la pantalla inicial). Se indican como «SPEC-001 T0NN». Esa historia **ya está en `develop`** (#15, y la historia 2 en #17), así que la dependencia está cumplida; las historias de Menú empiezan cuando se fusione el PR de definición de 002.
 - **Tests primero:** en cada tarea se escriben primero sus tests y después el código (principio 4).
 
 ## Fase 1 — Preparación
@@ -52,12 +52,12 @@ Rama: `feat/002-menu-definicion`.
   Hecho cuando: el PR no tiene conflictos, `npm run typecheck`, `lint`, `format:check`, `test`, `build`, `test:git` y `test:e2e` pasan y la CI del PR pasa sobre el commit de la integración.
 - [x] **T038 [web]** Corregir D-10 según DD-17 de SPEC-001: la aplicación usa el cliente real del menú también en desarrollo, y el cliente simulado y su selector se activan solo con `?escenarios=menu` (combinable con `acceso`: `?escenarios=acceso,menu`); actualizar `plan.md` (D-10, D-11), T011, T012 y T023. Depende de: T037
   Hecho cuando: una prueba comprueba qué escenarios activa el parámetro `escenarios`, el build no contiene nada de `dev/` del menú, y `plan.md` y `tasks.md` describen ese comportamiento.
-- [ ] **T039 [integración]** Corregir los textos desfasados sobre SPEC-001: `plan.md` y `tasks.md` dejan de decir que `feat/001-acceso-us1` no está en `develop`, y las dependencias «SPEC-001 T0NN» se marcan como ya cumplidas. Depende de: T037
+- [x] **T039 [integración]** Corregir los textos desfasados sobre SPEC-001: `plan.md` y `tasks.md` dejan de decir que `feat/001-acceso-us1` no está en `develop`, y las dependencias «SPEC-001 T0NN» se marcan como ya cumplidas. Depende de: T037
   Hecho cuando: ningún texto de `specs/002-menu/` dice que la historia 1 de Acceso falta en `develop`.
 
 ## Fase 3 — US1: armar el menú (P1)
 
-Rama: `feat/002-menu-us1`. Empieza cuando `feat/001-acceso-us1` esté en `develop`.
+Rama: `feat/002-menu-us1`. La historia 1 de Acceso ya está en `develop` (#15).
 
 - [ ] **T014 [api] [P] [US1]** Escribir en `categories.service.ts` crear y renombrar una categoría: nombre normalizado, repetido según `name_key` sin contar la propia, `unique_violation` traducido al mensaje, todo en una transacción (plan §5.3; RF-3, RF-7, RF-8, RF-12). Depende de: T007
   Hecho cuando: las pruebas de integración crean una categoría activa, la renombran, aceptan «bebidas» → «Bebidas», rechazan un nombre repetido (también de una inactiva) con su mensaje y comprueban que un error deja la base sin cambios.
@@ -65,9 +65,9 @@ Rama: `feat/002-menu-us1`. Empieza cuando `feat/001-acceso-us1` esté en `develo
   Hecho cuando: las pruebas de integración cubren crear y editar; el `400` con nombre repetido, sin categoría y precio inválido a la vez; un nombre repetido en otra categoría y uno inactivo; crear en una categoría inactiva; editar el precio de un producto que está en una categoría inactiva; y la carrera simulada (categoría desactivada o nombre ocupado entre la comprobación y la escritura) con su mensaje.
 - [ ] **T016 [api] [P] [US1]** Escribir `menu.views.ts` con `getAdminMenu` y `getCurrentMenu`, ordenados con `compareMenuNames`, y exportar `getCurrentMenu` desde `modules/menu/index.ts` (plan §5.5; RF-2, RF-15). Depende de: T008
   Hecho cuando: las pruebas de integración comprueban que la administración tiene todas las categorías y productos, con «Sin productos» representado como lista vacía, en el orden de «Comparación de nombres»; y que `getCurrentMenu` da nombre, categoría y precio de cada producto vendible, sin inactivos ni categorías inactivas.
-- [ ] **T017 [api] [P] [US1]** Escribir `menu.routes.ts` con `menuPlugin`: `GET /api/menu/admin`, `POST` y `PUT /api/menu/categories`, `POST` y `PUT /api/menu/products`, con `requireSession` y `requireOwner` (plan §5.6, §6.2; RF-1 a RF-7). Depende de: T014, T015, T016, SPEC-001 T022
+- [ ] **T017 [api] [P] [US1]** Escribir `menu.routes.ts` con `menuPlugin`: `GET /api/menu/admin`, `POST` y `PUT /api/menu/categories`, `POST` y `PUT /api/menu/products`, con `requireSession` y `requireOwner` (plan §5.6, §6.2; RF-1 a RF-7). Depende de: T014, T015, T016, SPEC-001 T022 (ya en `develop`)
   Hecho cuando: las pruebas con `app.inject` cubren cada ruta con sus respuestas del contrato, `401` sin sesión y `403 FORBIDDEN` con una sesión de cajero sin cambios en la base, y `404` para un id inexistente o que no es un uuid.
-- [ ] **T018 [web] [P] [US1]** Hacer que `HomePage` muestre los enlaces que recibe de `routes.tsx` según el rol de la sesión y el aviso de `location.state.notice` (plan §5.7, D-8; RF-1). Depende de: T013, SPEC-001 T029
+- [ ] **T018 [web] [P] [US1]** Hacer que `HomePage` muestre los enlaces que recibe de `routes.tsx` según el rol de la sesión y el aviso de `location.state.notice` (plan §5.7, D-8; RF-1). Depende de: T013, SPEC-001 T029 (ya en `develop`)
   Hecho cuando: las pruebas de componente comprueban que el dueño ve «Administrar menú», que el cajero no lo ve y que el aviso recibido se muestra.
 - [ ] **T019 [web] [P] [US1]** Escribir `MenuAdminPage.tsx` y `MenuAdminList.tsx`: lista con categorías y productos, precio con `formatPrice`, etiquetas «Inactiva» e «Inactivo», «Sin productos», menú vacío, y vuelta a `/` con el aviso ante `403` (plan §5.7, D-9; RF-1, RF-2). Depende de: T011, T012, T013
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren el menú cargado, el menú vacío, las etiquetas y el escenario sin permiso.
@@ -77,7 +77,7 @@ Rama: `feat/002-menu-us1`. Empieza cuando `feat/001-acceso-us1` esté en `develo
   Hecho cuando: las pruebas de componente cubren crear, editar con la precarga, los mensajes de cada campo con lo escrito conservado, el aviso sin categorías activas y el uso solo con teclado.
 - [ ] **T022 [web] [P] [US1]** Escribir `SaveStatus.tsx` y el flujo de guardado de la página: «Cambios guardados» y lista recargada, o «No hay conexión. Los cambios no se guardaron» con lo escrito conservado (plan §5.7; RF-7). Depende de: T020, T021
   Hecho cuando: las pruebas de componente cubren un guardado correcto con la lista actualizada y el escenario sin conexión.
-- [ ] **T023 [integración] [US1]** Registrar `menuPlugin` en `app.ts`, comprobar que la aplicación usa el cliente real del menú sin `?escenarios=menu` (plan D-10) y añadir a `e2e-server.ts` la ruta de prueba `POST /api/__test/menu`, que carga un menú con los servicios del módulo (plan §8.2; RF-1 a RF-7). Depende de: T017, T018, T019, T020, T021, T022, SPEC-001 T030
+- [ ] **T023 [integración] [US1]** Registrar `menuPlugin` en `app.ts`, comprobar que la aplicación usa el cliente real del menú sin `?escenarios=menu` (plan D-10) y añadir a `e2e-server.ts` la ruta de prueba `POST /api/__test/menu`, que carga un menú con los servicios del módulo (plan §8.2; RF-1 a RF-7). Depende de: T017, T018, T019, T020, T021, T022, SPEC-001 T030 (ya en `develop`)
   Hecho cuando: la interfaz en `vite preview` administra el menú contra la API de E2E, una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y `npm test` sigue pasando.
 - [ ] **T024 [integración] [US1]** Escribir `e2e/menu-us1-armar-menu.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-7). Depende de: T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.

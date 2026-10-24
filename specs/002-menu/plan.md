@@ -4,10 +4,10 @@ Estado: aprobado (modo delegado) · Fecha: 2026-10-24 · Especificación: [`spec
 
 Añade el módulo `menu` a las dos aplicaciones y al contrato, sobre el monorepo, las herramientas y las decisiones globales que dejó [SPEC-001](../001-acceso/plan.md). No crea paquetes ni cambia el despliegue.
 
-**Dependencia de SPEC-001.** Las rutas y pantallas del menú necesitan la sesión de Acceso: `requireSession` en la API (001, T022), `SessionProvider`, `useSession` y `RequireSession` en la interfaz (001, T027), la pantalla inicial y su layout (001, T029) y una `buildApp` que reciba la base de datos (001, T030). Todo eso es de la historia 1 de Acceso (`feat/001-acceso-us1`), que aún no está en `develop`. Por eso:
+**Dependencia de SPEC-001.** Las rutas y pantallas del menú necesitan la sesión de Acceso: `requireSession` en la API (001, T022), `SessionProvider`, `useSession` y `RequireSession` en la interfaz (001, T027), la pantalla inicial y su layout (001, T029) y una `buildApp` que reciba la base de datos (001, T030). Todo eso es de la historia 1 de Acceso, que **ya está en `develop`** (#15, fusionado el 2026-10-24, junto con la historia 2 en #17). Por eso:
 
-- La Preparación y la Base común de este plan **no dependen** de esas piezas: contrato, migración, repositorios, cliente de la interfaz, cliente simulado y rutas provisionales.
-- Las historias de Menú empiezan **después de que se fusione `feat/001-acceso-us1`** en `develop`.
+- La Preparación y la Base común de este plan **no dependen** de esas piezas: contrato, migración, repositorios, cliente de la interfaz, cliente simulado y rutas provisionales. Se integraron con ellas al traer `develop` (T037).
+- Las historias de Menú empiezan cuando se fusione el PR de definición de 002: la dependencia de SPEC-001 ya está cumplida.
 
 ## 1. Versión de la constitución
 
@@ -353,7 +353,7 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 | # | Decisión | Por qué | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
-| D-1 | **El menú se integra en el monorepo de SPEC-001 sin dependencias nuevas**, y sus historias empiezan cuando se fusione `feat/001-acceso-us1` | Las rutas necesitan `requireSession` y las pantallas, la sesión de la interfaz; duplicarlas o simularlas en producción dejaría dos versiones de Acceso | Empezar las historias con un `requireSession` provisional: habría que reescribirlo y podría dejar rutas sin proteger | RF-1 |
+| D-1 | **El menú se integra en el monorepo de SPEC-001 sin dependencias nuevas**, y sus historias usan la sesión de Acceso (`feat/001-acceso-us1`, ya en `develop` desde #15) | Las rutas necesitan `requireSession` y las pantallas, la sesión de la interfaz; duplicarlas o simularlas en producción dejaría dos versiones de Acceso | Empezar las historias con un `requireSession` provisional: habría que reescribirlo y podría dejar rutas sin proteger | RF-1 |
 | D-2 | **Precios en centavos enteros** (`integer` en la base, `priceCents` en el contrato) y **`formatPrice` en el contrato** | Los enteros son exactos (RNF-2) y servirán a Ventas para sumar sin errores de redondeo. Una sola función de formato, compartida, evita que la API y la interfaz muestren un mismo precio de dos formas. Formatear no es calcular un importe (principio 3) | `numeric(7,2)`: `pg` lo devuelve como texto y cada capa tendría que convertirlo. `number` con decimales: 0,1 + 0,2 no da 0,3. Que la API devuelva el texto formateado: Ventas y Dashboard tendrían que pedir cada formato a la API | RF-6, RNF-2 |
 | D-3 | **Letras admitidas:** a–z, A–Z, vocales con tilde aguda, «ü» y «ñ», en mayúscula y minúscula. Los nombres se normalizan a NFC antes de validarlos | Es la lectura literal de «letras (con tildes, diéresis y «ñ»)» de la especificación. NFC hace que una «é» escrita con el acento aparte valga lo mismo que la compuesta | `\p{L}` (cualquier letra Unicode): admitiría alfabetos y signos que la especificación no menciona | RF-3, RF-6 |
 | D-4 | **Comparación con `name_key` calculada en la API** (`menuNameKey`) y **orden con `Intl.Collator('es', { sensitivity: 'base' })`** | La extensión `unaccent` no está garantizada en PGlite, y el orden de `ORDER BY` depende de la collation de cada base. `Intl` viene con Node 24 (ICU completo) y ordena la «ñ» después de la «n» | `unaccent` y una collation ICU en la base: dependen de cómo se creó la base en Neon y no se pueden probar igual con PGlite | RF-2, RF-3, RF-6, RF-14 |
@@ -464,3 +464,13 @@ Correcciones del 2026-10-24 a los hallazgos menores del análisis (ninguno bloqu
 | 2 | T023 depende también de SPEC-001 T030 | `tasks.md` |
 | 3 | Desactivar y reactivar también confirman con «Cambios guardados» o avisan de la falta de conexión (RF-7) | `tasks.md` T028 |
 | 4 | Los textos de largo máximo en la API y de «No se encontró…» quedan registrados en «Aclaraciones» de `spec.md` | §6.1; `spec.md` |
+
+## 11. Cambios tras la verificación
+
+Correcciones del 2026-10-24 a los «Cambios requeridos» de la primera verificación:
+
+| Cambio requerido | Corrección | Dónde |
+| --- | --- | --- |
+| Conflictos con `develop` (SPEC-001 US1 y US2 fusionadas) | Merge de `origin/develop`; `main.tsx` y `routes.tsx` conservan el montaje de SPEC-001 y añaden el proveedor y las rutas del menú | T037 |
+| D-10 contradecía DD-17 de SPEC-001 | Cliente real también en desarrollo; el simulado del menú, solo con `?escenarios=menu`. D-11 describe las dos comprobaciones de coherencia del cliente simulado | §3, §7 (D-10, D-11); T038 |
+| Textos que decían que `feat/001-acceso-us1` no estaba en `develop` | Dependencia marcada como cumplida | Encabezado, §7 (D-1); `tasks.md`; T039 |
