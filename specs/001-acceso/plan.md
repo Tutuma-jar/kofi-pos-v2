@@ -366,6 +366,7 @@ Todas se instalan en su última versión estable al crear el paquete, y la versi
 | Raíz | `@playwright/test` | desarrollo | D-10 |
 | `@kofi/contracts` | `zod` | producción | Principio 1 |
 | `@kofi/api` | `fastify` | producción | Principio 1 |
+| `@kofi/api` | `zod`, `@kofi/contracts` | producción | Principio 1 y §6: `config/env.ts` valida las variables de entorno con Zod, y las rutas validan con los esquemas del contrato. Se declaran para no depender de las dependencias de otro paquete |
 | `@kofi/api` | `@fastify/cookie` | producción | D-8 |
 | `@kofi/api` | `pg` | producción | D-6 |
 | `@kofi/api` | `@types/pg`, `@types/node` | desarrollo | Tipos de TypeScript de `pg` y de Node, que no los incluyen |
