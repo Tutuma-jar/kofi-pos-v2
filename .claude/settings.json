@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(git config core.hooksPath *)",
+      "Bash(git fetch *)", "Bash(git pull *)", "Bash(git switch *)", "Bash(git merge origin/develop *)",
+      "Bash(git add *)", "Bash(git commit *)", "Bash(git push -u origin *)", "Bash(git push origin *)",
+      "Bash(gh pr create *)", "Bash(gh pr edit *)", "Bash(gh pr view *)", "Bash(gh pr list *)",
+      "Bash(gh pr ready *)", "Bash(gh pr checks *)", "Bash(gh pr checkout *)", "Bash(gh pr comment *)",
+      "Bash(gh auth status *)",
+      "Bash(npm install *)", "Bash(npm run *)", "Bash(npm test *)",
+
+      "PowerShell(git status *)", "PowerShell(git diff *)", "PowerShell(git log *)", "PowerShell(git config core.hooksPath *)",
+      "PowerShell(git fetch *)", "PowerShell(git pull *)", "PowerShell(git switch *)", "PowerShell(git merge origin/develop *)",
+      "PowerShell(git add *)", "PowerShell(git commit *)", "PowerShell(git push -u origin *)", "PowerShell(git push origin *)",
+      "PowerShell(gh pr create *)", "PowerShell(gh pr edit *)", "PowerShell(gh pr view *)", "PowerShell(gh pr list *)",
+      "PowerShell(gh pr ready *)", "PowerShell(gh pr checks *)", "PowerShell(gh pr checkout *)", "PowerShell(gh pr comment *)",
+      "PowerShell(gh auth status *)",
+      "PowerShell(npm install *)", "PowerShell(npm run *)", "PowerShell(npm test *)"
+    ],
+    "deny": [
+      "Bash(git push * --force*)", "Bash(git push * -f *)", "Bash(git push -f *)", "Bash(git push --force*)",
+      "Bash(git push * develop*)", "Bash(git push * main*)", "Bash(gh pr merge *)",
+      "PowerShell(git push * --force*)", "PowerShell(git push * -f *)", "PowerShell(git push -f *)", "PowerShell(git push --force*)",
+      "PowerShell(git push * develop*)", "PowerShell(git push * main*)", "PowerShell(gh pr merge *)",
+      "Read(**/.env)", "Read(**/.env.*)"
+    ]
+  }
+}
