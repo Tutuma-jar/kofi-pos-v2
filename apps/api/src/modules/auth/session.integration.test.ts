@@ -69,6 +69,25 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
     expect((await session(first.token)).statusCode).toBe(200);
     expect((await session(second.token)).statusCode).toBe(200);
   });
+  it('cerrar es inmediato e idempotente y no afecta a otras sesiones (RF-7, RF-8)', async () => {
+    const first = await login();
+    const second = await login();
+    const close = (token?: string) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/auth/logout',
+        headers: token ? { cookie: `kofi_session=${token}` } : {},
+      });
+    const response = await close(first.token);
+    expect(response.statusCode).toBe(204);
+    expect(response.body).toBe('');
+    expect(String(response.headers['set-cookie'])).toContain('Max-Age=0');
+    expect((await session(first.token)).json().error.code).toBe('SESSION_MISSING');
+    expect((await session(second.token)).statusCode).toBe(200);
+    expect((await close(first.token)).statusCode).toBe(204);
+    expect((await close()).statusCode).toBe(204);
+    expect((await close('unknown')).statusCode).toBe(204);
+  });
   it('el hook impide ejecutar una operación sin sesión y permite la válida', async () => {
     expect((await app.inject({ method: 'POST', url: '/api/protected' })).statusCode).toBe(401);
     expect(handler).not.toHaveBeenCalled();

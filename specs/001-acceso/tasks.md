@@ -67,7 +67,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas con `app.inject` cubren `200` con `Set-Cookie` y todos sus atributos, incluido `Max-Age=648000`, `401 INVALID_CREDENTIALS`, `400 VALIDATION_ERROR` para campos vacíos o solo con espacios (sin contar intento), y que la contraseña no aparece en los registros de la API.
 - [x] **T022 [api] [P] [US1]** Escribir `resolveSession` (sin cookie, token desconocido o revocado → `SESSION_MISSING`), el hook `requireSession` (exportado en `modules/auth/index.ts`) y `GET /api/auth/session` (plan §5.2; RF-4, RF-5, RF-6, RF-8). Depende de: T013, T015
   Hecho cuando: las pruebas cubren `200` con `SessionUser`, `401 SESSION_MISSING` en los tres casos (con la cookie borrada), dos cookies de la misma cuenta como sesiones independientes y una ruta de prueba protegida que no ejecuta su manejador sin sesión.
-- [ ] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
+- [x] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
   Hecho cuando: las pruebas comprueban `204` con la cookie borrada, que después la sesión da `SESSION_MISSING`, que otra sesión de la misma cuenta sigue válida y que sin sesión también responde `204`.
 - [ ] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
   Hecho cuando: las pruebas de integración crean una cuenta válida, rechazan cada dato fuera de «Datos de una cuenta» indicando cuál, y rechazan `ana` si ya existe `Ana`.

@@ -23,6 +23,9 @@ export function toSessionUser(user: UserRecord): SessionUser {
 
 export function createAuthService({ db, clock }: AuthDeps) {
   return {
+    async logout(token?: string): Promise<void> {
+      if (token) await revokeSession(db, token, clock.now());
+    },
     async resolveSession(token?: string): Promise<SessionUser> {
       const session = token ? await findSessionByToken(db, token) : null;
       if (!session || session.revokedAt || !session.user) {

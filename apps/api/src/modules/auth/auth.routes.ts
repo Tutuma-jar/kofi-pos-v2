@@ -2,7 +2,7 @@ import { loginRequestSchema, loginResponseSchema, sessionResponseSchema } from '
 import type { FastifyPluginAsync } from 'fastify';
 import { validate } from '../../shared/http/validate.ts';
 import { createAuthService, type AuthDeps } from './auth.service.ts';
-import { SESSION_COOKIE, sessionCookieOptions } from './auth.cookie.ts';
+import { SESSION_COOKIE, sessionCookieOptions, clearSessionCookie } from './auth.cookie.ts';
 import { requireSession } from './auth.hook.ts';
 
 export const authPlugin: FastifyPluginAsync<AuthDeps & { production?: boolean }> = async (
@@ -10,6 +10,11 @@ export const authPlugin: FastifyPluginAsync<AuthDeps & { production?: boolean }>
   deps,
 ) => {
   const auth = createAuthService(deps);
+  app.post('/api/auth/logout', async (request, reply) => {
+    await auth.logout(request.cookies[SESSION_COOKIE]);
+    clearSessionCookie(reply, deps.production);
+    return reply.code(204).send();
+  });
   app.get(
     '/api/auth/session',
     { preHandler: requireSession(auth, deps.production) },
