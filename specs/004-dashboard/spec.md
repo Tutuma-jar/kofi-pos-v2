@@ -1,6 +1,6 @@
 # SPEC-004 — Dashboard
 
-Estado: borrador · Fecha: 2026-10-24
+Estado: revisada · Fecha: 2026-10-24
 
 Reglas globales (moneda, zona horaria, un solo local): ver [`docs/business-rules.md`](../../docs/business-rules.md#reglas-globales).
 
@@ -90,14 +90,16 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 **RF-5. Productos más vendidos** (HU-1)
 
 - El sistema deberá mostrar en cada resumen sus productos más vendidos, según «Datos de un resumen», en ese orden y cada uno como «[nombre] · [unidades] · [importe]».
-- Mientras un resumen no tenga ventas, el sistema deberá mostrar en lugar de los productos más vendidos el aviso «Todavía no hay ventas hoy» en el resumen de hoy y «Todavía no hay ventas este mes» en el del mes.
+- Mientras el resumen de hoy no tenga ventas, el sistema deberá mostrar en lugar de sus productos más vendidos el aviso «Todavía no hay ventas hoy».
+- El sistema deberá mostrar como dos productos distintos dos productos del menú que aparezcan con el mismo nombre en los más vendidos (por ejemplo, porque uno se renombró con el nombre que antes tenía el otro).
 
 **RF-6. Momento de los datos y actualización** (HU-1)
 
 - El sistema deberá calcular los resúmenes al abrir o recargar la pantalla y cuando la persona elige «Actualizar»; los resúmenes no se actualizan solos.
 - El sistema deberá mostrar en cada resumen el momento de sus datos: «Datos al 24/10/2026 11:00».
 - Cuando la persona elige «Actualizar» después de la medianoche, el sistema deberá mostrar como resumen de hoy el del día nuevo.
-- Mientras se calculan los resúmenes, el sistema deberá indicar que se están cargando y no permitir elegir «Actualizar» de nuevo.
+- Mientras se calculan los resúmenes, el sistema deberá mostrar «Cargando…» y no permitir elegir «Actualizar» de nuevo; si ya se mostraban resúmenes anteriores, deberá seguir mostrándolos mientras tanto.
+- El sistema deberá decidir qué es «hoy» y «el mes en curso» con su propia fecha y hora en hora de Bolivia, no con la de la computadora desde la que se consulta.
 
 **RF-7. Sin conexión** (HU-1)
 
@@ -113,12 +115,13 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 **RF-9. Ventas del mes en curso** (HU-2)
 
-- El sistema deberá mostrar, junto al resumen de hoy, el resumen del mes en curso con el título «[Mes] de [año]», por ejemplo «Octubre de 2026».
-- El sistema deberá contar en el resumen del mes todas las ventas registradas del mes en curso (ver «Conceptos»), y ninguna otra, con los datos de RF-3, RF-4 y RF-5 y el momento de sus datos (RF-6).
+- El sistema deberá mostrar en la pantalla «Resumen de ventas», después del resumen de hoy, el resumen del mes en curso con el título «[Mes] de [año]», por ejemplo «Octubre de 2026».
+- El sistema deberá contar en el resumen del mes todas las ventas registradas del mes en curso (ver «Conceptos»), y ninguna otra, con los datos de RF-3, RF-4 y RF-5, y calcularlo, actualizarlo y mostrar el momento de sus datos como indican RF-6 y RF-7.
+- Mientras el resumen del mes no tenga ventas, el sistema deberá mostrar en lugar de sus productos más vendidos el aviso «Todavía no hay ventas este mes».
 
 **RF-10. Ventas por día** (HU-2)
 
-- El sistema deberá mostrar en el resumen del mes una fila por cada día del mes en curso, desde el día 1 hasta hoy, en orden de fecha, cada una con su fecha, el total vendido ese día y su número de ventas: «01/10/2026 · Bs 8,00 · 1 venta».
+- El sistema deberá mostrar en el resumen del mes una fila por cada día del mes en curso, desde el día 1 hasta hoy, del más antiguo al más reciente, cada una con su fecha, el total vendido ese día y su número de ventas: «01/10/2026 · Bs 8,00 · 1 venta».
 - El sistema deberá mostrar los días sin ventas con «Bs 0,00 · 0 ventas».
 - El sistema deberá mostrar filas por día cuyos totales sumen exactamente el total vendido del mes y cuyos números de ventas sumen exactamente su número de ventas.
 
@@ -126,7 +129,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 - **RNF-1. Idioma.** Todos los textos y mensajes para la persona están en español.
 - **RNF-2. Cifras exactas.** Los totales, importes y sumas son exactos al centavo: ninguno pierde ni gana centavos por redondeo. Solo la venta promedio se redondea, como indica «Datos de un resumen».
-- **RNF-3. Rapidez.** Desde la computadora del local, con hasta 6000 ventas registradas en el mes en curso, en el 95 % de los casos abrir «Resumen de ventas» o elegir «Actualizar» muestra los dos resúmenes en menos de 2 segundos. No cuenta la primera operación tras un período sin uso del sistema, mientras el servicio se reactiva (como en SPEC-001, RNF-4).
+- **RNF-3. Rapidez.** Desde la computadora del local, con hasta 6000 ventas registradas en el mes en curso, en el 95 % de los casos abrir «Resumen de ventas» o elegir «Actualizar» muestra todos sus resúmenes en menos de 2 segundos. No cuenta la primera operación tras un período sin uso del sistema, mientras el servicio se reactiva (como en SPEC-001, RNF-4).
 - **RNF-4. Uso con teclado.** Se puede llegar a «Resumen de ventas» y a «Actualizar» y elegirlos solo con teclado.
 
 ## 6. Casos límite
@@ -134,7 +137,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 | Caso | Comportamiento esperado |
 | --- | --- |
 | Todavía no hay ventas hoy | Total «Bs 0,00», «0 ventas», promedio «—», los dos medios de pago en «Bs 0,00 · 0 ventas» y el aviso «Todavía no hay ventas hoy» (RF-3 a RF-5). |
-| No hay ninguna venta registrada en el sistema | Los dos resúmenes vacíos, con sus avisos, y en el del mes todos los días con «Bs 0,00 · 0 ventas» (RF-3 a RF-5, RF-10). |
+| No hay ninguna venta registrada en el sistema | Los dos resúmenes vacíos, con sus avisos, y en el del mes todos los días con «Bs 0,00 · 0 ventas» (RF-3 a RF-5, RF-9, RF-10). |
 | Una venta registrada a las 23:59 y otra a las 00:00 del día siguiente, en hora de Bolivia | Cada una cuenta en su día (RF-2, RF-10). |
 | Una venta registrada el último día del mes anterior a las 23:59 | No cuenta en el mes en curso (RF-9). |
 | Hoy es el día 1 del mes | El resumen del mes tiene las mismas cifras que el de hoy y una sola fila por día (RF-9, RF-10). |
@@ -151,6 +154,9 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 | Un cajero abre la dirección del resumen | Ve «No tienes permiso para ver el resumen de ventas», sin cifras (RF-1). |
 | La sesión vence mientras se muestra el resumen y se elige «Actualizar» | Se aplica SPEC-001, RF-10 (RF-1). |
 | Se corta la conexión al elegir «Actualizar» | Se ve «No hay conexión. Inténtalo de nuevo» y siguen visibles las cifras anteriores, con el momento de sus datos (RF-7). |
+| La computadora del local tiene otra zona horaria o la hora equivocada | «Hoy» y «el mes en curso» siguen siendo los de la fecha y la hora del sistema en Bolivia (RF-6). |
+| Un producto se renombró con el nombre que antes tenía otro, y los dos se vendieron en el período | Aparecen como dos productos distintos, aunque se muestren con el mismo nombre (RF-5). |
+| Se elige «Actualizar» con resúmenes ya visibles | Se ve «Cargando…» y siguen visibles las cifras anteriores hasta que llegan las nuevas (RF-6). |
 | Un mes con 6000 ventas | Los resúmenes se muestran en menos de 2 segundos (RNF-3). |
 
 ## 7. Fuera de alcance
@@ -169,7 +175,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 - El dueño ve el total vendido hoy, separado en efectivo y QR, en menos de 10 segundos desde la pantalla inicial.
 - En el 100 % de los resúmenes, el total vendido es la suma exacta de los totales de sus ventas, los importes por medio de pago suman el total vendido y, en el del mes, las filas por día suman el total del mes.
 - Ninguna venta se cuenta en un día o un mes distinto del de su fecha y hora de registro en hora de Bolivia.
-- Ningún cajero ve una cifra del resumen de ventas mientras siga sin aclararse si debe verlo.
+- Ninguna sesión ve cifras del resumen de ventas que su rol no puede ver según «Usuarios».
 - Ningún cambio del menú ni de las cuentas cambia las cifras de las ventas ya registradas.
 
 ## 9. Dudas abiertas
@@ -197,3 +203,14 @@ La persona delegó la definición completa de 004-dashboard («Delego la definic
 - **Decisión delegada:** Mientras no se aclare la duda 2, solo el dueño ve el resumen de ventas, y un cajero recibe «No tienes permiso para ver el resumen de ventas». (Motivo: SPEC-001 anticipa que el dueño tiene acceso a los reportes; dar acceso al cajero sin confirmarlo mostraría datos del negocio que el dueño quizá no quiera compartir, mientras que darlo después solo añade un permiso. Alternativa descartada: mostrar el resumen de hoy a los dos roles.) (Aplicado en «Usuarios», RF-1 y «Dudas abiertas».)
 - **Decisión delegada:** Rapidez de menos de 2 segundos con hasta 6000 ventas en el mes. (Motivo: 2 segundos es el umbral de SPEC-001 a SPEC-003 para abrir una pantalla, y 6000 ventas son unas 200 por día durante 30 días, más de lo que atiende una cafetería pequeña con una o dos personas. Alternativa descartada: no fijar un volumen, que deja el requisito sin medida.) (Aplicado en RNF-3.)
 - **Decisión delegada:** Quedan fuera las comparaciones con períodos anteriores, los resúmenes por persona, categoría u hora, el arqueo de caja, la exportación y los gráficos. (Motivo: ninguno es necesario para saber cuánto se vendió hoy y en el mes, y cada uno trae reglas propias; los períodos anteriores son del Historial. Alternativa descartada: incluir la comparación con el día anterior.) (Aplicado en «Fuera de alcance».)
+
+**Revisión de QA.** En modo delegado, cada hallazgo se decidió con la recomendación indicada.
+
+- **Decisión delegada:** (Hallazgo 1) RF-6 no decía qué ve la persona mientras se calculan los resúmenes. → «Cargando…», y las cifras anteriores siguen visibles hasta que llegan las nuevas. (Motivo: la persona sabe que se está actualizando sin perder de vista lo que ya tenía. Alternativa descartada: vaciar la pantalla mientras carga.) (Aplicado en RF-6 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 2) RF-10 no decía en qué sentido se ordenan los días. → Del más antiguo (día 1) al más reciente (hoy). (Motivo: se lee como un calendario y muestra la marcha del mes. Alternativa descartada: de hoy hacia atrás.) (Aplicado en RF-10.)
+- **Decisión delegada:** (Hallazgo 3) RF-5, de HU-1, definía el aviso del resumen del mes, que es de HU-2. → El aviso del mes pasa a RF-9. (Motivo: HU-1 debe poder probarse sin el resumen del mes. Alternativa descartada: mover RF-5 a HU-2.) (Aplicado en RF-5 y RF-9.)
+- **Decisión delegada:** (Hallazgo 4) RF-9 mostraba el mes «junto al resumen de hoy», que hacía depender HU-2 de HU-1. → El resumen del mes va en la misma pantalla, después del de hoy si existe, y sigue las mismas reglas de cálculo, actualización y conexión (RF-6, RF-7). (Motivo: las dos historias comparten la pantalla, pero cada una se prueba sola. Alternativa descartada: una pantalla propia para el mes, que obliga a ir y volver para ver las dos cifras.) (Aplicado en RF-9.)
+- **Decisión delegada:** (Hallazgo 5) RNF-3 hablaba de «los dos resúmenes», pero con solo HU-1 hay uno. → «Todos sus resúmenes». (Motivo: el requisito vale con una o con las dos historias. Alternativa descartada: ninguna.) (Aplicado en RNF-3.)
+- **Decisión delegada:** (Hallazgo 6) No se cubría una computadora con otra zona horaria o con la hora equivocada. → «Hoy» y «el mes en curso» los decide la fecha y la hora del sistema en Bolivia. (Motivo: las ventas se registran con la hora del sistema (SPEC-003), y así el resumen es el mismo desde cualquier computadora. Alternativa descartada: usar la fecha de la computadora.) (Aplicado en RF-6 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 7) No se cubría que dos productos distintos aparezcan con el mismo nombre en los más vendidos. → Se muestran como dos productos. (Motivo: es la regla de contar cada producto del menú por separado, aunque se renombre; el caso es raro y unirlos mezclaría ventas de productos distintos. Alternativa descartada: unirlos por nombre.) (Aplicado en RF-5 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 8) Un criterio de finalización dependía de la duda abierta 2 y cambiaría de sentido al responderla. → Ninguna sesión ve cifras que su rol no puede ver según «Usuarios». (Motivo: el criterio sigue valiendo con cualquier respuesta. Alternativa descartada: ninguna.) (Aplicado en «Criterios de finalización».)
