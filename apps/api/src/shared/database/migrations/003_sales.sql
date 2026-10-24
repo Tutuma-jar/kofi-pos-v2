@@ -20,7 +20,9 @@ CREATE TABLE sales (
   registered_by_user_id uuid REFERENCES users (id) ON DELETE SET NULL,
   registered_by_name text NOT NULL CHECK (char_length(registered_by_name) BETWEEN 1 AND 40),
   registered_by_role text NOT NULL CHECK (registered_by_role IN ('owner', 'cashier')),
-  total_cents integer NOT NULL CHECK (total_cents >= 1)
+  total_cents integer NOT NULL CHECK (total_cents >= 1),
+  -- Efectivo o QR, los medios de pago de Kofi (RF-6; D-13).
+  payment_method text NOT NULL CHECK (payment_method IN ('cash', 'qr'))
 );
 
 CREATE INDEX sales_registered_at_idx ON sales (registered_at);

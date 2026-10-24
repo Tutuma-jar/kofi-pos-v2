@@ -47,14 +47,19 @@ let draftCounter = 0;
 async function insertSale(
   tx: Queryable,
   fixture: Fixture,
-  { number = 1, totalCents, lines }: { number?: number; totalCents: number; lines: LineInput[] },
+  {
+    number = 1,
+    totalCents,
+    lines,
+    paymentMethod = 'cash',
+  }: { number?: number; totalCents: number; lines: LineInput[]; paymentMethod?: string | null },
 ) {
   const draftId = `00000000-0000-4000-8000-${String(++draftCounter).padStart(12, '0')}`;
   const sale = await tx.query<{ id: string }>(
     `INSERT INTO sales (number, draft_id, registered_at, registered_by_user_id, registered_by_name,
-       registered_by_role, total_cents)
-     VALUES ($1, $2, '2026-10-24T18:05:12Z', $3, 'Ana', 'cashier', $4) RETURNING id`,
-    [number, draftId, fixture.userId, totalCents],
+       registered_by_role, total_cents, payment_method)
+     VALUES ($1, $2, '2026-10-24T18:05:12Z', $3, 'Ana', 'cashier', $4, $5) RETURNING id`,
+    [number, draftId, fixture.userId, totalCents, paymentMethod],
   );
   const saleId = sale.rows[0]!.id;
   for (const [index, line] of lines.entries()) {
@@ -117,6 +122,21 @@ describe('003_sales.sql', () => {
     ]);
   });
 
+  it('guarda el medio de pago, efectivo o QR (RF-6, D-13)', async () => {
+    await db.transaction((tx) => insertSale(tx, fixture, twoLines()));
+    await db.transaction((tx) =>
+      insertSale(tx, fixture, { ...twoLines(), number: 2, paymentMethod: 'qr' }),
+    );
+    const methods = await db.query('SELECT payment_method FROM sales ORDER BY number');
+    expect(methods.rows).toEqual([{ payment_method: 'cash' }, { payment_method: 'qr' }]);
+  });
+
+  it.each([null, 'card'])('rechaza el medio de pago %s', async (paymentMethod) => {
+    await expect(
+      db.transaction((tx) => insertSale(tx, fixture, { ...twoLines(), paymentMethod })),
+    ).rejects.toThrow(/null|check/i);
+  });
+
   it('rechaza un subtotal distinto del precio por la cantidad', async () => {
     const sale = twoLines();
     sale.lines[0]!.subtotalCents = 2400;
@@ -140,7 +160,7 @@ describe('003_sales.sql', () => {
     await expect(
       db.query(
         `INSERT INTO sales (number, draft_id, registered_at, registered_by_name, registered_by_role,
-           total_cents) VALUES (2, $1, now(), 'Ana', 'cashier', 1)`,
+           total_cents, payment_method) VALUES (2, $1, now(), 'Ana', 'cashier', 1, 'cash')`,
         [draft.rows[0]!.draft_id],
       ),
     ).rejects.toThrow(/unique|duplicate/i);
