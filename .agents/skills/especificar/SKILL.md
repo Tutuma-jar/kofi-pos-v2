@@ -1,7 +1,6 @@
 ---
 name: especificar
-description: Paso 1 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /especificar o $especificar.
-disable-model-invocation: true
+description: Paso 1 del ciclo SDD de Kofi POS. Escribe o continúa la spec.md de una funcionalidad (specs/NNN-<nombre>/). Usar al empezar una funcionalidad nueva o cuando la persona pida especificarla.
 ---
 
 # Especificar
@@ -18,10 +17,10 @@ Si falta la constitución o las reglas de negocio, detente y dilo.
 
 ## Procedimiento
 
-1. **Número y nombre.** `NNN` es el siguiente número de tres dígitos después del mayor de `specs/` (`001` si no hay ninguno); nunca se reutiliza. `<nombre>` va en kebab-case, sin tildes ni `ñ`. Confírmalos con la persona.
+1. **Número y nombre.** `NNN` es el siguiente número de tres dígitos después del mayor de `specs/` (`001` si no hay ninguno); nunca se reutiliza. `<nombre>` va en kebab-case, sin tildes ni `ñ`. Confírmalos con la persona; en modo delegado, decídelos tú.
 2. **Rama.** Trabaja en `feat/NNN-<nombre>-definicion`. Si la rama ya existe en GitHub, únete con `git fetch` y `git switch <rama>`; si no, créala con `git switch -c <rama>`. Si la persona decidió hacer la especificación en una sola rama, usa `feat/NNN-<nombre>`.
 3. **Contexto.** Lee la constitución y las reglas de negocio. Las reglas globales (moneda, zona horaria, un solo local) no se copian en la especificación: se enlazan.
-4. **Preguntas.** Pregunta **de una en una**, como máximo 10, sobre casos límite, errores y alcance. Espera cada respuesta antes de la siguiente.
+4. **Preguntas.** Pregunta **de una en una**, como máximo 10, sobre casos límite, errores y alcance. Espera cada respuesta antes de la siguiente. En modo delegado (`AGENTS.md`) no preguntes: decide cada punto con tu recomendación y regístralo en «Aclaraciones» como decisión delegada.
 5. **Escribe `specs/NNN-<nombre>/spec.md`** con este formato:
    1. **Contexto y objetivo.**
    2. **Usuarios.**
@@ -44,11 +43,12 @@ Si falta la constitución o las reglas de negocio, detente y dilo.
 
        ### AAAA-MM-DD
        - **P:** ¿…? → **R:** … (Aplicado en RF-3.)
+       - **Decisión delegada:** … (Motivo: …; alternativa descartada: …) (Aplicado en RF-4.)
        ```
 
    La fecha es la de hoy en hora de Bolivia, obtenida al ejecutarla: `node -e "console.log(new Intl.DateTimeFormat('en-CA',{timeZone:'America/La_Paz'}).format(new Date()))"`.
-6. **Aprobación.** Muestra la especificación y pide su aprobación. Aplica los cambios que pida hasta que la apruebe.
-7. **Commit y PR.** Con la aprobación, haz el commit `docs(<scope>): especificar <nombre>` (`<scope>` es el nombre del módulo en el código: `auth`, `menu`, `sales`, `dashboard` o `history`) y publica la rama con `git push -u origin <rama>`. Si la rama aún no tiene PR, ábrelo **en borrador** hacia `develop`, con la descripción de `AGENTS.md` y el estado «Especificación aprobada, pendiente de revisión».
+6. **Aprobación.** Muestra la especificación y pide su aprobación. Aplica los cambios que pida hasta que la apruebe. En modo delegado no la pidas: la especificación se aprueba al fusionar el PR de definición.
+7. **Commit y PR.** Con la aprobación (o, en modo delegado, al terminar), haz el commit `docs(<scope>): especificar <nombre>` (`<scope>` es el nombre del módulo en el código: `auth`, `menu`, `sales`, `dashboard` o `history`) y publica la rama con `git push -u origin <rama>`. Si la rama aún no tiene PR, ábrelo **en borrador** hacia `develop`, con la descripción de `AGENTS.md` y el estado «Especificación aprobada, pendiente de revisión».
 
 ## Salida
 
@@ -57,5 +57,5 @@ Si falta la constitución o las reglas de negocio, detente y dilo.
 ## Límites
 
 - No decide stack, arquitectura, archivos ni código.
-- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio.
-- Termina pidiendo la aprobación de la persona, sin pasar al paso siguiente (`/revisar-spec`).
+- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio. En modo delegado los decide con su recomendación y los registra; un dato que solo conocen las personas se marca `[NECESITA ACLARACIÓN]`.
+- Termina pidiendo la aprobación de la persona. Con su aprobación, o en modo delegado, sigue con la skill `revisar-spec`.

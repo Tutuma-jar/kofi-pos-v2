@@ -1,7 +1,6 @@
 ---
 name: desglosar
-description: Paso 4 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /desglosar o $desglosar.
-disable-model-invocation: true
+description: Paso 4 del ciclo SDD de Kofi POS. Escribe el tasks.md de una especificación, en fases verticales por historia. Usar cuando el plan.md está terminado, o cuando la persona pida las tareas.
 ---
 
 # Desglosar
@@ -11,7 +10,7 @@ Escribe el `tasks.md` de una especificación: el trabajo, en fases verticales po
 ## Entrada
 
 - `docs/constitution.md`.
-- `specs/NNN-<nombre>/spec.md` y `plan.md`, ya aprobados por la persona.
+- `specs/NNN-<nombre>/spec.md` y `plan.md`, ya aprobados por la persona (en modo delegado, terminados con sus skills).
 
 Si falta alguno, o el control de la constitución de `plan.md` tiene un principio sin cumplir ni justificar, detente y dilo.
 
@@ -54,8 +53,8 @@ Si falta alguno, o el control de la constitución de `plan.md` tiene un principi
    - Cada historia cierra con su tarea `[integración]`, que cambia el cliente simulado por el real y añade la prueba de punta a punta.
    - Cada RF de `spec.md` tiene al menos una tarea, y cada tarea traza a un RF o a Preparación, Base común o Pulido.
 5. **`quickstart.md` (solo si la persona lo pide):** pasos para comprobar a mano la funcionalidad, por historia, con los datos de partida, las acciones y el resultado esperado.
-6. **Aprobación.** Muestra las tareas y pide su aprobación. Aplica los cambios que pida hasta que las apruebe.
-7. **Commit y PR.** Con la aprobación, haz el commit `docs(<scope>): desglosar <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Tareas aprobadas, pendiente de análisis».
+6. **Aprobación.** Muestra las tareas y pide su aprobación. Aplica los cambios que pida hasta que las apruebe. En modo delegado no la pidas: las tareas se aprueban al fusionar el PR de definición.
+7. **Commit y PR.** Con la aprobación (o, en modo delegado, al terminar), haz el commit `docs(<scope>): desglosar <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Tareas aprobadas, pendiente de análisis».
 
 ## Salida
 
@@ -64,5 +63,5 @@ Si falta alguno, o el control de la constitución de `plan.md` tiene un principi
 ## Límites
 
 - No escribe código.
-- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio.
-- Termina pidiendo la aprobación de la persona, sin pasar al paso siguiente (`/analizar`).
+- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio. En modo delegado decide con su recomendación y lo registra.
+- Termina pidiendo la aprobación de la persona. Con su aprobación, o en modo delegado, sigue con la skill `analizar`.

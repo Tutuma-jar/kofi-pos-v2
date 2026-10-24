@@ -1,7 +1,6 @@
 ---
 name: implementar
-description: Paso 6 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /implementar T<nnn> o $implementar T<nnn>.
-disable-model-invocation: true
+description: Paso 6 del ciclo SDD de Kofi POS. Implementa una tarea de tasks.md con tests primero, commit y PR actualizado. Usar para implementar una tarea (T<nnn>) o la siguiente pendiente de la fase de la rama, cuando la definición ya está analizada.
 ---
 
 # Implementar
@@ -10,7 +9,7 @@ Implementa **una sola tarea** de `tasks.md`: tests primero, código después, co
 
 ## Entrada
 
-- El ID de la tarea (`T<nnn>`) que indica la persona. Si no lo indica, pregúntalo.
+- El ID de la tarea (`T<nnn>`) que indica la persona. Si no lo indica, toma la primera tarea sin marcar de la fase de la rama cuyas dependencias estén marcadas; si hay más de una, la de menor ID.
 - `docs/constitution.md` y `docs/architecture.md`.
 - `specs/NNN-<nombre>/spec.md`, `plan.md` y `tasks.md`.
 
@@ -27,10 +26,10 @@ Si falta alguno de esos archivos, detente y dilo.
    - Si la persona decidió hacer la especificación en una sola rama → `feat/NNN-<nombre>`.
 
    Si no estás en esa rama, **detente** y dilo. Integra lo publicado por la otra persona con `git pull` (merge, nunca rebase).
-4. **Bloqueos.** Detente si el último análisis tiene hallazgos bloqueantes o si hay `[NECESITA ACLARACIÓN]` abiertos que afecten a la historia de la tarea.
+4. **Bloqueos.** Detente si el último análisis tiene hallazgos bloqueantes o si hay `[NECESITA ACLARACIÓN]` abiertos que afecten a la historia de la tarea. Para una tarea de historia, el PR de definición debe estar fusionado en `develop`.
 5. **Tests primero.** Escribe los tests que cubren los RF de la tarea y su línea «Hecho cuando:». Ejecútalos y comprueba que fallan por la razón esperada.
-6. **Código.** Escribe el código mínimo para que pasen, siguiendo `plan.md`, `docs/architecture.md` y el contrato de `packages/contracts`. Si algo no encaja con `spec.md` o `plan.md`, detente y propón corregir uno de los dos.
-7. **Comprobaciones.** Ejecuta las comprobaciones de «Comandos» de `AGENTS.md` que existan y anota los comandos y sus resultados reales.
+6. **Código.** Escribe el código mínimo para que pasen, siguiendo `plan.md`, `docs/architecture.md` y el contrato de `packages/contracts`. Si algo no encaja con `spec.md` o `plan.md`, detente y propón corregir uno de los dos; en modo delegado, aplica «Bloqueos y correcciones» de `AGENTS.md`.
+7. **Comprobaciones.** Ejecuta las comprobaciones de «Comandos» de `AGENTS.md` que existan y anota los comandos y sus resultados reales. Si alguna falla, corrígela; si el mismo fallo persiste tras dos intentos, detente e infórmalo.
 8. **Casilla.** Marca la tarea en `tasks.md`.
 9. **Commit.** Agrega los archivos de forma explícita, revisa el diff (sin secretos, `.env` ni archivos temporales) y haz un commit con el formato de `AGENTS.md`, terminado en `Refs: SPEC-NNN (T<nnn>)`.
 10. **Publicación y PR.** Publica la rama con `git push -u origin <rama>`. Si la rama no tiene PR, ábrelo **en borrador** hacia `develop`; si ya lo tiene, actualiza su descripción. Las secciones salen de datos reales:
@@ -39,8 +38,8 @@ Si falta alguno de esos archivos, detente y dilo.
     - **Verificación:** los comandos ejecutados en esta tarea y su resultado, con extractos reales de los errores.
     - **Relacionado:** `specs/NNN-<nombre>/` y las especificaciones de las que depende.
     - **Observaciones:** problemas conocidos, desvíos respecto a `plan.md` y pasos pendientes.
-11. **Verificación.** Si era la última casilla de la fase de la rama, aplica la regla 6 de `AGENTS.md`: delega en el subagente `verificador` con el mensaje exacto `Verifica SPEC-NNN (PR #M).`
-12. **Informe.** Indica qué RF cubre la tarea, el resultado de las comprobaciones, el enlace al PR y, si hubo verificación, su veredicto. Después **detente**.
+11. **Verificación.** Si era la última casilla de la fase de la rama, aplica la regla 6 de `AGENTS.md`: delega en el subagente `verificador` con el mensaje exacto `Verifica SPEC-NNN (PR #M).` Si pide cambios, sigue «Bloqueos y correcciones»: añade las tareas de corrección e impleméntalas con esta misma skill.
+12. **Informe.** Indica qué RF cubre la tarea, el resultado de las comprobaciones, el enlace al PR y, si hubo verificación, su veredicto. Después **detente**, salvo que la persona haya pedido continuar o estés en modo delegado: en ese caso, sigue con la siguiente tarea de la fase.
 
 ## Salida
 
@@ -48,7 +47,7 @@ La tarea implementada con sus tests, la casilla marcada, un commit y el PR actua
 
 ## Límites
 
-- No empieza la siguiente tarea, aunque sea pequeña o esté relacionada, salvo que la persona lo pida.
+- No empieza la siguiente tarea, aunque sea pequeña o esté relacionada, salvo que la persona lo pida o esté en modo delegado.
 - No hace tareas de otra fase que la de la rama.
 - No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio y de la ejecución real.
-- Termina pidiendo la aprobación de la persona, sin pasar a la siguiente tarea.
+- Termina pidiendo la aprobación de la persona, salvo que deba continuar con la siguiente tarea.
