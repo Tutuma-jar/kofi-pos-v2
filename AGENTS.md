@@ -104,6 +104,6 @@ Requisitos: Node 24 y npm 11.
 
 | Acción | Comando |
 | --- | --- |
-| Instalar dependencias (activa los hooks de Git) | `npm install` |
+| Instalar dependencias (activa los hooks de Git y las skills) | `npm install` |
 | Pruebas de las reglas de Git | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |
