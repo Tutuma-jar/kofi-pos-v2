@@ -61,7 +61,7 @@ Rama: `feat/001-acceso-definicion`.
 
 Rama: `feat/001-acceso-us1`.
 
-- [ ] **T020 [api] [P] [US1]** Escribir el ingreso en `auth.service.ts`: usuario normalizado, contraseña exacta, hash ficticio si el usuario no existe, sesión de 12 h y revocación de la sesión anterior del mismo navegador, todavía sin bloqueo (plan §5.1; RF-1, RF-2, RF-6, RNF-2). Depende de: T012, T014, T015
+- [x] **T020 [api] [P] [US1]** Escribir el ingreso en `auth.service.ts`: usuario normalizado, contraseña exacta, hash ficticio si el usuario no existe, sesión de 12 h y revocación de la sesión anterior del mismo navegador, todavía sin bloqueo (plan §5.1; RF-1, RF-2, RF-6, RNF-2). Depende de: T012, T014, T015
   Hecho cuando: las pruebas de integración cubren el ingreso correcto con `"  Ana "`, la contraseña con otra mayúscula, el usuario inexistente y la contraseña incorrecta (el mismo error), que `verifyPassword` se ejecuta exactamente una vez tanto con un usuario inexistente como con uno existente (espía, plan §8.3) y una sesión nueva que revoca la anterior.
 - [ ] **T021 [api] [P] [US1]** Escribir `POST /api/auth/login` en `auth.routes.ts`, con la cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age=648000`, D-15) y `@fastify/cookie` (D-8) (RF-1, RF-2, RF-3, RF-10, RNF-1). Depende de: T013, T020
   Hecho cuando: las pruebas con `app.inject` cubren `200` con `Set-Cookie` y todos sus atributos, incluido `Max-Age=648000`, `401 INVALID_CREDENTIALS`, `400 VALIDATION_ERROR` para campos vacíos o solo con espacios (sin contar intento), y que la contraseña no aparece en los registros de la API.
