@@ -35,7 +35,7 @@ Rama: `feat/002-menu-definicion`.
   Hecho cuando: las pruebas de integración cubren cada función, incluida la búsqueda por `name_key` que excluye la propia categoría y cuenta las inactivas.
 - [x] **T008 [api] [P]** Escribir `products.repository.ts`: insertar, actualizar nombre, categoría y precio, cambiar `active`, buscar por id (con `FOR UPDATE`), buscar otro producto por `name_key`, listar todos y listar los vigentes con su categoría (plan §5.3 a §5.5; RF-4, RF-5, RF-9, RF-12, RF-15). Depende de: T005, T006
   Hecho cuando: las pruebas de integración cubren cada función; el precio se lee como el entero guardado; la lista de vigentes excluye los productos inactivos y los de categorías inactivas.
-- [ ] **T009 [web] [P]** Hacer que `shared/http/api-fetch.ts` admita `PUT` (plan D-7). Depende de: T001
+- [x] **T009 [web] [P]** Hacer que `shared/http/api-fetch.ts` admita `PUT` (plan D-7). Depende de: T001
   Hecho cuando: una prueba comprueba una petición `PUT` con cuerpo JSON, y las pruebas existentes siguen pasando.
 - [ ] **T010 [web] [P]** Escribir `modules/menu/api/menu-client.ts`: interfaz `MenuClient` con las 10 operaciones del contrato y su cliente HTTP real sobre `api-fetch` (plan §6.2; RF-1 a RF-6, RF-9, RF-10, RF-14). Depende de: T005, T009
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada operación, que las respuestas se validan con los esquemas del contrato y que un `ApiError` se propaga.

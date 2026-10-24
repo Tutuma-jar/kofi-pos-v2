@@ -32,7 +32,7 @@ interface ResponseSchema<T> {
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST';
+  method?: 'GET' | 'POST' | 'PUT';
   body?: unknown;
 }
 
