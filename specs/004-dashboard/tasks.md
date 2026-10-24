@@ -1,6 +1,6 @@
 # Tareas — SPEC-004 Dashboard
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024); correcciones tras las respuestas a las dudas abiertas (T025–T027) pendientes · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024) y las correcciones tras las respuestas a las dudas abiertas (T025–T027) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -49,7 +49,7 @@ Rama: `feat/004-dashboard-definicion`.
   Hecho cuando: las pruebas comprueban `DASHBOARD_MONTH_ROLES` y los textos, validan el `403` del mes de §6.2 del plan con `apiErrorSchema`, el contrato ya no exporta `DASHBOARD_ROLES`, y `npm run typecheck` pasa.
 - [x] **T026 [web] [P]** Hacer que la ruta `/resumen` sea de los dos roles, sin `roles` propios (plan §3, D-9; RF-1). Depende de: T008
   Hecho cuando: las pruebas de rutas navegan a `/resumen` con una sesión de dueño y otra de cajero, comprueban que sus `roles` son los dos y que `canView` la permite a los dos.
-- [ ] **T027 [web] [P]** Hacer que el escenario «Sin permiso» del cliente simulado responda el resumen de hoy y rechace solo el del mes con `403 FORBIDDEN` y `forbiddenMonth` (plan D-8; RF-9). Depende de: T024, T025
+- [x] **T027 [web] [P]** Hacer que el escenario «Sin permiso» del cliente simulado responda el resumen de hoy y rechace solo el del mes con `403 FORBIDDEN` y `forbiddenMonth` (plan D-8; RF-9). Depende de: T024, T025
   Hecho cuando: las pruebas del cliente simulado comprueban que en «Sin permiso» `today` responde y `month` falla con el `403` y el mensaje del contrato, validado con `apiErrorSchema`.
 
 ## Fase 3 — US1: ver el resumen de hoy (P1)

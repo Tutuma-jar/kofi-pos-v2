@@ -23,6 +23,7 @@ export const DASHBOARD_SCENARIOS = {
   offline: { label: 'Sin conexión' },
   // Error inesperado de la API (RF-7).
   error: { label: 'Con error' },
+  // Responde el resumen de hoy y rechaza el del mes, como la API a un cajero (RF-9).
   forbidden: { label: 'Sin permiso' },
   // Como «Con ventas», pero cada respuesta tarda 1,5 s, para ver «Cargando…».
   slow: { label: 'Lento' },
@@ -47,6 +48,7 @@ export function createDashboardDemoClient(initial: DashboardScenarioId): Dashboa
     withSales: T,
     empty: T,
     schema: { parse(data: unknown): T },
+    { ownerOnly }: { ownerOnly: boolean },
   ): Promise<T> {
     if (scenario === 'offline') {
       throw new ApiFetchError(null, { code: 'NETWORK_ERROR', message: NETWORK_ERROR_MESSAGE });
@@ -54,7 +56,7 @@ export function createDashboardDemoClient(initial: DashboardScenarioId): Dashboa
     if (scenario === 'error') {
       throw new ApiFetchError(500, { code: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE });
     }
-    if (scenario === 'forbidden') {
+    if (scenario === 'forbidden' && ownerOnly) {
       throw new ApiFetchError(403, {
         code: 'FORBIDDEN',
         message: DASHBOARD_MESSAGES.forbiddenMonth,
@@ -74,8 +76,8 @@ export function createDashboardDemoClient(initial: DashboardScenarioId): Dashboa
     setScenario(next) {
       scenario = next;
     },
-    today: () => respond(DEMO_TODAY, DEMO_EMPTY_TODAY, todaySummarySchema),
-    month: () => respond(DEMO_MONTH, DEMO_EMPTY_MONTH, monthSummarySchema),
+    today: () => respond(DEMO_TODAY, DEMO_EMPTY_TODAY, todaySummarySchema, { ownerOnly: false }),
+    month: () => respond(DEMO_MONTH, DEMO_EMPTY_MONTH, monthSummarySchema, { ownerOnly: true }),
   };
 }
 

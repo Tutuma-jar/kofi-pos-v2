@@ -95,13 +95,13 @@ describe('createDashboardDemoClient (plan D-8)', () => {
     }
   });
 
-  it('sin permiso falla con 403 FORBIDDEN y el mensaje del contrato', async () => {
+  it('sin permiso responde el resumen de hoy y rechaza el del mes con 403 (RF-9)', async () => {
     const client = createDashboardDemoClient('forbidden');
 
-    const error = await rejection(client.today());
+    expect(todaySummarySchema.parse(await client.today())).toMatchObject({ totalCents: 4550 });
+    const error = await rejection(client.month());
     expect(error.status).toBe(403);
     expect(error.error).toEqual({ code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbiddenMonth });
-    expect(await rejection(client.month())).toMatchObject({ status: 403 });
   });
 
   it('lento responde después de 1,5 s', async () => {
