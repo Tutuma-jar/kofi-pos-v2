@@ -108,6 +108,8 @@ Rama: `feat/001-acceso-us2`.
   Hecho cuando: una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y las rutas de prueba adelantan el reloj y cambian una cuenta en la API de E2E.
 - [x] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2 contra la API real de E2E.
+- [x] **T045 [web] [US2]** Corregir la sincronización de la prueba del aviso recibido al ingresar (RF-10, RF-12), requerida por el verificador del PR #17. Depende de: T040
+  Hecho cuando: la prueba representa la llegada al ingreso después de que se borre la cookie, espera el aviso y el formulario utilizable sin conservar referencias a elementos retirados, todas las comprobaciones pasan y `technical-checks` aprueba el commit corregido. Se vuelve a delegar la verificación de US2.
 
 ## Fase 5 — Pulido
 
