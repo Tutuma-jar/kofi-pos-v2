@@ -3,3 +3,4 @@ export * from './auth.ts';
 export * from './datetime.ts';
 export * from './errors.ts';
 export * from './menu.ts';
+export * from './sales.ts';

@@ -290,7 +290,7 @@ Ubicación: **`packages/contracts/src/sales.ts`** (esquemas de Zod y tipos), **`
 | --- | --- | --- |
 | `SALE_MAX_LINES` | `30` | RF-3 |
 | `SALE_MAX_QUANTITY` | `99` | RF-3 |
-| `SALE_MESSAGES` | Textos de la API: `maxQuantity` «Una venta puede tener como máximo 99 unidades de cada producto», `maxLines` «Una venta puede tener como máximo 30 productos distintos», `empty` «Agrega al menos un producto», `menuChanged` «El menú cambió. Revisa la venta antes de registrarla» | RF-3, RF-6, RF-7 |
+| `SALE_MESSAGES` | Textos de la API: `maxQuantity` «Una venta puede tener como máximo 99 unidades de cada producto», `maxLines` «Una venta puede tener como máximo 30 productos distintos», `empty` «Agrega al menos un producto», `menuChanged` «El menú cambió. Revisa la venta antes de registrarla», `draftTaken` «Esta venta ya se registró desde otra cuenta»; y dos que solo se ven si se esquiva la interfaz: `invalidLine` «Revisa los productos de la venta» (cantidad menor que 1, precio o identificador inválidos, producto repetido) e `invalidSale` «Revisa los datos de la venta» (`draftId` inválido) | RF-3, RF-6–RF-8 |
 | `BOLIVIA_TIME_ZONE` | `'America/La_Paz'` | Datos de una venta registrada |
 | `formatDateTime` | §5.6 | RF-6 |
 | `saleDraftLineSchema` | `{ productId: uuid, productName: string 1–40, quantity: int 1–99 (maxQuantity), unitPriceCents?: int 1–100000 }` | RF-3, RF-5 |
