@@ -42,6 +42,7 @@ Una vez por computadora (Windows):
 3. GitHub CLI: `winget install GitHub.cli` y luego `gh auth login`
 4. Identidad de Git: `git config --global user.name "…"` y `git config --global user.email "…"`
 5. En la app de Codex: usar el agente nativo de Windows y marcar el proyecto como de confianza
+6. Confiar en los hooks de agente del proyecto: en Claude, revisarlos en `/hooks`; en Codex, en **Settings → Hooks**
 
 ## Instalación
 
@@ -53,7 +54,7 @@ npm install   # dependencias y hooks de Git
 
 ## Flujo de trabajo
 
-Las reglas completas están en [AGENTS.md](AGENTS.md), que Claude y Codex cargan automáticamente, y en la [constitución](docs/constitution.md).
+Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.
 
 Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones, con aprobación de una persona en cada paso:
 
@@ -81,6 +82,13 @@ Cada especificación se entrega **por historias priorizadas**: un PR de definici
 | `post-merge` | Avisa si cambiaron las dependencias |
 
 `npm run hooks` muestra si están activos.
+
+### Hooks de agente
+
+| Hook | Qué hace |
+| --- | --- |
+| `SessionStart` | Entrega la constitución al agente y le avisa si falta preparar el entorno |
+| `PreToolUse` | Impide que el agente salte los hooks de Git, haga force push, publique en `develop` o `main` o fusione PR |
 
 ## Skills de terceros
 

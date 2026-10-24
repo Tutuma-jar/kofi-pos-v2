@@ -25,5 +25,22 @@
       "PowerShell(git push * develop*)", "PowerShell(git push * main*)", "PowerShell(gh pr merge *)",
       "Read(**/.env)", "Read(**/.env.*)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/agent-hooks/session-start.mjs\"" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/agent-hooks/guard-commands.mjs\"" }
+        ]
+      }
+    ]
   }
 }

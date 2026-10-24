@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node scripts/agent-hooks/session-start.mjs", "timeout": 15 }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|shell",
+        "hooks": [
+          { "type": "command", "command": "node scripts/agent-hooks/guard-commands.mjs", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}
