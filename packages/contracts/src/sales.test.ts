@@ -5,7 +5,11 @@ import {
   SALE_MAX_QUANTITY,
   SALE_MESSAGES,
   saleDraftLineSchema,
+  saleLineSchema,
   saleQuoteRequestSchema,
+  saleQuoteSchema,
+  saleResponseSchema,
+  saleSchema,
 } from './index.ts';
 
 // Ejemplos de §6.2 del plan, con identificadores completos.
@@ -150,5 +154,97 @@ describe('registerSaleRequestSchema (RF-6 a RF-8)', () => {
       path: ['draftId'],
       message: SALE_MESSAGES.invalidSale,
     });
+  });
+});
+
+describe('respuestas de las ventas (RF-2, RF-4, RF-6, RF-11)', () => {
+  const HOT_DRINKS = '1a7e4c2b-9d3f-4e5a-8b6c-7d8e9f0a1bc2';
+  const SNACKS = '77b0c1d2-e3f4-4a5b-8c6d-7e8f9a0b1ce4';
+  const SALE = '9b1c2d3e-4f5a-4b6c-8d7e-9f0a1b2c3da0';
+  const ANA = '7d3a4b5c-6d7e-4f8a-9b0c-1d2e3f4a5bc9';
+
+  const quotedLines = [
+    {
+      productId: AMERICANO,
+      productName: 'Café americano',
+      categoryName: 'Bebidas calientes',
+      quantity: 2,
+      unitPriceCents: 1250,
+      subtotalCents: 2500,
+    },
+    {
+      productId: EMPANADA,
+      productName: 'Empanada',
+      categoryName: 'Salados',
+      quantity: 1,
+      unitPriceCents: 800,
+      subtotalCents: 800,
+    },
+  ];
+  const sale = {
+    id: SALE,
+    number: 1,
+    registeredAt: '2026-10-24T18:05:12.000Z',
+    registeredBy: { userId: ANA, displayName: 'Ana', role: 'cashier' },
+    lines: quotedLines,
+    totalCents: 3300,
+  };
+
+  it('saleQuoteSchema acepta el ejemplo del plan', () => {
+    const quote = {
+      lines: quotedLines,
+      totalCents: 3300,
+      notices: ['Cambió el precio de “Café americano”: ahora cuesta Bs 12,50'],
+      menu: [
+        {
+          id: HOT_DRINKS,
+          name: 'Bebidas calientes',
+          products: [{ id: AMERICANO, name: 'Café americano', priceCents: 1250 }],
+        },
+        {
+          id: SNACKS,
+          name: 'Salados',
+          products: [{ id: EMPANADA, name: 'Empanada', priceCents: 800 }],
+        },
+      ],
+    };
+    expect(saleQuoteSchema.parse(quote)).toEqual(quote);
+  });
+
+  it('saleQuoteSchema acepta una venta vacía con total 0 y un menú vacío', () => {
+    const empty = { lines: [], totalCents: 0, notices: [], menu: [] };
+    expect(saleQuoteSchema.parse(empty)).toEqual(empty);
+  });
+
+  it('saleResponseSchema acepta el ejemplo del plan', () => {
+    expect(saleResponseSchema.parse({ sale })).toEqual({ sale });
+  });
+
+  it('acepta una venta de una cuenta eliminada', () => {
+    const orphan = { ...sale, registeredBy: { ...sale.registeredBy, userId: null } };
+    expect(saleSchema.parse(orphan)).toEqual(orphan);
+  });
+
+  it('acepta registeredAt con desplazamiento horario', () => {
+    expect(
+      saleSchema.safeParse({ ...sale, registeredAt: '2026-10-24T14:05:12-04:00' }).success,
+    ).toBe(true);
+  });
+
+  it.each([
+    ['sin líneas', { lines: [] }],
+    ['con registeredAt sin zona horaria', { registeredAt: '2026-10-24T14:05:12' }],
+    ['con un rol desconocido', { registeredBy: { ...sale.registeredBy, role: 'admin' } }],
+    ['con número 0', { number: 0 }],
+    ['con total 0', { totalCents: 0 }],
+  ])('saleSchema rechaza una venta %s', (_case, change) => {
+    expect(saleSchema.safeParse({ ...sale, ...change }).success).toBe(false);
+  });
+
+  it('saleLineSchema rechaza 100 unidades y un precio mayor que Bs 1000,00', () => {
+    expect(saleLineSchema.safeParse({ ...quotedLines[0], quantity: 100 }).success).toBe(false);
+    expect(saleLineSchema.safeParse({ ...quotedLines[0], unitPriceCents: 100001 }).success).toBe(
+      false,
+    );
   });
 });

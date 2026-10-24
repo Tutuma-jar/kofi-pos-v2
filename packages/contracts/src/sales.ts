@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { PRICE_MAX_CENTS, PRODUCT_NAME_MAX_LENGTH } from './menu.ts';
+import { roleSchema } from './auth.ts';
+import { currentMenuResponseSchema, PRICE_MAX_CENTS, PRODUCT_NAME_MAX_LENGTH } from './menu.ts';
 
 // Contrato del módulo Ventas (plan §6). La interfaz envía qué productos y cuántas unidades eligió
 // la persona; los importes, los avisos y el número de venta los calcula la API (principio 3).
@@ -70,3 +71,47 @@ export const registerSaleRequestSchema = z.object({
   ),
 });
 export type RegisterSaleRequest = z.infer<typeof registerSaleRequestSchema>;
+
+// Respuestas (plan §6.1, §6.2). Los importes los calcula la API; la interfaz los muestra con
+// formatPrice y la fecha con formatDateTime (D-7).
+const saleQuantitySchema = z.int().min(1).max(SALE_MAX_QUANTITY);
+
+export const saleLineSchema = z.object({
+  productId: z.uuid(),
+  productName: z.string(),
+  categoryName: z.string(),
+  quantity: saleQuantitySchema,
+  unitPriceCents: z.int().min(1).max(PRICE_MAX_CENTS),
+  subtotalCents: z.int().min(1),
+});
+export type SaleLine = z.infer<typeof saleLineSchema>;
+
+// POST /api/sales/quote: la venta en preparación calculada y los productos para vender, que son el
+// menú vigente con el que se calculó (D-2).
+export const saleQuoteSchema = z.object({
+  lines: z.array(saleLineSchema).max(SALE_MAX_LINES),
+  totalCents: z.int().min(0),
+  notices: z.array(z.string()),
+  menu: currentMenuResponseSchema.shape.categories,
+});
+export type SaleQuote = z.infer<typeof saleQuoteSchema>;
+
+// Una venta registrada (Datos de una venta registrada, RF-11). `registeredBy` guarda el nombre y el
+// rol del momento; `userId` es null si después se eliminó la cuenta.
+export const saleSchema = z.object({
+  id: z.uuid(),
+  number: z.int().min(1),
+  registeredAt: z.iso.datetime({ offset: true }),
+  registeredBy: z.object({
+    userId: z.uuid().nullable(),
+    displayName: z.string(),
+    role: roleSchema,
+  }),
+  lines: z.array(saleLineSchema).min(1).max(SALE_MAX_LINES),
+  totalCents: z.int().min(1),
+});
+export type Sale = z.infer<typeof saleSchema>;
+
+// POST /api/sales: 201 si se registró ahora, 200 si esa venta en preparación ya estaba registrada.
+export const saleResponseSchema = z.object({ sale: saleSchema });
+export type SaleResponse = z.infer<typeof saleResponseSchema>;
