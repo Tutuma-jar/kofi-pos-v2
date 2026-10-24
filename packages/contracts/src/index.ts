@@ -1,2 +1,2 @@
 // Superficie pública del contrato entre la interfaz y la API. Cada módulo se exporta desde aquí.
-export {};
+export * from './errors.ts';
