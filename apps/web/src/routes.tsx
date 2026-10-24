@@ -54,6 +54,18 @@ const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
   ...route,
   roles: route.roles ?? ALL_ROLES,
+  element:
+    route.path === '/' ? (
+      <HomePage
+        links={protectedRouteDefinitions.flatMap((entry) =>
+          entry.homeLink
+            ? [{ path: entry.path, label: entry.homeLink, roles: entry.roles ?? ALL_ROLES }]
+            : [],
+        )}
+      />
+    ) : (
+      route.element
+    ),
 }));
 
 export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) {
