@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
+import { AppRoutes } from './routes.tsx';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Falta el elemento #root en index.html');
@@ -7,7 +9,9 @@ const root = createRoot(container);
 
 root.render(
   <StrictMode>
-    <h1>Kofi POS</h1>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   </StrictMode>,
 );
 

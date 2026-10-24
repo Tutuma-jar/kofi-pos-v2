@@ -54,7 +54,7 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada llamada, y que las respuestas se validan con los esquemas del contrato.
 - [x] **T018 [web] [P]** Escribir `modules/auth/dev/`: `fixtures.ts`, `auth-demo-client.ts` (implementa `AuthClient`) y `ScenarioPicker.tsx` con los escenarios dueño, cajero, credenciales incorrectas, cuenta bloqueada, sin conexión, sesión vencida y sesión terminada, montado solo en desarrollo (`import.meta.env.DEV`). Depende de: T017
   Hecho cuando: las pruebas validan con los esquemas del contrato todos los datos del cliente simulado, y el build de producción no contiene `ScenarioPicker`.
-- [ ] **T019 [web] [P]** Escribir `routes.tsx` con `react-router` (D-9): `/ingresar` pública y `/` protegida con su lista `roles` (por defecto, los dos; `docs/architecture.md` §6.6), con páginas provisionales, y `modules/auth/index.ts` (RF-11). Depende de: T004
+- [x] **T019 [web] [P]** Escribir `routes.tsx` con `react-router` (D-9): `/ingresar` pública y `/` protegida con su lista `roles` (por defecto, los dos; `docs/architecture.md` §6.6), con páginas provisionales, y `modules/auth/index.ts` (RF-11). Depende de: T004
   Hecho cuando: una prueba de componente navega a las dos rutas, una ruta desconocida lleva a `/` y la ruta `/` declara los dos roles.
 
 ## Fase 3 — US1: iniciar y cerrar sesión (P1)
