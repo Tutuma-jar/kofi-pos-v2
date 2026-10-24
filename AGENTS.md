@@ -146,5 +146,15 @@ Requisitos: Node 24 y npm 11.
 | Acción | Comando |
 | --- | --- |
 | Instalar dependencias (activa los hooks de Git, las skills y el subagente) | `npm install` |
+| Comprobar los tipos¹ | `npm run typecheck` |
+| Revisar el código con ESLint | `npm run lint` |
+| Formatear con Prettier | `npm run format` |
+| Comprobar el formato | `npm run format:check` |
+| Pruebas con Vitest¹ | `npm run test` |
+| Pruebas de extremo a extremo con Playwright¹ ² | `npm run test:e2e` |
+| Compilar¹ | `npm run build` |
 | Pruebas de las reglas de Git | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |
+
+¹ Compila antes `@kofi/contracts`.
+² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.

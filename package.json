@@ -1,6 +1,7 @@
 {
   "name": "kofi-pos",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -8,6 +9,25 @@
   "scripts": {
     "prepare": "node scripts/git-hooks/install.mjs && node scripts/sync-skills.mjs && node scripts/sync-agents.mjs",
     "hooks": "node scripts/git-hooks/status.mjs",
-    "test:git": "node --test scripts/git-rules.test.mjs"
+    "build:contracts": "npm run build -w @kofi/contracts",
+    "typecheck": "npm run build:contracts && tsc -p tsconfig.json && tsc -p packages/contracts && tsc -p apps/api && tsc -p apps/web && tsc -p apps/web/tsconfig.node.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build:contracts && vitest run",
+    "test:e2e": "npm run build:contracts && npm run build -w @kofi/web && playwright test",
+    "test:git": "node --test scripts/git-rules.test.mjs",
+    "build": "npm run build:contracts && npm run build -w @kofi/api && npm run build -w @kofi/web"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
   }
 }
