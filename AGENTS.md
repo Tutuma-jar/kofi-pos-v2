@@ -38,7 +38,7 @@ Toda funcionalidad sigue este ciclo. La persona aprueba cada paso antes del sigu
 - **Historias priorizadas:** `tasks.md` se organiza en fases verticales (Preparación, Base común, una fase por historia en orden P1, P2…, Pulido). Cada historia se integra y se prueba completa.
 - **Contrato primero:** `plan.md` define el contrato y la fase «Base común» lo escribe en `packages/contracts`. Dentro de cada historia, la interfaz (`[web]`, contra un cliente simulado del contrato en `dev/`) y la API (`[api]`) avanzan en paralelo (`[P]`), sin esperarse; la tarea `[integración]` cierra la historia.
 - No implementes con hallazgos bloqueantes del análisis ni con `[NECESITA ACLARACIÓN]` abiertos que afecten a la historia.
-- No escribas código sin `spec.md` y `plan.md` aprobados.
+- No escribas código sin `spec.md` y `plan.md` aprobados. En modo delegado, solo las tareas de Preparación y Base común se implementan antes de que se apruebe la definición, en su mismo PR, y se aprueban junto con ella al fusionarlo.
 - Implementa **una tarea a la vez**: primero sus tests y después el código. Al terminarla, márcala en `tasks.md`, haz su commit y detente, salvo que la persona pida continuar o estés en modo delegado.
 - Si algo del código no encaja con la especificación, detente y propón corregir una de las dos; en modo delegado, aplica «Bloqueos y correcciones».
 
