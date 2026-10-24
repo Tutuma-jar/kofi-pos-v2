@@ -1,4 +1,3 @@
-import { DASHBOARD_ROLES } from '@kofi/contracts';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router';
 import { describe, expect, it } from 'vitest';
@@ -88,20 +87,23 @@ describe('routes', () => {
     },
   );
 
-  // SPEC-004 Dashboard (plan §3, D-6, D-9; RF-1).
-  it('/resumen muestra el resumen de ventas con una sesión de dueño', async () => {
-    await renderAt('/resumen');
+  // SPEC-004 Dashboard (plan §3, D-9; RF-1): el resumen de hoy lo ven los dos roles.
+  it.each(['owner', 'cashier'] as const)(
+    '/resumen muestra el resumen de ventas con una sesión de %s',
+    async (role) => {
+      await renderAt('/resumen', role);
 
-    expect(await screen.findByRole('heading', { name: 'Resumen de ventas' })).toBeInTheDocument();
-    expect(screen.getByLabelText('ruta actual')).toHaveTextContent('/resumen');
-  });
+      expect(await screen.findByRole('heading', { name: 'Resumen de ventas' })).toBeInTheDocument();
+      expect(screen.getByLabelText('ruta actual')).toHaveTextContent('/resumen');
+    },
+  );
 
-  it('/resumen declara los roles del contrato y solo el dueño puede verla', () => {
+  it('/resumen es de los dos roles', () => {
     const route = protectedRoutes.find((r) => r.path === '/resumen');
-    expect(route?.roles).toBe(DASHBOARD_ROLES);
+    expect(route?.roles).toEqual(['owner', 'cashier']);
     expect(route?.homeLink).toBe('Resumen de ventas');
     expect(canView('owner', '/resumen', protectedRoutes)).toBe(true);
-    expect(canView('cashier', '/resumen', protectedRoutes)).toBe(false);
+    expect(canView('cashier', '/resumen', protectedRoutes)).toBe(true);
   });
 
   it('las rutas protegidas declaran sus roles y el enlace de la pantalla inicial', () => {
@@ -111,7 +113,7 @@ describe('routes', () => {
         { path: '/menu/administrar', roles: ['owner'], homeLink: 'Administrar menú' },
         { path: '/menu', roles: ['owner', 'cashier'], homeLink: 'Ver menú' },
         { path: '/ventas/nueva', roles: ['owner', 'cashier'], homeLink: 'Nueva venta' },
-        { path: '/resumen', roles: ['owner'], homeLink: 'Resumen de ventas' },
+        { path: '/resumen', roles: ['owner', 'cashier'], homeLink: 'Resumen de ventas' },
       ],
     );
   });

@@ -1,4 +1,4 @@
-import { DASHBOARD_ROLES, roleSchema, type Role } from '@kofi/contracts';
+import { roleSchema, type Role } from '@kofi/contracts';
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import {
@@ -50,13 +50,8 @@ const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
   { path: '/menu', element: <MenuPage />, homeLink: 'Ver menú' },
   // SPEC-003 D-11: /ventas queda libre para el Historial (005).
   { path: '/ventas/nueva', element: <NewSalePage />, homeLink: 'Nueva venta' },
-  // SPEC-004 D-6, D-9: los roles salen del contrato, los mismos que comprueba la API.
-  {
-    path: '/resumen',
-    element: <DashboardPage />,
-    roles: DASHBOARD_ROLES,
-    homeLink: 'Resumen de ventas',
-  },
+  // SPEC-004 D-9: los dos roles ven el resumen de hoy; el del mes lo decide la página (D-6).
+  { path: '/resumen', element: <DashboardPage />, homeLink: 'Resumen de ventas' },
 ];
 
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({

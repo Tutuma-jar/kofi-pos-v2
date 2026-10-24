@@ -47,7 +47,7 @@ Rama: `feat/004-dashboard-definicion`.
 
 - [ ] **T025 [contrato]** Reemplazar en `dashboard.ts` `DASHBOARD_ROLES` por `DASHBOARD_MONTH_ROLES` (`['owner']`) y `DASHBOARD_MESSAGES.forbidden` por `forbiddenMonth` «No tienes permiso para ver el resumen del mes» (plan §6.1, §6.2, D-6; RF-9). Depende de: T003
   Hecho cuando: las pruebas comprueban `DASHBOARD_MONTH_ROLES` y los textos, validan el `403` del mes de §6.2 del plan con `apiErrorSchema`, el contrato ya no exporta `DASHBOARD_ROLES`, y `npm run typecheck` pasa.
-- [ ] **T026 [web] [P]** Hacer que la ruta `/resumen` sea de los dos roles, sin `roles` propios (plan §3, D-9; RF-1). Depende de: T008, T025
+- [x] **T026 [web] [P]** Hacer que la ruta `/resumen` sea de los dos roles, sin `roles` propios (plan §3, D-9; RF-1). Depende de: T008
   Hecho cuando: las pruebas de rutas navegan a `/resumen` con una sesión de dueño y otra de cajero, comprueban que sus `roles` son los dos y que `canView` la permite a los dos.
 - [ ] **T027 [web] [P]** Hacer que el escenario «Sin permiso» del cliente simulado responda el resumen de hoy y rechace solo el del mes con `403 FORBIDDEN` y `forbiddenMonth` (plan D-8; RF-9). Depende de: T024, T025
   Hecho cuando: las pruebas del cliente simulado comprueban que en «Sin permiso» `today` responde y `month` falla con el `403` y el mensaje del contrato, validado con `apiErrorSchema`.
