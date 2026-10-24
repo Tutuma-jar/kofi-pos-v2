@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
@@ -98,5 +98,61 @@ describe('administración del menú (RF-1, RF-2)', () => {
       'role',
       'status',
     );
+  });
+  it('desactiva y reactiva un producto con confirmación de guardado (RF-7, RF-9)', async () => {
+    mount();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Desactivar producto Café americano' }),
+    );
+    expect(
+      await screen.findByRole('button', { name: 'Reactivar producto Café americano' }),
+    ).toBeVisible();
+    expect(screen.getByText('Cambios guardados')).toBeVisible();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Reactivar producto Café americano' }),
+    );
+    expect(
+      await screen.findByRole('button', { name: 'Desactivar producto Café americano' }),
+    ).toBeVisible();
+  });
+  it('reactiva y desactiva una categoría conservando sus productos (RF-10)', async () => {
+    mount();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Reactivar categoría Temporada' }),
+    );
+    expect(
+      await screen.findByRole('button', { name: 'Desactivar categoría Temporada' }),
+    ).toBeVisible();
+    expect(
+      within(screen.getByRole('region', { name: 'Temporada' })).getByText('Inactivo'),
+    ).toBeVisible();
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar categoría Temporada' }));
+    expect(
+      await screen.findByRole('button', { name: 'Reactivar categoría Temporada' }),
+    ).toBeVisible();
+    expect(screen.getByText('Cambios guardados')).toBeVisible();
+  });
+  it('muestra el conflicto junto a la categoría y no ofrece eliminar (RF-10, RF-12)', async () => {
+    mount('categoryHasActiveProducts');
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Desactivar categoría Bebidas calientes' }),
+    );
+    expect(
+      await within(screen.getByRole('region', { name: 'Bebidas calientes' })).findByRole('alert'),
+    ).toHaveTextContent('Esta categoría tiene 2 productos activos');
+    expect(screen.queryByRole('button', { name: /eliminar|borrar/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /eliminar|borrar/i })).not.toBeInTheDocument();
+  });
+  it('avisa de la conexión al fallar una acción sin cambiar su estado (RF-7)', async () => {
+    const client = mount();
+    const button = await screen.findByRole('button', {
+      name: 'Desactivar producto Café americano',
+    });
+    client.setScenario('offline');
+    await userEvent.click(button);
+    expect(await screen.findByText('No hay conexión. Los cambios no se guardaron')).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Desactivar producto Café americano' }),
+    ).toBeVisible();
   });
 });
