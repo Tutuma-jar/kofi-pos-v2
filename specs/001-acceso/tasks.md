@@ -79,7 +79,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas de componente comprueban que sin sesión no se muestra el contenido protegido y se termina en `/ingresar`, y que un `401` en una operación hace lo mismo.
 - [x] **T028 [web] [P] [US1]** Escribir `LoginPage.tsx`: si ya hay sesión, va a `/`; tras un ingreso correcto, va a `/` (RF-1, RF-6). Depende de: T026, T027
   Hecho cuando: las pruebas de componente cubren las dos redirecciones con el cliente simulado.
-- [ ] **T029 [web] [P] [US1]** Escribir `AuthenticatedLayout.tsx` y `HomePage.tsx`: saludo con el nombre visible, rol («Dueño» o «Cajero») y «Cerrar sesión» sin confirmación, que lleva a `/ingresar`; al volver con `pageshow` persistido, se comprueba de nuevo la sesión (RF-5, RF-7, RF-8). Depende de: T027
+- [x] **T029 [web] [P] [US1]** Escribir `AuthenticatedLayout.tsx` y `HomePage.tsx`: saludo con el nombre visible, rol («Dueño» o «Cajero») y «Cerrar sesión» sin confirmación, que lleva a `/ingresar`; al volver con `pageshow` persistido, se comprueba de nuevo la sesión (RF-5, RF-7, RF-8). Depende de: T027
   Hecho cuando: las pruebas de componente cubren los dos roles, el cierre de sesión y la nueva comprobación de la sesión en `pageshow`.
 - [ ] **T030 [integración] [US1]** Cambiar el cliente simulado por el real en la aplicación y ampliar `e2e-server.ts` con PGlite y las cuentas de `e2e/fixtures.ts` creadas con `accounts.service` (RF-1 a RF-8, RF-13, RF-14). Depende de: T021, T022, T023, T024, T025, T026, T027, T028, T029
   Hecho cuando: la interfaz en `vite preview` inicia y cierra sesión contra la API de E2E, y `npm test` sigue pasando.

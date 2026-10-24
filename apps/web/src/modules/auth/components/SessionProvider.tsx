@@ -28,7 +28,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
     [location.key, location.pathname, navigate],
   );
 
-  const refresh = useCallback(() => {
+  const checkSession = useCallback(() => {
     const current = ++generation.current;
     return Promise.resolve()
       .then(() => client.getSession())
@@ -52,12 +52,17 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
 
   useEffect(() => {
     const sequence = generation;
-    void refresh();
+    void checkSession();
     return () => {
       sequence.current++;
     };
-  }, [refresh]);
+  }, [checkSession]);
   useEffect(() => subscribeUnauthorized(sessionMissing), [sessionMissing]);
+
+  const refresh = useCallback(() => {
+    setState({ user: null, checkedKey: null, error: null });
+    return checkSession();
+  }, [checkSession]);
 
   const acceptSession = useCallback(
     (user: SessionUser) => {

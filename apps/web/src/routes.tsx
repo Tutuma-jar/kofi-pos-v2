@@ -6,6 +6,7 @@ import {
   LoginPage,
   SessionProvider,
   RequireSession,
+  AuthenticatedLayout,
   httpAuthClient,
   type AuthClient,
 } from './modules/auth/index.ts';
@@ -44,7 +45,15 @@ export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) 
           <Route key={path} path={path} element={element} />
         ))}
         {protectedRoutes.map(({ path, element }) => (
-          <Route key={path} path={path} element={<RequireSession>{element}</RequireSession>} />
+          <Route
+            key={path}
+            path={path}
+            element={
+              <RequireSession>
+                <AuthenticatedLayout>{element}</AuthenticatedLayout>
+              </RequireSession>
+            }
+          />
         ))}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
