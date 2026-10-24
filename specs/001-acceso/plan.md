@@ -412,6 +412,8 @@ Decisión delegada DD-14 (T025): la CLI admite solo el comando (`create` o `list
 
 Decisión delegada DD-15 (T027): `apiFetch` publica los errores 401 a suscriptores y `SessionProvider` atiende los códigos de sesión (el ingreso incorrecto sigue siendo un error del formulario). La comprobación usa un contador para ignorar respuestas antiguas y oculta la identidad mientras cambia de ruta. Un fallo de red en la comprobación permite reintentar sin mostrar contenido protegido. Se descarta que cada módulo redirija por separado: dejaría operaciones sin protección visual y duplicaría las reglas de navegación. No cambia el contrato.
 
+Decisión delegada DD-16 (T028): `AppRoutes` monta el proveedor y las guardas con un cliente inyectable, HTTP por defecto; las pruebas de páginas y rutas inyectan el cliente simulado. Es necesario para montar `LoginPage` con su contexto al reemplazar la página provisional. Se descarta mantener la página conectada fuera de las rutas, que dejaría su redirección sin ejercitar en la aplicación. T030 completa el montaje de escenarios de desarrollo y la conexión con la API de E2E. La prueba de humo abre `/ingresar`, ya que `/` requiere sesión.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles

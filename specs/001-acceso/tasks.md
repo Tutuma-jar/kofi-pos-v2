@@ -77,7 +77,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas de componente, contra el cliente simulado, cubren el éxito, las credenciales incorrectas, los campos vacíos o solo con espacios (sin llamar al cliente), los límites de largo, la falta de conexión y el uso solo con teclado.
 - [x] **T027 [web] [P] [US1]** Escribir `SessionProvider.tsx`, `useSession.ts` y `RequireSession.tsx`: la sesión se comprueba al abrir o recargar una ruta protegida y, ante `SESSION_MISSING` en cualquier respuesta, se va a `/ingresar` sin aviso (RF-4, RF-8). Depende de: T018, T019
   Hecho cuando: las pruebas de componente comprueban que sin sesión no se muestra el contenido protegido y se termina en `/ingresar`, y que un `401` en una operación hace lo mismo.
-- [ ] **T028 [web] [P] [US1]** Escribir `LoginPage.tsx`: si ya hay sesión, va a `/`; tras un ingreso correcto, va a `/` (RF-1, RF-6). Depende de: T026, T027
+- [x] **T028 [web] [P] [US1]** Escribir `LoginPage.tsx`: si ya hay sesión, va a `/`; tras un ingreso correcto, va a `/` (RF-1, RF-6). Depende de: T026, T027
   Hecho cuando: las pruebas de componente cubren las dos redirecciones con el cliente simulado.
 - [ ] **T029 [web] [P] [US1]** Escribir `AuthenticatedLayout.tsx` y `HomePage.tsx`: saludo con el nombre visible, rol («Dueño» o «Cajero») y «Cerrar sesión» sin confirmación, que lleva a `/ingresar`; al volver con `pageshow` persistido, se comprueba de nuevo la sesión (RF-5, RF-7, RF-8). Depende de: T027
   Hecho cuando: las pruebas de componente cubren los dos roles, el cierre de sesión y la nueva comprobación de la sesión en `pageshow`.
