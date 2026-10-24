@@ -1,6 +1,6 @@
 # Tareas — SPEC-004 Dashboard
 
-Estado: aprobadas (modo delegado), pendientes de análisis · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -42,14 +42,14 @@ Rama: `feat/004-dashboard-definicion`.
 
 Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`, y se respondan las dudas abiertas de `spec.md`.
 
-- [ ] **T009 [api] [P] [US1]** Escribir en `dashboard.summary.ts` `summarizeSales`: total, número de ventas, promedio redondeado, importes por medio de pago y productos más vendidos; y `test-sales.ts` para construir ventas de prueba (plan §5.2, §8.4; RF-3, RF-4, RF-5, RF-8, RNF-2). Depende de: T003
+- [ ] **T009 [api] [P] [US1]** Escribir en `dashboard.summary.ts` `summarizeSales`: total, número de ventas, promedio redondeado, importes por medio de pago y productos más vendidos; y `apps/api/test/test-sales.ts` para construir ventas de prueba (plan §5.2, §8.4; RF-3, RF-4, RF-5, RF-8, RNF-2). Depende de: T003
   Hecho cuando: las pruebas unitarias cubren el ejemplo de §4 del plan; un período sin ventas (`null`, ceros y sin productos); los promedios 4550/3 → 1517 y 75/2 → 38; `cash` y `qr` siempre en ese orden y sumando el total; productos ordenados por unidades, importe y nombre (`compareMenuNames`), como máximo 5; un producto renombrado contado una vez con el nombre de su venta de mayor número; dos productos con el mismo nombre separados; un precio cambiado sumando cada venta con su precio; y 6000 ventas de 30 líneas de 99 unidades a 100000 centavos con el total exacto.
 - [ ] **T010 [api] [P] [US1]** Escribir en `dashboard.service.ts` el resumen de hoy (`today`) con `listSales` inyectada y el reloj (plan §5.4, D-1; RF-2, RF-6, RF-8). Depende de: T004, T009
   Hecho cuando: las pruebas, con un reloj falso y una función de ventas falsa, comprueban que se pide el rango de `boliviaDayRange`, que la respuesta cumple `todaySummarySchema` con la `date` de Bolivia y `asOf` del reloj, y que tras la medianoche de Bolivia el resumen es el del día nuevo.
 - [ ] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession` y la comprobación de `DASHBOARD_ROLES`; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2, D-6; RF-1, RF-8). Depende de: T010
   Hecho cuando: las pruebas con `app.inject`, PGlite y una función de ventas falsa cubren `200` con sesión de dueño, `403 FORBIDDEN` con el mensaje del contrato para el cajero sin llamar a la función de ventas, `401` sin sesión, y que la ruta no acepta `POST`.
-- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión conservando los datos y `403` sin datos (plan §5.5; RF-1, RF-6, RF-7). Depende de: T007
-  Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, el de sin permiso y que no hay recargas automáticas.
+- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos y `403` sin datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007
+  Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, un `500 INTERNAL_ERROR` («Ocurrió un error. Inténtalo de nuevo») con los datos conservados, el de sin permiso y que no hay recargas automáticas.
 - [ ] **T013 [web] [P] [US1]** Escribir `components/counts.ts` y `components/PeriodSummaryView.tsx`: total con `formatPrice`, «N venta(s)», promedio o «—», los dos medios de pago con `formatPaymentMethod` y los productos más vendidos con clave `productId`, o el aviso de período sin ventas que recibe (plan §5.5; RF-3, RF-4, RF-5, RNF-1). Depende de: T007
   Hecho cuando: las pruebas de componente muestran tal como llegan los resúmenes de `fixtures.ts`: «Bs 45,50», «2 ventas», «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», «Café americano · 3 unidades · Bs 37,50», «Empanada · 1 unidad · Bs 8,00»; el resumen vacío con «Bs 0,00», «0 ventas», «—» y el aviso; y dos productos con el mismo nombre en dos filas.
 - [ ] **T014 [web] [P] [US1]** Escribir `TodaySummarySection.tsx` y `DashboardPage.tsx`: «Resumen de ventas», «Hoy · [fecha]» con `formatDate`, «Datos al …» con `formatDateTime`, «Actualizar», «Cargando…», «Todavía no hay ventas hoy», el aviso sin conexión y el mensaje de `403` sin cifras (plan §5.5, D-7; RF-1, RF-2, RF-5, RF-6, RF-7, RNF-4). Depende de: T008, T012, T013

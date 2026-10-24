@@ -101,9 +101,10 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 - Mientras se calculan los resúmenes, el sistema deberá mostrar «Cargando…» y no permitir elegir «Actualizar» de nuevo; si ya se mostraban resúmenes anteriores, deberá seguir mostrándolos mientras tanto.
 - El sistema deberá decidir qué es «hoy» y «el mes en curso» con su propia fecha y hora en hora de Bolivia, no con la de la computadora desde la que se consulta.
 
-**RF-7. Sin conexión** (HU-1)
+**RF-7. Sin conexión o con error** (HU-1)
 
 - Si los resúmenes no se pueden obtener por falta de conexión, entonces el sistema deberá mostrar «No hay conexión. Inténtalo de nuevo» junto a la opción «Actualizar».
+- Si los resúmenes no se pueden obtener por un error inesperado del sistema, entonces el sistema deberá mostrar «Ocurrió un error. Inténtalo de nuevo» junto a la opción «Actualizar».
 - Si ya se mostraban resúmenes anteriores, entonces el sistema deberá seguir mostrándolos, cada uno con el momento de sus datos, junto al aviso.
 
 **RF-8. Las cifras salen de las ventas tal como se registraron** (HU-1)
@@ -214,3 +215,7 @@ La persona delegó la definición completa de 004-dashboard («Delego la definic
 - **Decisión delegada:** (Hallazgo 6) No se cubría una computadora con otra zona horaria o con la hora equivocada. → «Hoy» y «el mes en curso» los decide la fecha y la hora del sistema en Bolivia. (Motivo: las ventas se registran con la hora del sistema (SPEC-003), y así el resumen es el mismo desde cualquier computadora. Alternativa descartada: usar la fecha de la computadora.) (Aplicado en RF-6 y «Casos límite».)
 - **Decisión delegada:** (Hallazgo 7) No se cubría que dos productos distintos aparezcan con el mismo nombre en los más vendidos. → Se muestran como dos productos. (Motivo: es la regla de contar cada producto del menú por separado, aunque se renombre; el caso es raro y unirlos mezclaría ventas de productos distintos. Alternativa descartada: unirlos por nombre.) (Aplicado en RF-5 y «Casos límite».)
 - **Decisión delegada:** (Hallazgo 8) Un criterio de finalización dependía de la duda abierta 2 y cambiaría de sentido al responderla. → Ninguna sesión ve cifras que su rol no puede ver según «Usuarios». (Motivo: el criterio sigue valiendo con cualquier respuesta. Alternativa descartada: ninguna.) (Aplicado en «Criterios de finalización».)
+
+**Análisis de consistencia.** En modo delegado; ningún hallazgo era bloqueante.
+
+- **Decisión delegada:** (Hallazgo 1) El plan trataba un error inesperado al obtener los resúmenes, pero ningún requisito lo pedía. → RF-7 lo cubre: se muestra «Ocurrió un error. Inténtalo de nuevo» y se conservan las cifras anteriores, como sin conexión. (Motivo: cada comportamiento traza a un RF (principio 2), y la persona necesita lo mismo en los dos casos: saber que no se actualizó y poder reintentar. Alternativa descartada: quitar el caso del plan, que dejaría la pantalla sin respuesta ante un error.) (Aplicado en RF-7.)

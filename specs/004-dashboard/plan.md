@@ -50,8 +50,7 @@ apps/api/src/
     ├── index.ts                 superficie pública: dashboardPlugin
     ├── dashboard.routes.ts      GET /api/dashboard/today y /month, requireSession y rol    RF-1
     ├── dashboard.service.ts     período, ventas del período y momento de los datos         RF-2, RF-6, RF-8, RF-9
-    ├── dashboard.summary.ts     totales, promedio, medios de pago, productos, días (puras)  RF-3–RF-5, RF-10
-    └── test-sales.ts            ventas de prueba que cumplen saleSchema (solo pruebas)
+    └── dashboard.summary.ts     totales, promedio, medios de pago, productos, días (puras)  RF-3–RF-5, RF-10
 apps/web/src/
 ├── main.tsx                     provee el cliente del dashboard; con ?escenarios=dashboard, el simulado
 ├── scenarios.ts                 lee también ?escenarios=dashboard
@@ -198,7 +197,7 @@ abrir DashboardPage, recargar o «Actualizar»:
   loading ← true                            # «Cargando…», «Actualizar» deshabilitado; los resúmenes anteriores siguen visibles
   [today, month] ← en paralelo client.today(), client.month()     # month llega con US2
   ok              → today, month ← respuestas; error ← null
-  NETWORK_ERROR   → error ← «No hay conexión. Inténtalo de nuevo»; se conservan today y month   # RF-7
+  NETWORK_ERROR o 500 → error ← mensaje de ApiFetchError; se conservan today y month               # RF-7
   403 FORBIDDEN   → error ← mensaje de la API; today, month ← null                               # RF-1
   401             → lo maneja SessionProvider (SPEC-001)
   loading ← false
@@ -276,7 +275,7 @@ GET /api/dashboard/today          (sesión de cajero)
 ### 6.3 Errores sin esquema propio
 
 - **Sin conexión (RF-7):** como en SPEC-001, `api-fetch.ts` convierte el error de red en `NETWORK_ERROR`, y la pantalla muestra `NETWORK_ERROR_MESSAGE`, «No hay conexión. Inténtalo de nuevo».
-- **Error inesperado:** `500 INTERNAL_ERROR`, como en SPEC-001; la pantalla muestra su mensaje y conserva los resúmenes anteriores, igual que sin conexión.
+- **Error inesperado (RF-7):** `500 INTERNAL_ERROR`, como en SPEC-001; `api-fetch.ts` lo entrega con «Ocurrió un error. Inténtalo de nuevo», y la pantalla muestra ese mensaje y conserva los resúmenes anteriores, igual que sin conexión.
 
 ## 7. Decisiones técnicas
 
@@ -284,7 +283,7 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 | # | Decisión | Por qué | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
-| D-1 | **Las ventas registradas llegan al Dashboard como una función inyectada:** `dashboardPlugin` y el servicio reciben `listSales: (db: Database, range: { from?: Date; to?: Date }) => Promise<Sale[]>`, y `app.ts` les pasa `listRegisteredSales` de `modules/sales/index.ts` (SPEC-003 §6.3, T015). Las pruebas pasan una función falsa con ventas de `test-sales.ts` | La exportación es de la historia 1 de Ventas y aún no está en `develop`; así la Base común y la API de las historias se prueban sin ella, y `dashboard` no conoce las tablas de ventas (`docs/architecture.md` §4.2, SPEC-003 D-1) | Leer `sales` y `sale_lines` con SQL desde `dashboard`: rompería la frontera entre módulos y duplicaría cómo se lee una venta. Esperar a 003 US1 para empezar la Base común: frena 004 sin motivo | RF-2, RF-8, RF-9 |
+| D-1 | **Las ventas registradas llegan al Dashboard como una función inyectada:** `dashboardPlugin` y el servicio reciben `listSales: (db: Database, range: { from?: Date; to?: Date }) => Promise<Sale[]>`, y `app.ts` les pasa `listRegisteredSales` de `modules/sales/index.ts` (SPEC-003 §6.3, T015). Las pruebas pasan una función falsa con ventas de `apps/api/test/test-sales.ts` | La exportación es de la historia 1 de Ventas y aún no está en `develop`; así la Base común y la API de las historias se prueban sin ella, y `dashboard` no conoce las tablas de ventas (`docs/architecture.md` §4.2, SPEC-003 D-1) | Leer `sales` y `sale_lines` con SQL desde `dashboard`: rompería la frontera entre módulos y duplicaría cómo se lee una venta. Esperar a 003 US1 para empezar la Base común: frena 004 sin motivo | RF-2, RF-8, RF-9 |
 | D-2 | **Una ruta por resumen:** `GET /api/dashboard/today` (US1) y `GET /api/dashboard/month` (US2), cada una con su `asOf` | Cada historia se integra y se prueba completa sin la otra, y el contrato de las dos se escribe entero en la Base común sin que US1 tenga que calcular el mes. La interfaz las pide en paralelo | Una sola ruta con hoy y el mes: US1 tendría que entregar también el mes, o el contrato cambiaría en US2 | RF-2, RF-6, RF-9 |
 | D-3 | **La API calcula todo el resumen en memoria** a partir de `listRegisteredSales` del período: sumas, promedio, medios de pago, productos y días (`dashboard.summary.ts`, funciones puras) | Cumple el principio 3 y la frontera entre módulos con lo que Ventas ya entrega. Con hasta 6000 ventas al mes (RNF-3) son unas decenas de miles de líneas, que se suman en milisegundos; el costo está en leerlas, y se mide en Pulido (D-11). Las funciones puras se prueban sin base | Agregar con SQL (`SUM`, `GROUP BY`) en una función nueva de `sales`: más rápido con muchos datos, pero cambia el módulo de 003 y reparte la regla del resumen entre dos módulos. Queda como plan B si la medición de Pulido no cumple RNF-3 | RF-3–RF-5, RF-8, RF-10, RNF-2, RNF-3 |
 | D-4 | **`shared/calendar.ts` en la API** calcula la fecha de Bolivia de un instante y los rangos del día y del mes con `Intl` (desfase de `America/La_Paz` con `timeZoneName: 'longOffset'`), a partir de `clock.now()` | Los límites de día y mes son una regla de negocio y van en la API (principio 3); no dependen de la zona de la computadora (RF-6) ni de la zona horaria de PostgreSQL. Va en `shared/` porque el Historial (005) los necesitará | Calcular el día en la interfaz con la hora de la computadora: contradice RF-6. `AT TIME ZONE 'America/La_Paz'` en SQL: no se puede usar sin SQL propio del Dashboard (D-1) y PGlite y Neon deben tener la misma base de zonas. Un desfase fijo `-04:00`: depende de que Bolivia nunca cambie de hora | RF-2, RF-6, RF-9, RF-10 |
@@ -346,7 +345,7 @@ Las ventas se registran por la interfaz de «Nueva venta» o con peticiones a `P
 
 ### 8.4 Datos
 
-- `test-sales.ts` construye ventas que cumplen `saleSchema` (número, `registeredAt`, líneas, total, medio de pago) para las pruebas del resumen y del servicio. Solo lo importan las pruebas.
+- `apps/api/test/test-sales.ts`, junto a `test-database.ts` y fuera del build de producción (`tsconfig.build.json` solo incluye `src/`), construye ventas que cumplen `saleSchema` (número, `registeredAt`, líneas, total, medio de pago) para las pruebas del resumen y del servicio. Solo lo importan las pruebas.
 - Las pruebas de `shared/calendar.ts` cubren los bordes: 23:59:59.999 y 00:00 de Bolivia (03:59:59.999Z y 04:00Z), el último día de un mes de 30 y de 31 días, febrero de un año bisiesto, y el resultado con cualquier zona horaria en el proceso de pruebas (`TZ`).
 - Las pruebas de integración de las rutas crean su base PGlite con las migraciones y las cuentas de SPEC-001 (`createTestDatabase`), y una función de ventas falsa que registra con qué rango la llamaron.
 
@@ -371,3 +370,12 @@ Afectan a todo el proyecto. En modo delegado se aplican en este mismo PR y se in
 
 1. **Días y meses de Bolivia (§6.8; D-4):** los límites del día y del mes en hora de Bolivia los calcula `apps/api/src/shared/calendar.ts` a partir de `clock.ts`; la interfaz nunca los decide con la hora de la computadora.
 2. **Fechas sin hora y meses (§6.8; D-5):** viajan como `YYYY-MM-DD` y `YYYY-MM` ya en hora de Bolivia, y se muestran con `formatDate` («24/10/2026») y `formatMonth` («Octubre de 2026») de `packages/contracts`.
+
+## 10. Cambios tras el análisis de consistencia
+
+Correcciones del 2026-10-24 a los hallazgos menores del análisis (ninguno bloqueante):
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 | El error inesperado al obtener los resúmenes traza a RF-7, que ahora lo pide | `spec.md` RF-7; §5.5, §6.3; `tasks.md` T012 |
+| 2 | Las ventas de prueba van en `apps/api/test/test-sales.ts`, fuera del build de producción | §3, §8.4, D-1; `tasks.md` T009 |
