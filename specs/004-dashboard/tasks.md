@@ -1,6 +1,6 @@
 # Tareas — SPEC-004 Dashboard
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024) pendiente · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -38,6 +38,11 @@ Rama: `feat/004-dashboard-definicion`.
 - [x] **T008 [web] [P]** Añadir a `routes.tsx` la ruta `/resumen` con `homeLink: 'Resumen de ventas'` y `roles: DASHBOARD_ROLES`, con una página `DashboardPage` provisional exportada desde `modules/dashboard/index.ts` (plan §3, D-6, D-9; RF-1). Depende de: T003
   Hecho cuando: una prueba de componente navega a la ruta con una sesión de dueño y comprueba su `homeLink` y que sus `roles` son `DASHBOARD_ROLES`, y que con una sesión de cajero `canView` no la permite.
 
+**Correcciones tras la verificación** (plan §11):
+
+- [ ] **T024 [web] [P]** Corregir RF-7: añadir al cliente simulado y a su selector el escenario «Con error», que responde `500 INTERNAL_ERROR` con «Ocurrió un error. Inténtalo de nuevo» en `today` y `month` (plan D-8; RF-7). Depende de: T007
+  Hecho cuando: las pruebas del cliente simulado comprueban el `500` con su código y su mensaje en las dos operaciones, validado con `apiErrorSchema`, y las del selector muestran los seis escenarios.
+
 ## Fase 3 — US1: ver el resumen de hoy (P1)
 
 Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`, y se respondan las dudas abiertas de `spec.md`.
@@ -48,7 +53,7 @@ Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición 
   Hecho cuando: las pruebas, con un reloj falso y una función de ventas falsa, comprueban que se pide el rango de `boliviaDayRange`, que la respuesta cumple `todaySummarySchema` con la `date` de Bolivia y `asOf` del reloj, y que tras la medianoche de Bolivia el resumen es el del día nuevo.
 - [ ] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession` y la comprobación de `DASHBOARD_ROLES`; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2, D-6; RF-1, RF-8). Depende de: T010
   Hecho cuando: las pruebas con `app.inject`, PGlite y una función de ventas falsa cubren `200` con sesión de dueño, `403 FORBIDDEN` con el mensaje del contrato para el cajero sin llamar a la función de ventas, `401` sin sesión, y que la ruta no acepta `POST`.
-- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos y `403` sin datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007
+- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos y `403` sin datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007, T024
   Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, un `500 INTERNAL_ERROR` («Ocurrió un error. Inténtalo de nuevo») con los datos conservados, el de sin permiso y que no hay recargas automáticas.
 - [ ] **T013 [web] [P] [US1]** Escribir `components/counts.ts` y `components/PeriodSummaryView.tsx`: total con `formatPrice`, «N venta(s)», promedio o «—», los dos medios de pago con `formatPaymentMethod` y los productos más vendidos con clave `productId`, o el aviso de período sin ventas que recibe (plan §5.5; RF-3, RF-4, RF-5, RNF-1). Depende de: T007
   Hecho cuando: las pruebas de componente muestran tal como llegan los resúmenes de `fixtures.ts`: «Bs 45,50», «2 ventas», «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», «Café americano · 3 unidades · Bs 37,50», «Empanada · 1 unidad · Bs 8,00»; el resumen vacío con «Bs 0,00», «0 ventas», «—» y el aviso; y dos productos con el mismo nombre en dos filas.
@@ -93,7 +98,7 @@ Rama: `feat/004-dashboard-pulido`.
 | RF-4 | T003, T009, T013, T016 |
 | RF-5 | T003, T009, T013, T014, T016 |
 | RF-6 | T003, T004, T010, T012, T014, T016, T019 |
-| RF-7 | T007, T012, T014, T016, T019 |
+| RF-7 | T007, T012, T014, T016, T019, T024 |
 | RF-8 | T009, T010, T011, T015, T016 |
 | RF-9 | T002, T003, T004, T005, T018, T019, T020 |
 | RF-10 | T002, T003, T004, T017, T018, T019, T020 |
