@@ -414,6 +414,8 @@ Decisión delegada DD-15 (T027): `apiFetch` publica los errores 401 a suscriptor
 
 Decisión delegada DD-16 (T028): `AppRoutes` monta el proveedor y las guardas con un cliente inyectable, HTTP por defecto; las pruebas de páginas y rutas inyectan el cliente simulado. Es necesario para montar `LoginPage` con su contexto al reemplazar la página provisional. Se descarta mantener la página conectada fuera de las rutas, que dejaría su redirección sin ejercitar en la aplicación. T030 completa el montaje de escenarios de desarrollo y la conexión con la API de E2E. La prueba de humo abre `/ingresar`, ya que `/` requiere sesión.
 
+Decisión delegada DD-17 (T030): el montaje normal usa el cliente HTTP, también en desarrollo. El selector conectado al cliente simulado se activa solo en desarrollo con `?escenarios=acceso`, y cambiar de escenario vuelve a montar el proveedor para comprobar la nueva sesión. Se descarta sustituir siempre la API por el simulador al desarrollar, porque impediría probar la integración normal. Vite elimina el simulador del build de producción. La API de E2E se construye con una función importable, usa cuentas de prueba de `e2e/fixtures.ts` y cierra PGlite al cerrar Fastify.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles
