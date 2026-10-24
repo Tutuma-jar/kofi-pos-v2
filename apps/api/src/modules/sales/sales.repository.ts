@@ -1,4 +1,4 @@
-import type { Role, Sale, SaleLine } from '@kofi/contracts';
+import type { PaymentMethod, Role, Sale, SaleLine } from '@kofi/contracts';
 import type { Queryable } from '../../shared/database/database.ts';
 
 // Acceso a sale_counter, sales y sale_lines (RF-6, RF-8, RF-10, RF-11). Los importes ya llegan
@@ -11,6 +11,7 @@ export interface NewSale {
   registeredBy: { userId: string; displayName: string; role: Role };
   lines: SaleLine[];
   totalCents: number;
+  paymentMethod: PaymentMethod;
 }
 
 // Incrementa el contador y bloquea su fila hasta el fin de la transacción: dos registros a la vez
@@ -26,8 +27,8 @@ export async function nextSaleNumber(tx: Queryable): Promise<number> {
 export async function insertSale(tx: Queryable, sale: NewSale): Promise<Sale> {
   const inserted = await tx.query<{ id: string }>(
     `INSERT INTO sales (number, draft_id, registered_at, registered_by_user_id, registered_by_name,
-       registered_by_role, total_cents)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+       registered_by_role, total_cents, payment_method)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
     [
       sale.number,
       sale.draftId,
@@ -36,6 +37,7 @@ export async function insertSale(tx: Queryable, sale: NewSale): Promise<Sale> {
       sale.registeredBy.displayName,
       sale.registeredBy.role,
       sale.totalCents,
+      sale.paymentMethod,
     ],
   );
   const id = inserted.rows[0]!.id;
@@ -63,6 +65,7 @@ export async function insertSale(tx: Queryable, sale: NewSale): Promise<Sale> {
     registeredBy: sale.registeredBy,
     lines: sale.lines,
     totalCents: sale.totalCents,
+    paymentMethod: sale.paymentMethod,
   };
 }
 
@@ -74,13 +77,14 @@ interface SaleRow {
   displayName: string;
   role: Role;
   totalCents: number;
+  paymentMethod: PaymentMethod;
   lines: SaleLine[];
 }
 
 const SELECT_SALES = `
   SELECT s.id, s.number, s.registered_at AS "registeredAt", s.registered_by_user_id AS "userId",
     s.registered_by_name AS "displayName", s.registered_by_role AS "role",
-    s.total_cents AS "totalCents",
+    s.total_cents AS "totalCents", s.payment_method AS "paymentMethod",
     (SELECT json_agg(json_build_object(
         'productId', l.product_id, 'productName', l.product_name,
         'categoryName', l.category_name, 'quantity', l.quantity,
@@ -97,6 +101,7 @@ function toSale(row: SaleRow): Sale {
     registeredBy: { userId: row.userId, displayName: row.displayName, role: row.role },
     lines: row.lines,
     totalCents: row.totalCents,
+    paymentMethod: row.paymentMethod,
   };
 }
 

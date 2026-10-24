@@ -66,7 +66,12 @@ afterEach(async () => {
   await db.close();
 });
 
-function newSale(number: number, draftId: string, registeredAt: string): NewSale {
+function newSale(
+  number: number,
+  draftId: string,
+  registeredAt: string,
+  paymentMethod: NewSale['paymentMethod'] = 'cash',
+): NewSale {
   return {
     number,
     draftId,
@@ -74,6 +79,7 @@ function newSale(number: number, draftId: string, registeredAt: string): NewSale
     registeredBy: { userId, displayName: 'Ana', role: 'cashier' },
     lines: [empanada, americano],
     totalCents: 3300,
+    paymentMethod,
   };
 }
 
@@ -107,6 +113,7 @@ describe('insertSale y findSaleByDraftId (RF-6, RF-8, RF-11)', () => {
       registeredBy: { userId, displayName: 'Ana', role: 'cashier' },
       lines: [empanada, americano],
       totalCents: 3300,
+      paymentMethod: 'cash',
     });
     expect(await findSaleByDraftId(db, DRAFT_1)).toEqual(sale);
   });
@@ -128,14 +135,18 @@ describe('insertSale y findSaleByDraftId (RF-6, RF-8, RF-11)', () => {
 
 describe('listRegisteredSales (RF-11)', () => {
   beforeEach(async () => {
-    await db.transaction((tx) => insertSale(tx, newSale(2, DRAFT_2, '2026-10-24T20:00:00Z')));
+    await db.transaction((tx) => insertSale(tx, newSale(2, DRAFT_2, '2026-10-24T20:00:00Z', 'qr')));
     await db.transaction((tx) => insertSale(tx, newSale(1, DRAFT_1, '2026-10-24T12:00:00Z')));
     await db.transaction((tx) => insertSale(tx, newSale(3, DRAFT_3, '2026-10-25T04:00:00Z')));
   });
 
   it('devuelve todas las ventas ordenadas por número', async () => {
     const sales = await listRegisteredSales(db);
-    expect(sales.map((sale) => sale.number)).toEqual([1, 2, 3]);
+    expect(sales.map((sale) => [sale.number, sale.paymentMethod])).toEqual([
+      [1, 'cash'],
+      [2, 'qr'],
+      [3, 'cash'],
+    ]);
     for (const sale of sales) expect(saleSchema.parse(sale)).toEqual(sale);
   });
 
