@@ -34,7 +34,7 @@ Rama: `feat/001-acceso-definicion`.
 
 - [x] **T008 [contrato]** Escribir `packages/contracts/src/errors.ts`: esquema `ApiError` (`code`, `message`, `fields?`, `retryAfterMinutes?`, `userId?`) y los códigos de error del plan (§6; RF-11). Depende de: T002
   Hecho cuando: las pruebas validan los ejemplos de error de §6 del plan, incluido `SESSION_EXPIRED` con `userId`, y rechazan un error sin `code`, sin `message` o con un `userId` que no es un uuid.
-- [ ] **T009 [contrato]** Escribir `packages/contracts/src/auth.ts`: `USERNAME_MAX_LENGTH`, `PASSWORD_MAX_LENGTH`, `Role`, `SessionUser`, `accountInputSchema`, `loginRequestSchema`, `loginResponseSchema` y `sessionResponseSchema` (RF-1, RF-3, RF-5, RF-13). Depende de: T008
+- [x] **T009 [contrato]** Escribir `packages/contracts/src/auth.ts`: `USERNAME_MAX_LENGTH`, `PASSWORD_MAX_LENGTH`, `Role`, `SessionUser`, `accountInputSchema`, `loginRequestSchema`, `loginResponseSchema` y `sessionResponseSchema` (RF-1, RF-3, RF-5, RF-13). Depende de: T008
   Hecho cuando: las pruebas validan los ejemplos de §6 del plan, `"  Ana "` queda como `"ana"`, una contraseña solo con espacios se rechaza, se respetan los límites de «Datos de una cuenta» y `npm run typecheck` pasa.
 - [ ] **T010 [api] [P]** Escribir la interfaz `Database` (`query`, `transaction`) con el adaptador de `pg` y el de PGlite, y el helper `apps/api/test/test-database.ts` (D-6, D-7). Depende de: T003
   Hecho cuando: una prueba de integración ejecuta una consulta y una transacción que se deshace ante un error, sobre PGlite.
