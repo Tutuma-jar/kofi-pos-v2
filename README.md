@@ -49,7 +49,7 @@ Una vez por computadora (Windows):
 ```bash
 git clone https://github.com/Tutuma-jar/kofi-pos-v2.git
 cd kofi-pos-v2
-npm install   # dependencias y hooks de Git
+npm install   # dependencias, hooks de Git y skills del proyecto
 ```
 
 ## Flujo de trabajo
@@ -58,14 +58,14 @@ Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/
 
 Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones, con aprobación de una persona en cada paso:
 
-| Paso | Resultado |
+| Paso | Cómo |
 | --- | --- |
-| 1. Especificar | `spec.md`, con historias priorizadas |
-| 2. Revisar | Lista de hallazgos de QA |
-| 3. Planificar | `plan.md`, con el contrato |
-| 4. Desglosar | `tasks.md`, en fases por historia |
-| 5. Analizar | Consistencia entre documentos, antes de programar |
-| 6. Implementar | Una tarea, tests primero |
+| 1. Especificar | `/especificar` (Claude) o `$especificar` (Codex) → `spec.md` |
+| 2. Revisar | `/revisar-spec` → lista de hallazgos |
+| 3. Planificar | `/planificar` → `plan.md` |
+| 4. Desglosar | `/desglosar` → `tasks.md`, en fases por historia |
+| 5. Analizar | `/analizar` → consistencia entre documentos, antes de programar |
+| 6. Implementar | `/implementar T<nnn>` → una tarea, tests primero |
 | 7. Verificar | Revisión independiente, RF por RF |
 | 8. Integrar | Una persona revisa y fusiona con squash merge |
 
