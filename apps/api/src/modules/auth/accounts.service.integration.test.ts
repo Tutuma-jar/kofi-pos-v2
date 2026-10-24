@@ -3,6 +3,8 @@ import { createTestDatabase } from '../../../test/test-database.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { createAccountsService } from './accounts.service.ts';
 import { verifyPassword } from './passwords.service.ts';
+import { createAuthService } from './auth.service.ts';
+import { createFakeClock } from '../../shared/clock.ts';
 
 const INPUT = {
   username: '  Ana ',
@@ -77,5 +79,60 @@ describe('preparar cuentas (RF-13)', () => {
       role: 'owner',
     });
     expect(await accounts.list()).toHaveLength(2);
+  });
+  it('actualiza nombre sin terminar y rol o contraseña terminando todas las sesiones (RF-12)', async () => {
+    await accounts.create(INPUT);
+    const auth = createAuthService({
+      db,
+      clock: createFakeClock(new Date('2026-10-24T12:00:00Z')),
+    });
+    const first = await auth.login({ username: 'ana', password: INPUT.password });
+    const second = await auth.login({ username: 'ana', password: INPUT.password });
+    expect(await accounts.update(' ANA ', { displayName: ' Ana Nueva ' })).toMatchObject({
+      displayName: 'Ana Nueva',
+    });
+    expect((await auth.resolveSession(first.token)).displayName).toBe('Ana Nueva');
+    await accounts.update('ana', { role: 'cashier' });
+    for (const { token } of [first, second])
+      await expect(auth.resolveSession(token)).rejects.toMatchObject({
+        code: 'SESSION_TERMINATED',
+      });
+    const next = await auth.login({ username: 'ana', password: INPUT.password });
+    await accounts.update('ana', { password: 'otra clave de prueba' });
+    await expect(auth.resolveSession(next.token)).rejects.toMatchObject({
+      code: 'SESSION_TERMINATED',
+    });
+    await expect(auth.login({ username: 'ana', password: INPUT.password })).rejects.toMatchObject({
+      code: 'INVALID_CREDENTIALS',
+    });
+    const last = await auth.login({ username: 'ana', password: 'otra clave de prueba' });
+    expect(last.user.role).toBe('cashier');
+    await accounts.delete('ANA');
+    await expect(auth.resolveSession(last.token)).rejects.toMatchObject({
+      code: 'SESSION_TERMINATED',
+    });
+    expect(await accounts.list()).toEqual([]);
+  });
+  it.each([
+    { role: 'admin' },
+    { password: 'corta' },
+    { password: '        ' },
+    { displayName: '' },
+    { displayName: 'a'.repeat(41) },
+    { username: 'otro' },
+    {},
+  ])('rechaza cambios inválidos sin tocar la cuenta: %j (RF-13)', async (changes) => {
+    const user = await accounts.create(INPUT);
+    await expect(accounts.update('ana', changes)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
+    expect(await accounts.list()).toEqual([user]);
+  });
+  it('informa cuentas inexistentes e identificadores inválidos', async () => {
+    await expect(accounts.update('nadie', { role: 'cashier' })).rejects.toMatchObject({
+      statusCode: 404,
+    });
+    await expect(accounts.delete('nadie')).rejects.toMatchObject({ statusCode: 404 });
+    await expect(accounts.delete('a')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
   });
 });

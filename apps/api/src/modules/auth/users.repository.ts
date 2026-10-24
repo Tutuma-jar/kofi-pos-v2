@@ -71,6 +71,24 @@ export async function listUsers(db: Queryable): Promise<UserRecord[]> {
   return result.rows.map(toUserRecord);
 }
 
+export async function updateUser(
+  db: Queryable,
+  username: string,
+  changes: { displayName?: string; role?: Role; passwordHash?: string },
+): Promise<UserRecord | null> {
+  const result = await db.query<UserRow>(
+    `UPDATE users AS u SET display_name = COALESCE($2, display_name),
+      role = COALESCE($3, role), password_hash = COALESCE($4, password_hash), updated_at = now()
+      WHERE username = $1 RETURNING ${USER_COLUMNS}`,
+    [username, changes.displayName ?? null, changes.role ?? null, changes.passwordHash ?? null],
+  );
+  return result.rows[0] ? toUserRecord(result.rows[0]) : null;
+}
+
+export async function deleteUser(db: Queryable, username: string): Promise<boolean> {
+  return (await db.query('DELETE FROM users WHERE username = $1', [username])).rowCount > 0;
+}
+
 export async function clearLoginFailures(db: Queryable, userId: string): Promise<void> {
   await db.query('DELETE FROM failed_logins WHERE user_id = $1', [userId]);
 }

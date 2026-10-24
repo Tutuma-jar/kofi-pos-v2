@@ -85,8 +85,10 @@ export async function runAccounts(
   accounts: AccountsService,
   io: AccountsIO,
 ): Promise<number> {
-  if (args.length !== 1 || !['create', 'list'].includes(args[0]!)) {
-    io.write('Uso: npm run accounts -w @kofi/api -- create|list (sin otros argumentos)');
+  if (args.length !== 1 || !['create', 'list', 'update', 'delete'].includes(args[0]!)) {
+    io.write(
+      'Uso: npm run accounts -w @kofi/api -- create|list|update|delete (sin otros argumentos)',
+    );
     return 1;
   }
   try {
@@ -97,6 +99,22 @@ export async function runAccounts(
       const password = await io.ask('Contraseña: ', { secret: true });
       const user = await accounts.create({ username, displayName, role, password });
       io.write(`Cuenta creada: ${user.username}`);
+    } else if (args[0] === 'update') {
+      const username = await io.ask('Usuario: ');
+      const field = await io.ask('Dato a cambiar (rol, nombre, contraseña): ');
+      let changes: unknown;
+      if (field === 'rol')
+        changes = { role: await io.ask('Nuevo rol (owner: dueño, cashier: cajero): ') };
+      else if (field === 'nombre')
+        changes = { displayName: await io.ask('Nuevo nombre visible: ') };
+      else if (field === 'contraseña')
+        changes = { password: await io.ask('Nueva contraseña: ', { secret: true }) };
+      else throw new AppError(400, 'VALIDATION_ERROR', 'Elige rol, nombre o contraseña');
+      const user = await accounts.update(username, changes);
+      io.write(`Cuenta actualizada: ${user.username}`);
+    } else if (args[0] === 'delete') {
+      const user = await accounts.delete(await io.ask('Usuario: '));
+      io.write(`Cuenta eliminada: ${user.username}`);
     } else {
       const users = await accounts.list();
       if (users.length === 0) io.write('No hay cuentas.');

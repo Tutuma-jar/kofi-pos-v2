@@ -64,6 +64,48 @@ describe('CLI de cuentas (RF-13, RNF-1)', () => {
     expect(await runAccounts(['list'], accounts, io)).toBe(0);
     expect(messages).toContain('No hay cuentas.');
   });
+  it('actualiza rol, nombre y contraseña sin eco y elimina con entrada simulada (RF-12, RF-13)', async () => {
+    await accounts.create({
+      username: 'ana',
+      displayName: 'Ana',
+      role: 'owner',
+      password: 'clave de prueba',
+    });
+    for (const [field, value] of [
+      ['rol', 'cashier'],
+      ['nombre', 'Ana Nueva'],
+      ['contraseña', 'otra de prueba'],
+    ]) {
+      const { io, messages } = terminal(['ANA', field!, value!]);
+      expect(await runAccounts(['update'], accounts, io)).toBe(0);
+      expect(messages).toContain('Cuenta actualizada: ana');
+      expect(messages.join('\n')).not.toContain('otra de prueba');
+      if (field === 'contraseña')
+        expect(io.ask).toHaveBeenLastCalledWith('Nueva contraseña: ', { secret: true });
+    }
+    expect(await accounts.list()).toMatchObject([{ displayName: 'Ana Nueva', role: 'cashier' }]);
+    const removed = terminal(['ana']);
+    expect(await runAccounts(['delete'], accounts, removed.io)).toBe(0);
+    expect(removed.messages).toContain('Cuenta eliminada: ana');
+    expect(await accounts.list()).toEqual([]);
+  });
+  it('rechaza cambios inválidos y datos por argumentos', async () => {
+    await accounts.create({
+      username: 'ana',
+      displayName: 'Ana',
+      role: 'owner',
+      password: 'clave de prueba',
+    });
+    const invalid = terminal(['ana', 'rol', 'admin']);
+    expect(await runAccounts(['update'], accounts, invalid.io)).toBe(1);
+    expect(invalid.messages.join('\n')).toContain('El rol debe ser');
+    const extra = terminal([]);
+    expect(await runAccounts(['update', '--password', 'dato-sensible'], accounts, extra.io)).toBe(
+      1,
+    );
+    expect(extra.io.ask).not.toHaveBeenCalled();
+    expect(extra.messages.join('\n')).not.toContain('dato-sensible');
+  });
 });
 
 describe('entrada secreta', () => {
