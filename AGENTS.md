@@ -153,8 +153,14 @@ Requisitos: Node 24 y npm 11.
 | Pruebas con Vitest¹ | `npm run test` |
 | Pruebas de extremo a extremo con Playwright¹ ² | `npm run test:e2e` |
 | Compilar¹ | `npm run build` |
+| Comprobar que el build web excluye desarrollo | `npm run check:web-build` |
+| Probar la detección de módulos de desarrollo | `npm run test:build` |
 | Pruebas de las reglas de Git y del guardián de comandos | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |
+| Probar el medidor de acceso con datos ficticios | `npm run test:measure` |
+| Medir acceso en el despliegue de prueba³ | `npm run measure:access` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
+
+³ Medición interactiva que ejecuta la persona en su terminal: introduce su contraseña sin eco y luego hace un ingreso manual en Chromium. Se ejecuta al medir T043, fuera de las comprobaciones automáticas; estas usan `npm run test:measure` con datos ficticios. No recibe credenciales por chat, archivos ni argumentos.

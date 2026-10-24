@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1 y US2 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1, US2 y Pulido implementados · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -115,14 +115,16 @@ Rama: `feat/001-acceso-us2`.
 
 Rama: `feat/001-acceso-pulido`.
 
-- [ ] **T041 [integración]** Añadir a la CI la comprobación de que el build de `apps/web` no contiene nada de `dev/`, con un script en Node (`docs/architecture.md` §5). Depende de: T040
+- [x] **T041 [integración]** Añadir a la CI la comprobación de que el build de `apps/web` no contiene nada de `dev/`, con un script en Node (`docs/architecture.md` §5). Depende de: T040
   Hecho cuando: el script falla si se importa `ScenarioPicker` fuera de `dev/` y pasa con el build actual, y la CI lo ejecuta.
-- [ ] **T042 [integración]** Desplegar la versión completa en Render y comprobarla, con el Blueprint apuntando a esta rama y su base de Neon propia (`docs/architecture.md` §6.5): migraciones al arrancar, cuentas creadas con `npm run accounts` (contraseñas entregadas en privado, sin escribirlas en ningún archivo) e ingreso y cierre de sesión a través de la reescritura. Requiere a una persona con acceso a Render y a Neon. Depende de: T041
+- [x] **T042 [integración]** Desplegar la versión completa en Render y comprobarla, con el Blueprint apuntando a esta rama y su base de Neon propia (`docs/architecture.md` §6.5): migraciones al arrancar, cuentas creadas con `npm run accounts` (contraseñas entregadas en privado, sin escribirlas en ningún archivo) e ingreso y cierre de sesión a través de la reescritura. Requiere a una persona con acceso a Render y a Neon. Depende de: T041
   Hecho cuando: la cookie `kofi_session` llega con sus atributos a través del dominio del sitio estático, se inicia y se cierra sesión con una cuenta creada con la CLI y `/api/health` responde `200`.
-- [ ] **T043 [integración]** Medir en el despliegue de T042 el RNF-4 y el criterio de 15 segundos, como indica el plan (§8.3): tras un primer ingreso que reactiva el servicio, 20 ingresos y 20 cierres de sesión, y un ingreso cronometrado desde la pantalla de ingreso (RNF-4). Depende de: T042
-  Hecho cuando: al menos 19 de cada 20 ingresos y cierres tardan menos de 2 segundos, el ingreso cronometrado tarda menos de 15 segundos, y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T044 [integración]** Actualizar `README.md`: estado del módulo Acceso, cómo arrancar en desarrollo (`apps/api/.env`, `npm run migrate` y las tres terminales de §3 del plan: `npm run dev -w @kofi/contracts`, `-w @kofi/api` y `-w @kofi/web`) y cómo preparar las cuentas. Depende de: T043
+- [x] **T043 [integración]** Medir en el despliegue de T042 el RNF-4 y el criterio de 15 segundos, como indica el plan (§8.3): script local con Playwright y contraseña introducida una vez sin eco, un ciclo de calentamiento excluido, 20 ingresos y 20 cierres automáticos hasta el resultado visible y la petición terminada, y un ingreso manual cronometrado desde el formulario visible. Guardar solo tiempos/resultados, sin identidad, cuerpos ni credenciales (RNF-1, RNF-4). Método automatizado aprobado por la persona. Depende de: T042
+  Hecho cuando: al menos 19 de cada 20 ingresos tardan menos de 3 segundos y al menos 19 de cada 20 cierres menos de 2 segundos (límites aprobados expresamente por la persona), el ingreso cronometrado tarda menos de 15 segundos, y los resultados quedan anotados en la descripción del PR de pulido.
+- [x] **T044 [integración]** Actualizar `README.md`: estado del módulo Acceso, cómo arrancar en desarrollo (`apps/api/.env`, `npm run migrate` y las tres terminales de §3 del plan: `npm run dev -w @kofi/contracts`, `-w @kofi/api` y `-w @kofi/web`) y cómo preparar las cuentas. Depende de: T043
   Hecho cuando: siguiendo el README desde un clon nuevo se levanta la aplicación en desarrollo y se crea una cuenta.
+- [x] **T046 [integración]** Corregir el timeout de la prueba que aísla los controles de E2E de la aplicación normal (RF-4, RF-9, RF-10, RF-12), detectado en la CI del PR #18. Depende de: T044
+  Hecho cuando: la prueba conserva las dos comprobaciones de 404 con base de datos, dispone del mismo margen de 15 segundos que las otras pruebas del archivo para el arranque de PGlite y las migraciones, todas las comprobaciones pasan, la CI aprueba el commit corregido y se repite la verificación independiente.
 
 ## Cobertura de RF
 
