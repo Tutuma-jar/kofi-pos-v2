@@ -1,6 +1,8 @@
 # Tareas — SPEC-002 Menú
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); US1, US2 y US3 implementadas; pulido con medición T035 pendiente · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+
+**Instrucción de ejecución de la persona (2026-10-24):** implementar US1, US2, US3 y pulido en ramas apiladas, integrando cada predecesora con merge y abriendo cada PR hacia `develop`. La persona fusionará en orden US1 → US2 → US3 → pulido. T035 queda excluida de la implementación delegada y sin marcar; T036 se ejecuta tras T034, sin esperar la medición, y documenta lo que falta. Esta excepción no da por cumplidos RNF-3 ni el criterio de 30 segundos.
 
 ## Cómo leer estas tareas
 
@@ -118,7 +120,7 @@ Rama: `feat/002-menu-pulido`.
   Hecho cuando: una prueba lo ejecuta sobre PGlite y comprueba 200 productos en el menú vigente, y que con productos previos no carga nada.
 - [ ] **T035 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T034
   Hecho cuando: al menos 19 de cada 20 aperturas de la administración, de la consulta y de guardados tardan menos de 2 segundos, una persona crea un producto en menos de 30 segundos y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T036 [integración]** Actualizar `README.md` con el estado del módulo Menú y cómo cargar el menú (RF-1 a RF-15). Depende de: T035
+- [x] **T036 [integración]** Actualizar `README.md` con el estado del módulo Menú y cómo cargar el menú (RF-1 a RF-15). Depende de: T034; la persona autorizó expresamente ejecutarla sin esperar T035, documentando la medición pendiente
   Hecho cuando: el README describe quién administra y quién consulta el menú y cómo llegar a cada pantalla.
 
 ## Cobertura de RF
