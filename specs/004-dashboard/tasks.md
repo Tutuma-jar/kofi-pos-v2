@@ -1,6 +1,6 @@
 # Tareas — SPEC-004 Dashboard
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024); correcciones tras las respuestas a las dudas abiertas (T025–T027) pendientes · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -8,7 +8,7 @@ Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y 
 - **`[P]`:** se puede hacer en paralelo con las tareas del otro frente de su fase. En Base común, las tareas `[api]` y `[web]` avanzan en paralelo una vez escrito el contrato. En las fases de historia, ninguna tarea `[web]` depende de una `[api]` ni al revés: las dos dependen solo de Preparación y Base común (y, en US2, de las de su mismo frente en US1). Dentro de un mismo frente, las tareas se hacen en orden de ID y declaran sus dependencias.
 - **Ramas** (`AGENTS.md`): Preparación y Base común en `feat/004-dashboard-definicion`, como en SPEC-001 a SPEC-003; cada historia en `feat/004-dashboard-usN`; Pulido en `feat/004-dashboard-pulido`.
 - **Dependencia de SPEC-003 y SPEC-002** (plan, encabezado y D-1): Preparación y Base común no usan nada de sus historias. Las historias del Dashboard necesitan de la historia 1 de Ventas, que **todavía no está en `develop`**, la exportación de `listRegisteredSales` y `salesPlugin` (SPEC-003 T015) y su registro en `app.ts` (SPEC-003 T020); y de la historia 1 de Menú, que Ventas también necesita, los enlaces de la pantalla inicial (SPEC-002 T018) y la ruta de pruebas `POST /api/__test/menu` (SPEC-002 T023). Por eso **las historias del Dashboard empiezan cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`** (que llega después de `feat/002-menu-us1`). Dentro de cada historia, solo las tareas `[integración]` usan esas piezas; las demás trabajan con ventas falsas o con el cliente simulado.
-- **Dudas abiertas** (`spec.md` §9): las dos afectan a US1 y la primera también a US2. Ninguna historia empieza mientras sigan abiertas (`AGENTS.md`); su respuesta se aplica en `shared/calendar.ts` (duda 1, plan D-10) y en `DASHBOARD_ROLES` (duda 2, plan D-6). Preparación y Base común no dependen de ellas.
+- **Dudas abiertas:** ninguna. La persona respondió el 2026-10-24 que la jornada es el día calendario (plan D-10) y que el cajero ve el resumen de hoy, pero no el del mes (plan D-6); las correcciones de la Base común son T025 a T027 (plan §12).
 - **Dependencia de SPEC-001:** `requireSession`, `createAuthService` y la sesión de la interfaz ya están en `develop` (#15 y #17).
 - **Tests primero:** en cada tarea se escriben primero sus tests y después el código (principio 4).
 
@@ -43,24 +43,33 @@ Rama: `feat/004-dashboard-definicion`.
 - [x] **T024 [web] [P]** Corregir RF-7: añadir al cliente simulado y a su selector el escenario «Con error», que responde `500 INTERNAL_ERROR` con «Ocurrió un error. Inténtalo de nuevo» en `today` y `month` (plan D-8; RF-7). Depende de: T007
   Hecho cuando: las pruebas del cliente simulado comprueban el `500` con su código y su mensaje en las dos operaciones, validado con `apiErrorSchema`, y las del selector muestran los seis escenarios.
 
+**Correcciones tras las respuestas a las dudas abiertas** (el cajero ve el resumen de hoy, no el del mes; plan §12):
+
+- [ ] **T025 [contrato]** Reemplazar en `dashboard.ts` `DASHBOARD_ROLES` por `DASHBOARD_MONTH_ROLES` (`['owner']`) y `DASHBOARD_MESSAGES.forbidden` por `forbiddenMonth` «No tienes permiso para ver el resumen del mes» (plan §6.1, §6.2, D-6; RF-9). Depende de: T003
+  Hecho cuando: las pruebas comprueban `DASHBOARD_MONTH_ROLES` y los textos, validan el `403` del mes de §6.2 del plan con `apiErrorSchema`, el contrato ya no exporta `DASHBOARD_ROLES`, y `npm run typecheck` pasa.
+- [ ] **T026 [web] [P]** Hacer que la ruta `/resumen` sea de los dos roles, sin `roles` propios (plan §3, D-9; RF-1). Depende de: T008, T025
+  Hecho cuando: las pruebas de rutas navegan a `/resumen` con una sesión de dueño y otra de cajero, comprueban que sus `roles` son los dos y que `canView` la permite a los dos.
+- [ ] **T027 [web] [P]** Hacer que el escenario «Sin permiso» del cliente simulado responda el resumen de hoy y rechace solo el del mes con `403 FORBIDDEN` y `forbiddenMonth` (plan D-8; RF-9). Depende de: T024, T025
+  Hecho cuando: las pruebas del cliente simulado comprueban que en «Sin permiso» `today` responde y `month` falla con el `403` y el mensaje del contrato, validado con `apiErrorSchema`.
+
 ## Fase 3 — US1: ver el resumen de hoy (P1)
 
-Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`, y se respondan las dudas abiertas de `spec.md`.
+Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`.
 
 - [ ] **T009 [api] [P] [US1]** Escribir en `dashboard.summary.ts` `summarizeSales`: total, número de ventas, promedio redondeado, importes por medio de pago y productos más vendidos; y `apps/api/test/test-sales.ts` para construir ventas de prueba (plan §5.2, §8.4; RF-3, RF-4, RF-5, RF-8, RNF-2). Depende de: T003
   Hecho cuando: las pruebas unitarias cubren el ejemplo de §4 del plan; un período sin ventas (`null`, ceros y sin productos); los promedios 4550/3 → 1517 y 75/2 → 38; `cash` y `qr` siempre en ese orden y sumando el total; productos ordenados por unidades, importe y nombre (`compareMenuNames`), como máximo 5; un producto renombrado contado una vez con el nombre de su venta de mayor número; dos productos con el mismo nombre separados; un precio cambiado sumando cada venta con su precio; y 6000 ventas de 30 líneas de 99 unidades a 100000 centavos con el total exacto.
 - [ ] **T010 [api] [P] [US1]** Escribir en `dashboard.service.ts` el resumen de hoy (`today`) con `listSales` inyectada y el reloj (plan §5.4, D-1; RF-2, RF-6, RF-8). Depende de: T004, T009
   Hecho cuando: las pruebas, con un reloj falso y una función de ventas falsa, comprueban que se pide el rango de `boliviaDayRange`, que la respuesta cumple `todaySummarySchema` con la `date` de Bolivia y `asOf` del reloj, y que tras la medianoche de Bolivia el resumen es el del día nuevo.
-- [ ] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession` y la comprobación de `DASHBOARD_ROLES`; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2, D-6; RF-1, RF-8). Depende de: T010
-  Hecho cuando: las pruebas con `app.inject`, PGlite y una función de ventas falsa cubren `200` con sesión de dueño, `403 FORBIDDEN` con el mensaje del contrato para el cajero sin llamar a la función de ventas, `401` sin sesión, y que la ruta no acepta `POST`.
-- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos y `403` sin datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007, T024
-  Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, un `500 INTERNAL_ERROR` («Ocurrió un error. Inténtalo de nuevo») con los datos conservados, el de sin permiso y que no hay recargas automáticas.
+- [ ] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession`, para el dueño y el cajero; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2; RF-1, RF-8). Depende de: T010
+  Hecho cuando: las pruebas con `app.inject`, PGlite y una función de ventas falsa cubren `200` con sesión de dueño y con sesión de cajero, `401` sin sesión sin llamar a la función de ventas, y que la ruta no acepta `POST`.
+- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007, T024, T027
+  Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, un `500 INTERNAL_ERROR` («Ocurrió un error. Inténtalo de nuevo») con los datos conservados, el de sin permiso (el resumen de hoy se muestra) y que no hay recargas automáticas.
 - [ ] **T013 [web] [P] [US1]** Escribir `components/counts.ts` y `components/PeriodSummaryView.tsx`: total con `formatPrice`, «N venta(s)», promedio o «—», los dos medios de pago con `formatPaymentMethod` y los productos más vendidos con clave `productId`, o el aviso de período sin ventas que recibe (plan §5.5; RF-3, RF-4, RF-5, RNF-1). Depende de: T007
   Hecho cuando: las pruebas de componente muestran tal como llegan los resúmenes de `fixtures.ts`: «Bs 45,50», «2 ventas», «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», «Café americano · 3 unidades · Bs 37,50», «Empanada · 1 unidad · Bs 8,00»; el resumen vacío con «Bs 0,00», «0 ventas», «—» y el aviso; y dos productos con el mismo nombre en dos filas.
-- [ ] **T014 [web] [P] [US1]** Escribir `TodaySummarySection.tsx` y `DashboardPage.tsx`: «Resumen de ventas», «Hoy · [fecha]» con `formatDate`, «Datos al …» con `formatDateTime`, «Actualizar», «Cargando…», «Todavía no hay ventas hoy», el aviso sin conexión y el mensaje de `403` sin cifras (plan §5.5, D-7; RF-1, RF-2, RF-5, RF-6, RF-7, RNF-4). Depende de: T008, T012, T013
+- [ ] **T014 [web] [P] [US1]** Escribir `TodaySummarySection.tsx` y `DashboardPage.tsx`: «Resumen de ventas», «Hoy · [fecha]» con `formatDate`, «Datos al …» con `formatDateTime`, «Actualizar», «Cargando…», «Todavía no hay ventas hoy» y el aviso sin conexión o con error (plan §5.5; RF-1, RF-2, RF-5, RF-6, RF-7, RNF-4). Depende de: T012, T013, T026
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada escenario de `dev/`, «Actualizar» deshabilitado mientras carga, «Actualizar» con Tab e Intro, y que la página no hace cuentas (muestra los valores de los fixtures tal cual).
 - [ ] **T015 [integración] [US1]** Registrar `dashboardPlugin` en `app.ts` con `listRegisteredSales` de `modules/sales/index.ts` y la sesión de SPEC-001, y comprobar que la aplicación usa el cliente real del dashboard sin `?escenarios=dashboard` (plan D-1; RF-1, RF-2, RF-8). Depende de: T011, T014, SPEC-003 T015, SPEC-003 T020, SPEC-002 T018
-  Hecho cuando: una prueba de integración con `buildApp` registra dos ventas con `POST /api/sales` en días distintos (reloj falso) y `GET /api/dashboard/today` cuenta solo la de hoy, sin modificar ninguna venta; la interfaz en `vite preview` muestra el resumen de hoy contra la API de E2E; la pantalla inicial muestra «Resumen de ventas» al dueño y no al cajero; y `npm test` sigue pasando.
+  Hecho cuando: una prueba de integración con `buildApp` registra dos ventas con `POST /api/sales` en días distintos (reloj falso) y `GET /api/dashboard/today` cuenta solo la de hoy, sin modificar ninguna venta; la interfaz en `vite preview` muestra el resumen de hoy contra la API de E2E; la pantalla inicial muestra «Resumen de ventas» al dueño y al cajero; y `npm test` sigue pasando.
 - [ ] **T016 [integración] [US1]** Escribir `e2e/dashboard-us1-resumen-hoy.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-8, RNF-4). Depende de: T015, SPEC-002 T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
@@ -70,11 +79,11 @@ Rama: `feat/004-dashboard-us2`.
 
 - [ ] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
-- [ ] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` (plan §5.4, §6.2; RF-1, RF-9, RF-10). Depende de: T011, T017
-  Hecho cuando: las pruebas comprueban que se pide el rango de `boliviaMonthRange`, que la respuesta cumple `monthSummarySchema` con el `month` y los días del 1 a hoy, y que la ruta responde `200` al dueño, `403` al cajero y `401` sin sesión.
-- [ ] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate` (plan §5.5; RF-6, RF-7, RF-9, RF-10). Depende de: T014
-  Hecho cuando: las pruebas de componente, con el cliente simulado, muestran «Octubre de 2026» con sus cifras y sus días tal como llegan («01/10/2026 · Bs 8,00 · 1 venta», «02/10/2026 · Bs 0,00 · 0 ventas»), el mes vacío con su aviso, la sección del mes después de la de hoy, y que «Actualizar» y sin conexión se aplican a los dos resúmenes.
-- [ ] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
+- [ ] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
+  Hecho cuando: las pruebas comprueban que se pide el rango de `boliviaMonthRange`, que la respuesta cumple `monthSummarySchema` con el `month` y los días del 1 a hoy, y que la ruta responde `200` al dueño, `403 FORBIDDEN` con «No tienes permiso para ver el resumen del mes» al cajero sin llamar a la función de ventas, y `401` sin sesión.
+- [ ] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy, solo con los roles de `DASHBOARD_MONTH_ROLES`, y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate`; un `403` del mes muestra su mensaje en lugar de la sección, sin cifras del mes (plan §5.5, D-6, D-7; RF-6, RF-7, RF-9, RF-10). Depende de: T014
+  Hecho cuando: las pruebas de componente, con el cliente simulado, muestran «Octubre de 2026» con sus cifras y sus días tal como llegan («01/10/2026 · Bs 8,00 · 1 venta», «02/10/2026 · Bs 0,00 · 0 ventas»), el mes vacío con su aviso, la sección del mes después de la de hoy, que con una sesión de cajero no se pide el mes ni aparece su sección, que el escenario sin permiso muestra «No tienes permiso para ver el resumen del mes» con el resumen de hoy visible, y que «Actualizar» y sin conexión se aplican a los dos resúmenes.
+- [ ] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
 ## Fase 5 — Pulido
@@ -92,7 +101,7 @@ Rama: `feat/004-dashboard-pulido`.
 
 | RF | Tareas |
 | --- | --- |
-| RF-1 | T003, T007, T008, T011, T012, T014, T015, T016, T018 |
+| RF-1 | T007, T008, T011, T012, T014, T015, T016, T026 |
 | RF-2 | T002, T003, T004, T005, T010, T014, T015, T016 |
 | RF-3 | T003, T009, T013, T016 |
 | RF-4 | T003, T009, T013, T016 |
@@ -100,7 +109,7 @@ Rama: `feat/004-dashboard-pulido`.
 | RF-6 | T003, T004, T010, T012, T014, T016, T019 |
 | RF-7 | T007, T012, T014, T016, T019, T024 |
 | RF-8 | T009, T010, T011, T015, T016 |
-| RF-9 | T002, T003, T004, T005, T018, T019, T020 |
+| RF-9 | T002, T003, T004, T005, T018, T019, T020, T025, T027 |
 | RF-10 | T002, T003, T004, T017, T018, T019, T020 |
 | RNF-1 | T013, T014, T016, T019, T020 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T009, T017 |
