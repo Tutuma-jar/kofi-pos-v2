@@ -48,7 +48,7 @@ Rama: `feat/002-menu-definicion`.
 
 **Correcciones de la verificación** (primera ronda, «Cambios requeridos»):
 
-- [ ] **T037 [integración]** Corregir la integración con `develop`: integrar `origin/develop` (con SPEC-001 US1 y US2 fusionadas) con merge y resolver los conflictos de `main.tsx` y `routes.tsx`, conservando lo de SPEC-001 y añadiendo lo de 002 (proveedor del menú, `homeLink` y rutas del menú dentro de `RequireSession`). Depende de: T013
+- [x] **T037 [integración]** Corregir la integración con `develop`: integrar `origin/develop` (con SPEC-001 US1 y US2 fusionadas) con merge y resolver los conflictos de `main.tsx` y `routes.tsx`, conservando lo de SPEC-001 y añadiendo lo de 002 (proveedor del menú, `homeLink` y rutas del menú dentro de `RequireSession`). Depende de: T013
   Hecho cuando: el PR no tiene conflictos, `npm run typecheck`, `lint`, `format:check`, `test`, `build`, `test:git` y `test:e2e` pasan y la CI del PR pasa sobre el commit de la integración.
 - [ ] **T038 [web]** Corregir D-10 según DD-17 de SPEC-001: la aplicación usa el cliente real del menú también en desarrollo, y el cliente simulado y su selector se activan solo con `?escenarios=menu` (combinable con `acceso`: `?escenarios=acceso,menu`); actualizar `plan.md` (D-10, D-11), T011, T012 y T023. Depende de: T037
   Hecho cuando: una prueba comprueba qué escenarios activa el parámetro `escenarios`, el build no contiene nada de `dev/` del menú, y `plan.md` y `tasks.md` describen ese comportamiento.

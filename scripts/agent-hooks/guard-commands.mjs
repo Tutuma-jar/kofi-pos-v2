@@ -18,10 +18,27 @@ function gitArgs(words) {
   const i = words.findIndex((w) => /(^|[\\/])git(\.exe)?$/i.test(w));
   if (i === -1) return null;
   const rest = words.slice(i + 1);
-  // Saltar opciones globales de git (-C dir, -c k=v, --git-dir=…)
+  // Saltar opciones globales de git (-C dir, -c k=v, --git-dir=…), guardando las -c k=v
+  const configs = [];
   let j = 0;
-  while (j < rest.length && rest[j].startsWith('-')) j += ['-C', '-c'].includes(rest[j]) ? 2 : 1;
-  return { sub: rest[j], args: rest.slice(j + 1) };
+  while (j < rest.length && rest[j].startsWith('-')) {
+    if (rest[j] === '-c') configs.push(rest[j + 1] ?? '');
+    j += ['-C', '-c'].includes(rest[j]) ? 2 : 1;
+  }
+  return { sub: rest[j], args: rest.slice(j + 1), configs };
+}
+
+// ¿El comando cambia core.hooksPath a otro valor que .githooks o lo quita?
+// Leerlo (git config core.hooksPath, git config --get core.hooksPath) está permitido.
+function changesHooksPath(g) {
+  const isKey = (a) => a.toLowerCase() === 'core.hookspath';
+  if (g.configs.some((c) => isKey(c.split('=')[0]) && c.slice(c.indexOf('=') + 1) !== '.githooks')) return true;
+  if (g.sub !== 'config') return false;
+  const i = g.args.findIndex(isKey);
+  if (i === -1) return false;
+  if (g.args.slice(0, i).some((a) => /^(--unset|--unset-all|--remove-section|unset|remove-section)$/.test(a))) return true;
+  const value = g.args.slice(i + 1).find((a) => !a.startsWith('-'));
+  return value !== undefined && value !== '.githooks';
 }
 
 const reasons = [];
@@ -39,7 +56,7 @@ for (const words of segments) {
         reasons.push('`develop` y `main` solo reciben cambios por PR.');
       }
     }
-    if (g.sub === 'config' && g.args.some((a) => a === 'core.hooksPath') && !g.args.includes('.githooks')) {
+    if (changesHooksPath(g)) {
       reasons.push('No se cambia `core.hooksPath`: desactivaría los hooks de Git.');
     }
     if (g.sub === 'add' && g.args.some((a) => a === '-f' || a === '--force') && g.args.some((a) => /(^|[\\/])\.env(\.|$)/.test(a))) {

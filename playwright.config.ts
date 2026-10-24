@@ -7,6 +7,8 @@ const WEB_PORT = 4173;
 // npm run test:e2e compila antes el contrato y la interfaz.
 export default defineConfig({
   testDir: 'e2e',
+  // Las historias comparten la API en memoria; US2 adelanta su reloj y cambia cuentas.
+  workers: 1,
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
