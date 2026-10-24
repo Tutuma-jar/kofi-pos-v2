@@ -51,7 +51,7 @@ Rama: `feat/003-ventas-definicion`.
   Hecho cuando: las pruebas de integración guardan una venta con `cash` y otra con `qr` y rechazan una sin medio de pago o con otro valor, y las demás pruebas de la migración siguen pasando.
 - [x] **T030 [api] [P]** Guardar y leer el medio de pago en `sales.repository.ts` (plan §5.3; RF-6, RF-11). Depende de: T028, T029
   Hecho cuando: las pruebas de integración comprueban que `insertSale`, `findSaleByDraftId` y `listRegisteredSales` devuelven el `paymentMethod` guardado y que las ventas leídas cumplen `saleSchema`.
-- [ ] **T031 [web] [P]** Hacer que el cliente simulado de ventas registre el medio de pago recibido y devuelva el `400` sin él, y que el reintento de una venta ya registrada devuelva su medio de pago original (plan §5.3, D-10; RF-6, RF-8). Depende de: T028, T010
+- [x] **T031 [web] [P]** Hacer que el cliente simulado de ventas registre el medio de pago recibido y devuelva el `400` sin él, y que el reintento de una venta ya registrada devuelva su medio de pago original (plan §5.3, D-10; RF-6, RF-8). Depende de: T028, T010
   Hecho cuando: las pruebas del cliente simulado cubren una venta con `cash` y otra con `qr`, el `400` con `fields.paymentMethod` y el reintento con otro medio de pago que devuelve la venta original, y validan las ventas con `saleSchema`.
 
 ## Fase 3 — US1: registrar una venta pagada (P1)

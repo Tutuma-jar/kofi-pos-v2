@@ -34,6 +34,7 @@ const sale = {
   registeredBy: { userId: ANA, displayName: 'Ana', role: 'cashier' },
   lines: [line],
   totalCents: 2500,
+  paymentMethod: 'cash',
 };
 
 const json = (status: number, body: unknown) =>
@@ -63,7 +64,7 @@ describe('httpSalesClient', () => {
 
   it.each([201, 200])('register usa POST /api/sales y acepta %i', async (status) => {
     fetchMock.mockResolvedValue(json(status, { sale }));
-    const request = { draftId: DRAFT, lines: [draftLine] };
+    const request = { draftId: DRAFT, paymentMethod: 'cash' as const, lines: [draftLine] };
 
     expect(await httpSalesClient.register(request)).toEqual(sale);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -76,7 +77,7 @@ describe('httpSalesClient', () => {
     ['quote', () => httpSalesClient.quote({ lines: [] }), { lines: [], totalCents: -1 }],
     [
       'register',
-      () => httpSalesClient.register({ draftId: DRAFT, lines: [draftLine] }),
+      () => httpSalesClient.register({ draftId: DRAFT, paymentMethod: 'cash', lines: [draftLine] }),
       { sale: { ...sale, lines: [] } },
     ],
   ])('%s valida la respuesta con el esquema del contrato', async (_name, call, response) => {
@@ -96,7 +97,7 @@ describe('httpSalesClient', () => {
     );
 
     const error = await httpSalesClient
-      .register({ draftId: DRAFT, lines: [draftLine] })
+      .register({ draftId: DRAFT, paymentMethod: 'qr', lines: [draftLine] })
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiFetchError);
     expect(error).toMatchObject({ status: 409, code: 'MENU_CHANGED' });

@@ -103,22 +103,31 @@ describe('createSalesDemoClient (plan D-10)', () => {
   it('registra ventas numeradas con el formato del contrato', async () => {
     const client = createSalesDemoClient('loaded');
 
-    const first = await client.register({ draftId: DRAFT_1, lines: [shownAmericano] });
+    const first = await client.register({
+      draftId: DRAFT_1,
+      paymentMethod: 'cash',
+      lines: [shownAmericano],
+    });
     const second = await client.register({
       draftId: DRAFT_2,
+      paymentMethod: 'cash',
       lines: [{ ...newEmpanada, unitPriceCents: 800 }],
     });
 
     expect(saleSchema.parse(first)).toEqual(first);
-    expect(first).toMatchObject({ number: 1, totalCents: 2500 });
+    expect(first).toMatchObject({ number: 1, totalCents: 2500, paymentMethod: 'cash' });
     expect(second).toMatchObject({ number: 2, totalCents: 800 });
-    expect(await client.register({ draftId: DRAFT_1, lines: [shownAmericano] })).toEqual(first);
+    expect(
+      await client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+    ).toEqual(first);
   });
 
   it('«Cambió un precio» rechaza el registro y después avisa del precio nuevo', async () => {
     const client = createSalesDemoClient('priceChanged');
 
-    const error = await rejection(client.register({ draftId: DRAFT_1, lines: [shownAmericano] }));
+    const error = await rejection(
+      client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+    );
     expect(error).toMatchObject({
       status: 409,
       code: 'MENU_CHANGED',
@@ -131,6 +140,7 @@ describe('createSalesDemoClient (plan D-10)', () => {
 
     const sale = await client.register({
       draftId: DRAFT_1,
+      paymentMethod: 'cash',
       lines: [{ ...shownAmericano, unitPriceCents: 1300 }],
     });
     expect(sale.totalCents).toBe(2600);
@@ -140,7 +150,9 @@ describe('createSalesDemoClient (plan D-10)', () => {
     const client = createSalesDemoClient('productRemoved');
 
     expect(
-      await rejection(client.register({ draftId: DRAFT_1, lines: [shownAmericano] })),
+      await rejection(
+        client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+      ),
     ).toMatchObject({ status: 409, code: 'MENU_CHANGED' });
 
     const quote = await client.quote({ lines: [shownAmericano] });
@@ -155,12 +167,22 @@ describe('createSalesDemoClient (plan D-10)', () => {
     const client = createSalesDemoClient('lostResponse');
 
     expect(
-      await rejection(client.register({ draftId: DRAFT_1, lines: [shownAmericano] })),
+      await rejection(
+        client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+      ),
     ).toMatchObject({ status: null, code: 'NETWORK_ERROR' });
 
-    const sale = await client.register({ draftId: DRAFT_1, lines: [shownAmericano] });
+    const sale = await client.register({
+      draftId: DRAFT_1,
+      paymentMethod: 'cash',
+      lines: [shownAmericano],
+    });
     expect(sale.number).toBe(1);
-    const next = await client.register({ draftId: DRAFT_2, lines: [shownAmericano] });
+    const next = await client.register({
+      draftId: DRAFT_2,
+      paymentMethod: 'cash',
+      lines: [shownAmericano],
+    });
     expect(next.number).toBe(2);
   });
 
@@ -168,7 +190,9 @@ describe('createSalesDemoClient (plan D-10)', () => {
     const client = createSalesDemoClient('offline');
     expect(await rejection(client.quote({ lines: [] }))).toMatchObject({ code: 'NETWORK_ERROR' });
     expect(
-      await rejection(client.register({ draftId: DRAFT_1, lines: [shownAmericano] })),
+      await rejection(
+        client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+      ),
     ).toMatchObject({ code: 'NETWORK_ERROR' });
   });
 
@@ -177,5 +201,53 @@ describe('createSalesDemoClient (plan D-10)', () => {
     client.setScenario('empty');
     expect(client.scenario).toBe('empty');
     expect((await client.quote({ lines: [] })).menu).toEqual([]);
+  });
+});
+
+describe('medio de pago en el cliente simulado (RF-6, RF-8; plan D-13)', () => {
+  it('registra el medio de pago recibido', async () => {
+    const client = createSalesDemoClient('loaded');
+    const cash = await client.register({
+      draftId: DRAFT_1,
+      paymentMethod: 'cash',
+      lines: [shownAmericano],
+    });
+    const qr = await client.register({
+      draftId: DRAFT_2,
+      paymentMethod: 'qr',
+      lines: [shownAmericano],
+    });
+    expect([saleSchema.parse(cash).paymentMethod, saleSchema.parse(qr).paymentMethod]).toEqual([
+      'cash',
+      'qr',
+    ]);
+  });
+
+  it('rechaza un registro sin medio de pago con 400 y fields.paymentMethod', async () => {
+    const error = await rejection(
+      createSalesDemoClient('loaded').register({
+        draftId: DRAFT_1,
+        lines: [shownAmericano],
+      } as unknown as Parameters<ReturnType<typeof createSalesDemoClient>['register']>[0]),
+    );
+    expect(error).toMatchObject({
+      status: 400,
+      code: 'VALIDATION_ERROR',
+      error: { fields: { paymentMethod: SALE_MESSAGES.paymentMethod } },
+    });
+  });
+
+  it('el reintento con otro medio de pago devuelve la venta original', async () => {
+    const client = createSalesDemoClient('lostResponse');
+    await rejection(
+      client.register({ draftId: DRAFT_1, paymentMethod: 'cash', lines: [shownAmericano] }),
+    );
+
+    const retry = await client.register({
+      draftId: DRAFT_1,
+      paymentMethod: 'qr',
+      lines: [shownAmericano],
+    });
+    expect(retry).toMatchObject({ number: 1, paymentMethod: 'cash' });
   });
 });

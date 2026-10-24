@@ -158,7 +158,7 @@ export function createSalesDemoClient(initial: SalesScenarioId): SalesDemoClient
 
     async register(request) {
       online();
-      const { draftId, lines } = validated(registerSaleRequestSchema, request);
+      const { draftId, paymentMethod, lines } = validated(registerSaleRequestSchema, request);
       const previous = sales.get(draftId);
       if (previous) return previous;
 
@@ -174,6 +174,7 @@ export function createSalesDemoClient(initial: SalesScenarioId): SalesDemoClient
         registeredBy: { ...DEMO_SELLER },
         lines: priced.lines,
         totalCents: priced.totalCents,
+        paymentMethod,
       };
       sales.set(draftId, sale);
       if (scenario === 'lostResponse' && !responseLost) {
