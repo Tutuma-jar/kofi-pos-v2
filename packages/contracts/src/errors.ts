@@ -11,6 +11,11 @@ export const ERROR_CODES = {
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   // Solo lo genera la interfaz, cuando no llega respuesta de la API (RF-14).
   NETWORK_ERROR: 'NETWORK_ERROR',
+  // SPEC-002 Menú (plan §6.2): rol sin permiso, recurso inexistente y reglas de activación.
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  CATEGORY_HAS_ACTIVE_PRODUCTS: 'CATEGORY_HAS_ACTIVE_PRODUCTS',
+  CATEGORY_INACTIVE: 'CATEGORY_INACTIVE',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

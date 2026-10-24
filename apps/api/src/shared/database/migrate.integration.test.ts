@@ -43,11 +43,13 @@ describe('migrate', () => {
   });
 
   it('aplica las migraciones una sola vez, aunque se ejecute dos veces', async () => {
-    expect(await migrate(db)).toEqual(['001_auth.sql']);
+    expect(await migrate(db)).toEqual(['001_auth.sql', '002_menu.sql']);
     expect(await migrate(db)).toEqual([]);
 
-    const applied = await db.query<{ name: string }>('SELECT name FROM schema_migrations');
-    expect(applied.rows).toEqual([{ name: '001_auth.sql' }]);
+    const applied = await db.query<{ name: string }>(
+      'SELECT name FROM schema_migrations ORDER BY name',
+    );
+    expect(applied.rows).toEqual([{ name: '001_auth.sql' }, { name: '002_menu.sql' }]);
   });
 
   describe('con una carpeta de migraciones propia', () => {

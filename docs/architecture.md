@@ -142,7 +142,7 @@ Se aplican desde que existen las aplicaciones (`001-acceso`):
 
 ## 6. Decisiones globales
 
-Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md), que tiene el detalle y las alternativas descartadas.
+Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
 
 ### 6.1 Mismo origen
 
@@ -155,6 +155,7 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md), que tien
 - La cookie dura más que la sesión: `Max-Age` de 12 horas más 7 días de margen. El vencimiento lo decide solo la API, con `sessions.expires_at`, para poder distinguir una sesión vencida de una inexistente.
 - Toda ruta protegida de cualquier módulo usa `requireSession`, que exporta el módulo `auth` de la API. Ante una sesión inválida responde `401` con `SESSION_MISSING`, `SESSION_EXPIRED` o `SESSION_TERMINATED`.
 - Las respuestas de la API llevan `Cache-Control: no-store`.
+- Una ruta restringida por rol responde `403 FORBIDDEN` con el mensaje de su módulo (por ejemplo, «No tienes permiso para administrar el menú»), y la interfaz muestra ese mensaje. La comprobación del rol vive en el módulo, después de `requireSession` (SPEC-002, D-9).
 
 ### 6.3 Errores
 
@@ -180,3 +181,10 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md), que tien
 
 - Las rutas se declaran en `apps/web/src/routes.tsx` con `react-router`.
 - Cada ruta protegida declara los roles que pueden verla (`roles`; por defecto, `owner` y `cashier`). La interfaz solo usa esa lista para navegar y para no mostrar lo que el rol no puede ver; los permisos reales los aplica la API en cada módulo.
+- Una ruta protegida puede declarar `homeLink` (el texto de su enlace). La pantalla inicial recibe esos enlaces desde `routes.tsx` y muestra los que el rol de la sesión puede ver, así que ningún módulo modifica `auth` para añadir el suyo (SPEC-002, D-8).
+
+### 6.7 Importes
+
+- Los importes en bolivianos se guardan (`integer`) y viajan en el contrato como **centavos enteros** (por ejemplo, `priceCents: 1250`), para que las sumas sean exactas.
+- Se muestran siempre con `formatPrice` de `packages/contracts`: «Bs 12,50», con dos decimales, coma decimal y sin separador de miles. Formatear no es calcular: las sumas y los totales los hace la API (constitución, principio 3).
+- Adoptado en SPEC-002 (D-2).
