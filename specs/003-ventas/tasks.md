@@ -1,6 +1,6 @@
 # Tareas — SPEC-003 Ventas
 
-Estado: aprobadas (modo delegado); Preparación y Base común implementadas salvo las correcciones del medio de pago (T028–T031), ya analizadas (sin bloqueantes) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con las correcciones del medio de pago (T028–T031) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
