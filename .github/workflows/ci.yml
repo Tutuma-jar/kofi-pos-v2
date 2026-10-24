@@ -42,3 +42,5 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Pruebas de punta a punta
         run: npm run test:e2e
+      - name: Probar el medidor de acceso con datos ficticios
+        run: npm run test:measure

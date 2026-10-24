@@ -132,7 +132,7 @@ Como **dueño**, quiero que **las sesiones venzan solas, que se frenen los inten
 - **RNF-1. Contraseñas protegidas.** Las contraseñas nunca se guardan, se registran ni se muestran en claro, ni siquiera a quien administra el sistema.
 - **RNF-2. Sin pistas sobre las cuentas.** Un intento fallido no revela si el usuario existe (RF-2). El mensaje de bloqueo (RF-9) solo aparece para cuentas existentes; se acepta porque el sistema funciona en un único local.
 - **RNF-3. Idioma.** Todos los textos y mensajes para la persona están en español.
-- **RNF-4. Rapidez.** En el 95 % de los ingresos y cierres de sesión hechos desde la computadora del local, el resultado aparece en menos de 2 segundos. No cuenta el primer ingreso tras un período sin uso del sistema, mientras el servicio se reactiva: ese ingreso puede tardar alrededor de un minuto.
+- **RNF-4. Rapidez.** En el 95 % de los ingresos hechos desde la computadora del local, el resultado aparece en menos de 3 segundos; en el 95 % de los cierres de sesión, en menos de 2 segundos. Cada operación se evalúa por separado. No cuenta el primer ingreso tras un período sin uso del sistema, mientras el servicio se reactiva: ese ingreso puede tardar alrededor de un minuto.
 - **RNF-5. Uso con teclado.** El ingreso se puede completar solo con teclado: pasar de un campo a otro y enviar con Intro.
 
 ## 6. Casos límite
@@ -226,6 +226,7 @@ La persona respondió a la primera pregunta: «sigue con todas tus recomendacion
 **Planificación.** El servicio de la API usará el plan gratuito de Render, que se suspende tras 15 minutos sin tráfico y tarda alrededor de un minuto en reactivarse.
 
 - **P:** Con el plan gratuito, el primer ingreso tras un período sin uso no cumple RNF-4 ni el criterio de 15 segundos. ¿Se corrige la especificación o el plan? → **R:** La especificación: ese primer ingreso queda fuera de ambos límites. (Aplicado en RNF-4 y «Criterios de finalización».)
+- **P:** Tras medir ingresos de entre 2,63 y 2,95 segundos, ¿qué límites se aceptan para continuar? → **R:** La persona confirmó «acepto esos límites»: al menos 19 de 20 ingresos en menos de 3 segundos y 19 de 20 cierres en menos de 2 segundos. Se mantiene el ingreso manual en menos de 15 segundos y la exclusión del primer acceso tras inactividad. Aprobación expresa del 2026-10-24, aplicada en RNF-4; no modifica la protección de las contraseñas ni amplía el alcance funcional.
 
 **Implementación de Preparación y Base común (modo delegado).** La persona delegó sus decisiones hasta terminar la Base común: «Delego 001-acceso hasta terminar la Base común». Las decisiones de negocio se registran aquí; quedan aprobadas al fusionar el PR de definición.
 
