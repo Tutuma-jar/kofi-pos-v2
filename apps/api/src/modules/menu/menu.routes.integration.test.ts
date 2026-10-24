@@ -3,6 +3,7 @@ import {
   apiErrorSchema,
   categoryResponseSchema,
   productResponseSchema,
+  currentMenuResponseSchema,
 } from '@kofi/contracts';
 import type { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -132,6 +133,34 @@ describe('rutas del menú (RF-1 a RF-7)', () => {
       }
     },
   );
+  it('consulta el menú vigente ordenado con ambos roles y rechaza sin sesión (RF-13 a RF-15)', async () => {
+    const post = (url: string, payload?: object) =>
+      app.inject({ method: 'POST', url, payload, headers: { cookie: ownerCookie } });
+    const season = (await post('/api/menu/categories', { name: 'Temporada' })).json().category;
+    const hot = (await post('/api/menu/categories', { name: 'Bebidas' })).json().category;
+    for (const name of ['Piña', 'Pino', 'Pipa', 'Pina'])
+      await post('/api/menu/products', { name, categoryId: hot.id, price: '12,5' });
+    const hidden = (
+      await post('/api/menu/products', { name: 'Oculto', categoryId: season.id, price: '10' })
+    ).json().product;
+    await post(`/api/menu/products/${hidden.id}/deactivate`);
+    await post(`/api/menu/categories/${season.id}/deactivate`);
+    await post('/api/menu/categories', { name: 'Vacía' });
+    for (const cookie of [ownerCookie, cashierCookie]) {
+      const response = await app.inject({ url: '/api/menu', headers: { cookie } });
+      expect(response.statusCode).toBe(200);
+      const menu = currentMenuResponseSchema.parse(response.json()).categories;
+      expect(menu.map((category) => category.name)).toEqual(['Bebidas']);
+      expect(menu[0]!.products.map((product) => product.name)).toEqual([
+        'Pina',
+        'Pino',
+        'Piña',
+        'Pipa',
+      ]);
+      expect(menu[0]!.products[0]!.priceCents).toBe(1250);
+    }
+    expect((await app.inject({ url: '/api/menu' })).statusCode).toBe(401);
+  });
 
   it('rechaza el cuerpo vacío y los datos inválidos con errores de campo', async () => {
     for (const entity of ['categories', 'products']) {

@@ -103,7 +103,7 @@ Rama: `feat/002-menu-us2`.
 
 Rama: `feat/002-menu-us3`.
 
-- [ ] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
+- [x] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
   Hecho cuando: las pruebas con `app.inject` comprueban el menú vigente ordenado con las dos sesiones, sin categorías sin productos activos, y `401` sin sesión.
 - [ ] **T032 [web] [P] [US3]** Escribir `MenuPage.tsx` y `CurrentMenuList.tsx`: solo lectura, precio con `formatPrice`, aviso «El menú todavía no tiene productos disponibles», y el enlace «Ver menú» en la pantalla inicial para los dos roles (plan §5.7; RF-13, RF-14). Depende de: T011, T012, T018
   Hecho cuando: las pruebas de componente cubren el menú cargado sin ninguna acción de edición, el menú vacío y el enlace para el cajero y para el dueño.
