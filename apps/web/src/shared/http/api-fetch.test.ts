@@ -1,4 +1,4 @@
-import { sessionResponseSchema } from '@kofi/contracts';
+import { productResponseSchema, sessionResponseSchema } from '@kofi/contracts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiFetch, ApiFetchError } from './api-fetch.ts';
 
@@ -65,6 +65,31 @@ describe('apiFetch', () => {
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: 'ana', password: 'cafe con leche' }),
+    });
+  });
+
+  it('envía un PUT con cuerpo JSON (SPEC-002, plan D-7)', async () => {
+    const product = {
+      id: 'c4e1a2b3-4c5d-4e6f-8a7b-9c0d1e2f3a07',
+      name: 'Café americano',
+      categoryId: '1a7e4c2b-9d3f-4e5a-8b6c-7d8e9f0a1bc2',
+      priceCents: 1300,
+      active: true,
+    };
+    fetchMock.mockResolvedValue(jsonResponse(200, { product }));
+
+    const result = await apiFetch(`/api/menu/products/${product.id}`, {
+      method: 'PUT',
+      body: { name: 'Café americano', categoryId: product.categoryId, price: '13' },
+      schema: productResponseSchema,
+    });
+
+    expect(result).toEqual({ product });
+    expect(fetchMock).toHaveBeenCalledWith(`/api/menu/products/${product.id}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Café americano', categoryId: product.categoryId, price: '13' }),
     });
   });
 

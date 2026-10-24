@@ -32,6 +32,34 @@ describe('apiErrorSchema', () => {
       error: { code: 'SESSION_TERMINATED', message: 'Tu sesión terminó. Vuelve a iniciar sesión' },
     },
     { error: { code: 'INTERNAL_ERROR', message: 'Ocurrió un error. Inténtalo de nuevo' } },
+    // SPEC-002 Menú (plan §6.2).
+    {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Revisa los datos',
+        fields: {
+          name: 'Ya existe un producto con ese nombre',
+          categoryId: 'Elige una categoría',
+          price: 'Escribe el precio en bolivianos, con hasta 2 decimales (por ejemplo, 12,50)',
+        },
+      },
+    },
+    { error: { code: 'FORBIDDEN', message: 'No tienes permiso para administrar el menú' } },
+    { error: { code: 'NOT_FOUND', message: 'No se encontró el producto' } },
+    {
+      error: {
+        code: 'CATEGORY_HAS_ACTIVE_PRODUCTS',
+        message:
+          'Esta categoría tiene 3 productos activos. Desactívalos o muévelos a otra categoría antes',
+      },
+    },
+    {
+      error: {
+        code: 'CATEGORY_INACTIVE',
+        message:
+          'Reactiva la categoría “Bebidas calientes” o mueve el producto a otra antes de reactivarlo',
+      },
+    },
   ])('acepta el ejemplo $error.code', (example) => {
     expect(apiErrorSchema.parse(example)).toEqual(example);
   });
@@ -69,6 +97,10 @@ describe('ERROR_CODES', () => {
       'SESSION_TERMINATED',
       'INTERNAL_ERROR',
       'NETWORK_ERROR',
+      'FORBIDDEN',
+      'NOT_FOUND',
+      'CATEGORY_HAS_ACTIVE_PRODUCTS',
+      'CATEGORY_INACTIVE',
     ]);
   });
 });

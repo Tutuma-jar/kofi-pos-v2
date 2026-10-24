@@ -11,10 +11,12 @@ import {
   type AuthClient,
   canView,
 } from './modules/auth/index.ts';
+import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
 
 // Rutas de la interfaz (docs/architecture.md §6.6). Cada ruta protegida declara los roles que pueden
-// verla; por defecto, los dos. La interfaz solo usa esa lista para navegar (RF-11); los permisos
-// reales los aplica la API.
+// verla; por defecto, los dos. La interfaz solo usa esa lista para navegar (RF-11) y para no mostrar
+// lo que el rol no puede ver; los permisos reales los aplica la API. `homeLink` es el texto de su
+// enlace en la pantalla inicial (SPEC-002, D-8).
 
 export const ALL_ROLES: readonly Role[] = roleSchema.options;
 
@@ -25,6 +27,7 @@ interface RouteDefinition {
 
 interface ProtectedRouteDefinition extends RouteDefinition {
   roles?: readonly Role[];
+  homeLink?: string;
 }
 
 export const publicRoutes: RouteDefinition[] = [
@@ -36,6 +39,13 @@ export const publicRoutes: RouteDefinition[] = [
 
 const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
   { path: '/', element: <HomePage /> },
+  {
+    path: '/menu/administrar',
+    element: <MenuAdminPage />,
+    roles: ['owner'],
+    homeLink: 'Administrar menú',
+  },
+  { path: '/menu', element: <MenuPage />, homeLink: 'Ver menú' },
 ];
 
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
