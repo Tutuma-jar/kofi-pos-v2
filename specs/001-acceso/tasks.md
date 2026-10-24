@@ -50,7 +50,7 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: las pruebas de integración crean y encuentran una sesión por su token, comprueban que el token no se guarda en claro y que una sesión revocada se lee con `revoked_at`.
 - [x] **T016 [web] [P]** Escribir `shared/http/api-fetch.ts`: peticiones al mismo origen con cookies, lectura de `ApiError` con el esquema del contrato y error de red convertido en `NETWORK_ERROR` (RF-14). Depende de: T004, T008
   Hecho cuando: las pruebas cubren una respuesta `200`, un `ApiError` y un fallo de red simulado.
-- [ ] **T017 [web] [P]** Escribir `modules/auth/api/auth-client.ts`: interfaz `AuthClient` (`login`, `logout`, `getSession`) y su cliente HTTP real sobre `api-fetch`. Depende de: T009, T016
+- [x] **T017 [web] [P]** Escribir `modules/auth/api/auth-client.ts`: interfaz `AuthClient` (`login`, `logout`, `getSession`) y su cliente HTTP real sobre `api-fetch`. Depende de: T009, T016
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada llamada, y que las respuestas se validan con los esquemas del contrato.
 - [ ] **T018 [web] [P]** Escribir `modules/auth/dev/`: `fixtures.ts`, `auth-demo-client.ts` (implementa `AuthClient`) y `ScenarioPicker.tsx` con los escenarios dueño, cajero, credenciales incorrectas, cuenta bloqueada, sin conexión, sesión vencida y sesión terminada, montado solo en desarrollo (`import.meta.env.DEV`). Depende de: T017
   Hecho cuando: las pruebas validan con los esquemas del contrato todos los datos del cliente simulado, y el build de producción no contiene `ScenarioPicker`.
