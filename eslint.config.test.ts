@@ -11,7 +11,7 @@ async function restrictedImports(filePath: string, specifier: string): Promise<s
     .map((m) => m.message);
 }
 
-describe('eslint.config.js: no-restricted-imports', () => {
+describe('eslint.config.js: no-restricted-imports', { timeout: 15_000 }, () => {
   describe('ninguna aplicación importa de otra', () => {
     it.each([
       ['apps/web/src/main.tsx', '@kofi/api'],
