@@ -1,0 +1,40 @@
+# Despliegue en Render (D-12, docs/architecture.md §6.5). Secretos: solo se declaran (sync: false) y
+# se cargan en Render.
+#
+# Comprobación de T007: mientras Acceso no esté en main, el Blueprint apunta a la rama de definición
+# y usa una base de Neon propia. Cuando Acceso llegue a main, branch pasa a main y DATABASE_URL a la
+# base de producción.
+services:
+  # API (Fastify). El plan gratuito no admite preDeployCommand: las migraciones pendientes se
+  # aplican al arrancar (npm run start -w @kofi/api).
+  - type: web
+    name: kofi-api
+    runtime: node
+    plan: free
+    region: virginia
+    branch: feat/001-acceso-definicion
+    # TypeScript y las herramientas de build son dependencias de desarrollo (D-12).
+    buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/api
+    startCommand: npm run start -w @kofi/api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+
+  # Interfaz (sitio estático). /api/* se reescribe a la API para servir las dos desde el mismo
+  # origen (D-2). La destinación debe ser la URL pública de kofi-api que muestra Render.
+  - type: web
+    name: kofi-web
+    runtime: static
+    branch: feat/001-acceso-definicion
+    buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/web
+    staticPublishPath: apps/web/dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://kofi-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
