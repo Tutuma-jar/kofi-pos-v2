@@ -9,6 +9,15 @@ import {
   setCategoryActive,
   updateCategoryName,
 } from './categories.repository.ts';
+import {
+  findProductById,
+  findProductByNameKey,
+  insertProduct,
+  listCurrentMenuRows,
+  listProducts,
+  setProductActive,
+  updateProduct,
+} from './products.repository.ts';
 
 const UNKNOWN_ID = '9e8d7c6b-5a49-4f38-a271-605f4e3d2c1b';
 
@@ -105,5 +114,148 @@ describe('categories.repository', () => {
 
     expect(await countActiveProducts(db, hot.id)).toBe(2);
     expect(await countActiveProducts(db, UNKNOWN_ID)).toBe(0);
+  });
+});
+
+describe('products.repository', () => {
+  let db: Database;
+  let hot: string;
+  let juices: string;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    hot = (await insertCategory(db, { name: 'Bebidas calientes', nameKey: 'bebidas calientes' }))
+      .id;
+    juices = (await insertCategory(db, { name: 'Jugos', nameKey: 'jugos' })).id;
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  const americano = () =>
+    insertProduct(db, {
+      name: 'Café americano',
+      nameKey: 'cafe americano',
+      categoryId: hot,
+      priceCents: 1250,
+    });
+
+  it('inserta un producto activo con su precio en centavos y lo encuentra por su id', async () => {
+    const created = await americano();
+
+    expect(created).toEqual({
+      id: expect.any(String),
+      name: 'Café americano',
+      categoryId: hot,
+      priceCents: 1250,
+      active: true,
+    });
+    expect(await findProductById(db, created.id)).toEqual(created);
+    expect(await findProductById(db, UNKNOWN_ID)).toBeNull();
+  });
+
+  it('busca por id bloqueando la fila (FOR UPDATE)', async () => {
+    const created = await americano();
+
+    const found = await db.transaction((tx) =>
+      findProductById(tx, created.id, { forUpdate: true }),
+    );
+
+    expect(found).toEqual(created);
+  });
+
+  it('actualiza nombre, categoría y precio sin cambiar active', async () => {
+    const created = await americano();
+    await setProductActive(db, created.id, false);
+
+    const updated = await updateProduct(db, created.id, {
+      name: 'Café americano grande',
+      nameKey: 'cafe americano grande',
+      categoryId: juices,
+      priceCents: 1300,
+    });
+
+    expect(updated).toEqual({
+      id: created.id,
+      name: 'Café americano grande',
+      categoryId: juices,
+      priceCents: 1300,
+      active: false,
+    });
+    expect(
+      await updateProduct(db, UNKNOWN_ID, {
+        name: 'X',
+        nameKey: 'x',
+        categoryId: hot,
+        priceCents: 100,
+      }),
+    ).toBeNull();
+  });
+
+  it('cambia active y devuelve el producto actualizado', async () => {
+    const created = await americano();
+
+    expect(await setProductActive(db, created.id, false)).toEqual({ ...created, active: false });
+    expect(await setProductActive(db, created.id, true)).toEqual(created);
+    expect(await setProductActive(db, UNKNOWN_ID, false)).toBeNull();
+  });
+
+  it('encuentra otro producto por name_key en cualquier categoría, también inactivo', async () => {
+    const created = await americano();
+    await setProductActive(db, created.id, false);
+
+    expect(await findProductByNameKey(db, 'cafe americano')).toEqual({
+      ...created,
+      active: false,
+    });
+    expect(await findProductByNameKey(db, 'cafe americano', { excludeId: created.id })).toBeNull();
+    expect(await findProductByNameKey(db, 'te')).toBeNull();
+  });
+
+  it('lista todos los productos, activos e inactivos', async () => {
+    const created = await americano();
+    const pina = await insertProduct(db, {
+      name: 'Jugo de piña',
+      nameKey: 'jugo de piña',
+      categoryId: juices,
+      priceCents: 1500,
+    });
+    await setProductActive(db, pina.id, false);
+
+    expect(await listProducts(db)).toEqual(
+      expect.arrayContaining([created, { ...pina, active: false }]),
+    );
+    expect(await listProducts(db)).toHaveLength(2);
+  });
+
+  it('lista los vigentes con su categoría: sin inactivos ni categorías inactivas', async () => {
+    const created = await americano();
+    const tea = await insertProduct(db, {
+      name: 'Té',
+      nameKey: 'te',
+      categoryId: hot,
+      priceCents: 800,
+    });
+    await setProductActive(db, tea.id, false);
+    const season = await insertCategory(db, { name: 'Temporada', nameKey: 'temporada' });
+    const api = await insertProduct(db, {
+      name: 'Api',
+      nameKey: 'api',
+      categoryId: season.id,
+      priceCents: 900,
+    });
+    await setProductActive(db, api.id, false);
+    await setCategoryActive(db, season.id, false);
+
+    expect(await listCurrentMenuRows(db)).toEqual([
+      {
+        id: created.id,
+        name: 'Café americano',
+        priceCents: 1250,
+        categoryId: hot,
+        categoryName: 'Bebidas calientes',
+      },
+    ]);
   });
 });
