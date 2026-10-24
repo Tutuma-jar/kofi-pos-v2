@@ -19,14 +19,14 @@ Consultar ventas pasadas una por una, buscarlas o ver otros días y meses es del
 | Usuario | Qué puede hacer en el Dashboard |
 | --- | --- |
 | **Dueño** | Ver el resumen de las ventas de hoy y del mes en curso. |
-| **Cajero** | Nada, mientras no se aclare si debe ver el resumen del día (ver «Dudas abiertas»). |
+| **Cajero** | Ver el resumen de las ventas de hoy, para cerrar la caja de su turno. No ve el resumen del mes en curso. |
 
 ### Conceptos
 
 | Concepto | Definición |
 | --- | --- |
 | **Venta registrada** | Una venta cobrada y registrada en Ventas (SPEC-003). Solo las ventas registradas cuentan en el Dashboard; una venta en preparación no cuenta. |
-| **Hoy** | El día de la fecha actual en hora de Bolivia, desde las 00:00 hasta el momento de la consulta. Una venta es «de hoy» si su fecha y hora de registro, en hora de Bolivia, caen en ese día. |
+| **Hoy** | El día de la fecha actual en hora de Bolivia, desde las 00:00 hasta el momento de la consulta. Una venta es «de hoy» si su fecha y hora de registro, en hora de Bolivia, caen en ese día. La jornada de Kofi no pasa de la medianoche, así que el día es el día calendario, de 00:00 a 23:59 (ver «Aclaraciones»). |
 | **Mes en curso** | El mes de la fecha actual en hora de Bolivia, desde las 00:00 del día 1 hasta el momento de la consulta. |
 | **Resumen** | Las cifras de las ventas registradas en un período (hoy o el mes en curso), que calcula el sistema. |
 
@@ -49,17 +49,17 @@ Consultar ventas pasadas una por una, buscarlas o ver otros días y meses es del
 
 ### HU-1 — Ver el resumen de hoy (P1)
 
-Como **dueño**, quiero **ver cuánto se vendió hoy, en cuántas ventas, cuánto se cobró en efectivo y cuánto con QR, y qué productos se vendieron más** para **controlar la caja al cerrar el día y saber cómo va la jornada sin hacer cuentas**.
+Como **persona que atiende el local (dueño o cajero)**, quiero **ver cuánto se vendió hoy, en cuántas ventas, cuánto se cobró en efectivo y cuánto con QR, y qué productos se vendieron más** para **controlar la caja al cerrar el día o el turno y saber cómo va la jornada sin hacer cuentas**.
 
-**Prueba independiente:** con estas ventas registradas: el 23/10/2026 a las 23:50, «Café americano × 1» por Bs 12,50 en efectivo; el 24/10/2026 a las 09:15, «Café americano × 2» por Bs 25,00 en efectivo; y el 24/10/2026 a las 10:30, «Empanada × 1» y «Café americano × 1» por Bs 20,50 con QR. Ese mismo día a las 11:00, una sesión de dueño abre «Resumen de ventas» y ve en «Hoy · 24/10/2026»: total vendido «Bs 45,50», «2 ventas», venta promedio «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», los productos más vendidos «Café americano · 3 unidades · Bs 37,50» y «Empanada · 1 unidad · Bs 8,00», y «Datos al 24/10/2026 11:00». La venta del 23/10 no cuenta. Si se registra otra venta y el dueño elige «Actualizar», el resumen la incluye. Una sesión de cajero no ve la opción «Resumen de ventas», y si abre su dirección recibe «No tienes permiso para ver el resumen de ventas».
+**Prueba independiente:** con estas ventas registradas: el 23/10/2026 a las 23:50, «Café americano × 1» por Bs 12,50 en efectivo; el 24/10/2026 a las 09:15, «Café americano × 2» por Bs 25,00 en efectivo; y el 24/10/2026 a las 10:30, «Empanada × 1» y «Café americano × 1» por Bs 20,50 con QR. Ese mismo día a las 11:00, una sesión de dueño abre «Resumen de ventas» y ve en «Hoy · 24/10/2026»: total vendido «Bs 45,50», «2 ventas», venta promedio «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», los productos más vendidos «Café americano · 3 unidades · Bs 37,50» y «Empanada · 1 unidad · Bs 8,00», y «Datos al 24/10/2026 11:00». La venta del 23/10 no cuenta. Si se registra otra venta y el dueño elige «Actualizar», el resumen la incluye. Una sesión de cajero también ve la opción «Resumen de ventas» y, en ella, el mismo resumen de hoy.
 
-*Producto mínimo útil:* por sí sola, esta historia ya permite al dueño cerrar la caja del día sabiendo cuánto debe tener en efectivo y cuánto entró por QR.
+*Producto mínimo útil:* por sí sola, esta historia ya permite al dueño y al cajero cerrar la caja del día sabiendo cuánto debe tener en efectivo y cuánto entró por QR.
 
 ### HU-2 — Ver el resumen del mes en curso (P2)
 
 Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se reparte entre efectivo y QR, cuánto se vendió cada día y qué productos se vendieron más** para **seguir la marcha del negocio durante el mes**.
 
-**Prueba independiente:** con ventas registradas el 30/09/2026 a las 23:59 por Bs 12,50, el 01/10/2026 a las 08:00 por Bs 8,00 en efectivo, el 15/10/2026 a las 16:20 por Bs 25,00 con QR y el 24/10/2026 a las 09:15 por Bs 12,50 en efectivo, el 24/10/2026 a las 11:00 una sesión de dueño abre «Resumen de ventas» y ve en «Octubre de 2026»: total vendido «Bs 45,50», «3 ventas», venta promedio «Bs 15,17», «Efectivo: Bs 20,50 · 2 ventas», «QR: Bs 25,00 · 1 venta», sus productos más vendidos y las ventas por día del 01/10/2026 al 24/10/2026: el 01/10 con «Bs 8,00 · 1 venta», el 15/10 con «Bs 25,00 · 1 venta», el 24/10 con «Bs 12,50 · 1 venta» y los demás días con «Bs 0,00 · 0 ventas». La venta del 30/09 no cuenta.
+**Prueba independiente:** con ventas registradas el 30/09/2026 a las 23:59 por Bs 12,50, el 01/10/2026 a las 08:00 por Bs 8,00 en efectivo, el 15/10/2026 a las 16:20 por Bs 25,00 con QR y el 24/10/2026 a las 09:15 por Bs 12,50 en efectivo, el 24/10/2026 a las 11:00 una sesión de dueño abre «Resumen de ventas» y ve en «Octubre de 2026»: total vendido «Bs 45,50», «3 ventas», venta promedio «Bs 15,17», «Efectivo: Bs 20,50 · 2 ventas», «QR: Bs 25,00 · 1 venta», sus productos más vendidos y las ventas por día del 01/10/2026 al 24/10/2026: el 01/10 con «Bs 8,00 · 1 venta», el 15/10 con «Bs 25,00 · 1 venta», el 24/10 con «Bs 12,50 · 1 venta» y los demás días con «Bs 0,00 · 0 ventas». La venta del 30/09 no cuenta. Una sesión de cajero no ve el resumen del mes en «Resumen de ventas», y si lo pide por otra vía recibe «No tienes permiso para ver el resumen del mes», sin cifras.
 
 ## 4. Requisitos funcionales
 
@@ -67,9 +67,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 **RF-1. Acceso al resumen** (HU-1)
 
-- Mientras haya una sesión válida de dueño, el sistema deberá ofrecer en la pantalla inicial la opción «Resumen de ventas», que abre la pantalla con los resúmenes.
-- Mientras la sesión sea de cajero, el sistema deberá no ofrecerle la opción «Resumen de ventas».
-- Si una sesión de cajero intenta ver el resumen de ventas, entonces el sistema deberá rechazarlo, mostrar «No tienes permiso para ver el resumen de ventas» y no mostrar ninguna cifra.
+- Mientras haya una sesión válida, de dueño o de cajero, el sistema deberá ofrecer en la pantalla inicial la opción «Resumen de ventas», que abre la pantalla con los resúmenes que su rol puede ver (ver «Usuarios»).
 - Mientras no haya una sesión válida, el sistema deberá aplicar al resumen de ventas lo que dice SPEC-001 (RF-4, RF-8, RF-10 y RF-12).
 
 **RF-2. Ventas de hoy** (HU-1)
@@ -116,9 +114,11 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 **RF-9. Ventas del mes en curso** (HU-2)
 
-- El sistema deberá mostrar en la pantalla «Resumen de ventas», después del resumen de hoy, el resumen del mes en curso con el título «[Mes] de [año]», por ejemplo «Octubre de 2026».
+- Mientras la sesión sea de dueño, el sistema deberá mostrar en la pantalla «Resumen de ventas», después del resumen de hoy, el resumen del mes en curso con el título «[Mes] de [año]», por ejemplo «Octubre de 2026».
 - El sistema deberá contar en el resumen del mes todas las ventas registradas del mes en curso (ver «Conceptos»), y ninguna otra, con los datos de RF-3, RF-4 y RF-5, y calcularlo, actualizarlo y mostrar el momento de sus datos como indican RF-6 y RF-7.
 - Mientras el resumen del mes no tenga ventas, el sistema deberá mostrar en lugar de sus productos más vendidos el aviso «Todavía no hay ventas este mes».
+- Mientras la sesión sea de cajero, el sistema deberá no mostrarle el resumen del mes en curso.
+- Si una sesión de cajero intenta ver el resumen del mes, entonces el sistema deberá rechazarlo con el mensaje «No tienes permiso para ver el resumen del mes» y no mostrar ninguna cifra del mes.
 
 **RF-10. Ventas por día** (HU-2)
 
@@ -152,7 +152,9 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 | Solo se cobró con un medio de pago | El otro aparece igual, con «Bs 0,00 · 0 ventas» (RF-4). |
 | Tres ventas que suman Bs 45,50 | Venta promedio «Bs 15,17» (45,50 ÷ 3 = 15,1666…) (Datos de un resumen). |
 | Dos ventas de Bs 0,25 y Bs 0,50 | Venta promedio «Bs 0,38» (0,375 se redondea hacia arriba) (Datos de un resumen). |
-| Un cajero abre la dirección del resumen | Ve «No tienes permiso para ver el resumen de ventas», sin cifras (RF-1). |
+| Un cajero abre «Resumen de ventas» | Ve el resumen de hoy y no el del mes (RF-1, RF-9). |
+| Un cajero pide el resumen del mes sin pasar por la pantalla | Recibe «No tienes permiso para ver el resumen del mes», sin cifras del mes (RF-9). |
+| Dos personas atienden la caja el mismo día, en turnos distintos | Las dos ven el resumen del día completo, no el de su turno (ver «Fuera de alcance»). |
 | La sesión vence mientras se muestra el resumen y se elige «Actualizar» | Se aplica SPEC-001, RF-10 (RF-1). |
 | Se corta la conexión al elegir «Actualizar» | Se ve «No hay conexión. Inténtalo de nuevo» y siguen visibles las cifras anteriores, con el momento de sus datos (RF-7). |
 | La computadora del local tiene otra zona horaria o la hora equivocada | «Hoy» y «el mes en curso» siguen siendo los de la fecha y la hora del sistema en Bolivia (RF-6). |
@@ -164,7 +166,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 - Consultar, buscar o listar ventas registradas una por una, ver el detalle de una venta, o ver días y meses anteriores al actual: es del Historial (SPEC-005).
 - Comparar con el día, la semana o el mes anterior, metas de venta y proyecciones.
-- Resúmenes por persona que registró las ventas, por categoría o por hora del día.
+- Resúmenes por persona que registró las ventas, por turno, por categoría o por hora del día.
 - Cierre o arqueo de caja: monto inicial, efectivo contado, diferencias y retiros. El Dashboard solo muestra lo cobrado en efectivo según las ventas registradas.
 - Exportar o imprimir los resúmenes, y enviarlos por correo o mensajería.
 - Gráficos: las cifras se muestran como números y listas.
@@ -173,7 +175,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 ## 8. Criterios de finalización
 
-- El dueño ve el total vendido hoy, separado en efectivo y QR, en menos de 10 segundos desde la pantalla inicial.
+- El dueño o el cajero ve el total vendido hoy, separado en efectivo y QR, en menos de 10 segundos desde la pantalla inicial.
 - En el 100 % de los resúmenes, el total vendido es la suma exacta de los totales de sus ventas, los importes por medio de pago suman el total vendido y, en el del mes, las filas por día suman el total del mes.
 - Ninguna venta se cuenta en un día o un mes distinto del de su fecha y hora de registro en hora de Bolivia.
 - Ninguna sesión ve cifras del resumen de ventas que su rol no puede ver según «Usuarios».
@@ -181,8 +183,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 ## 9. Dudas abiertas
 
-1. [NECESITA ACLARACIÓN] ¿La jornada de Kofi puede pasar de la medianoche (por ejemplo, abrir hasta la 01:00)? Si es así, ¿las ventas de después de la medianoche deben contar en el día en que empezó la jornada? Mientras no se aclare, «hoy» es el día calendario en hora de Bolivia, de 00:00 a 23:59 (ver «Conceptos»). Afecta a HU-1 y HU-2.
-2. [NECESITA ACLARACIÓN] ¿El cajero debe ver el resumen de hoy (por ejemplo, para cerrar la caja de su turno)? Mientras no se aclare, solo el dueño ve el resumen de ventas (RF-1). Afecta a HU-1.
+Ninguna.
 
 ## 10. Aclaraciones
 
@@ -201,7 +202,7 @@ La persona delegó la definición completa de 004-dashboard («Delego la definic
 - **Decisión delegada:** Los resúmenes se calculan al abrir, al recargar y al elegir «Actualizar», con el momento de sus datos visible, y no se actualizan solos. (Motivo: el dueño lo consulta de vez en cuando, y el momento visible deja claro hasta cuándo valen las cifras; igual que «Ver menú» (SPEC-002) y los productos para vender (SPEC-003). Alternativa descartada: actualizar cada minuto, que genera tráfico sin que nadie mire y no deja claro cuándo cambian las cifras.) (Aplicado en RF-6 y «Fuera de alcance».)
 - **Decisión delegada:** Si no hay conexión al actualizar, se siguen mostrando las cifras anteriores con el momento de sus datos y un aviso. (Motivo: las cifras anteriores siguen siendo útiles y su momento dice cuánto tienen de antiguas. Alternativa descartada: vaciar la pantalla.) (Aplicado en RF-7.)
 - **Decisión delegada:** La opción de la pantalla inicial y el título de la pantalla son «Resumen de ventas». (Motivo: describe en español lo que muestra (RNF-1); «Dashboard» es el nombre interno del módulo. Alternativa descartada: «Dashboard».) (Aplicado en HU-1 y RF-1.)
-- **Decisión delegada:** Mientras no se aclare la duda 2, solo el dueño ve el resumen de ventas, y un cajero recibe «No tienes permiso para ver el resumen de ventas». (Motivo: SPEC-001 anticipa que el dueño tiene acceso a los reportes; dar acceso al cajero sin confirmarlo mostraría datos del negocio que el dueño quizá no quiera compartir, mientras que darlo después solo añade un permiso. Alternativa descartada: mostrar el resumen de hoy a los dos roles.) (Aplicado en «Usuarios», RF-1 y «Dudas abiertas».)
+- **Decisión delegada:** Mientras no se aclare la duda 2, solo el dueño ve el resumen de ventas, y un cajero recibe «No tienes permiso para ver el resumen de ventas». (Motivo: SPEC-001 anticipa que el dueño tiene acceso a los reportes; dar acceso al cajero sin confirmarlo mostraría datos del negocio que el dueño quizá no quiera compartir, mientras que darlo después solo añade un permiso. Alternativa descartada: mostrar el resumen de hoy a los dos roles.) (Aplicado en «Usuarios», RF-1 y «Dudas abiertas».) *Sustituida el 2026-10-24 por las respuestas de la persona: ver «Respuestas a las dudas abiertas».*
 - **Decisión delegada:** Rapidez de menos de 2 segundos con hasta 6000 ventas en el mes. (Motivo: 2 segundos es el umbral de SPEC-001 a SPEC-003 para abrir una pantalla, y 6000 ventas son unas 200 por día durante 30 días, más de lo que atiende una cafetería pequeña con una o dos personas. Alternativa descartada: no fijar un volumen, que deja el requisito sin medida.) (Aplicado en RNF-3.)
 - **Decisión delegada:** Quedan fuera las comparaciones con períodos anteriores, los resúmenes por persona, categoría u hora, el arqueo de caja, la exportación y los gráficos. (Motivo: ninguno es necesario para saber cuánto se vendió hoy y en el mes, y cada uno trae reglas propias; los períodos anteriores son del Historial. Alternativa descartada: incluir la comparación con el día anterior.) (Aplicado en «Fuera de alcance».)
 
@@ -219,3 +220,10 @@ La persona delegó la definición completa de 004-dashboard («Delego la definic
 **Análisis de consistencia.** En modo delegado; ningún hallazgo era bloqueante.
 
 - **Decisión delegada:** (Hallazgo 1) El plan trataba un error inesperado al obtener los resúmenes, pero ningún requisito lo pedía. → RF-7 lo cubre: se muestra «Ocurrió un error. Inténtalo de nuevo» y se conservan las cifras anteriores, como sin conexión. (Motivo: cada comportamiento traza a un RF (principio 2), y la persona necesita lo mismo en los dos casos: saber que no se actualizó y poder reintentar. Alternativa descartada: quitar el caso del plan, que dejaría la pantalla sin respuesta ante un error.) (Aplicado en RF-7.)
+
+**Respuestas a las dudas abiertas.** La persona respondió las dos dudas siguiendo las recomendaciones que se le propusieron («seguiré tus recomendaciones para las dudas»); los puntos que dejaron abiertos se decidieron en modo delegado, que sigue vigente para la definición.
+
+- **P:** ¿La jornada de Kofi puede pasar de la medianoche? → **R:** No: Kofi cierra antes de la medianoche, y «hoy» es el día calendario en hora de Bolivia, de 00:00 a 23:59. (Aplicado en «Conceptos»; registrado también en `docs/business-rules.md`.)
+- **P:** ¿El cajero debe ver el resumen de hoy? → **R:** Sí, para cerrar la caja de su turno; el resumen del mes en curso lo ve solo el dueño. (Aplicado en «Usuarios», HU-1, HU-2, RF-1, RF-9, «Casos límite» y «Criterios de finalización».)
+- **Decisión delegada:** El cajero ve en «Resumen de ventas» solo la sección de hoy, sin ningún aviso sobre el mes; si pide el resumen del mes por otra vía, recibe «No tienes permiso para ver el resumen del mes». (Motivo: no mostrar lo que el rol no puede ver, como la opción «Administrar menú» de SPEC-002, y un mensaje propio que dice qué parte no puede ver. Alternativa descartada: mostrar al cajero la sección del mes con el aviso de permiso, que ocupa la pantalla sin darle nada.) (Aplicado en HU-2, RF-9 y «Casos límite».)
+- **Decisión delegada:** El resumen de hoy es del día completo, también para el cajero, aunque varias personas atiendan la caja en turnos distintos. (Motivo: Kofi tiene una sola caja y SPEC-003 no registra turnos; un resumen por turno o por persona trae reglas propias (cuándo empieza y termina un turno). Alternativa descartada: mostrar al cajero solo sus propias ventas.) (Aplicado en «Casos límite» y «Fuera de alcance».)
