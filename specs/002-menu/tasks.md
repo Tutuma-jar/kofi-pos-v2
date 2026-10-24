@@ -21,7 +21,7 @@ Rama: `feat/002-menu-definicion`.
 
 Rama: `feat/002-menu-definicion`.
 
-- [ ] **T002 [contrato]** Añadir a `packages/contracts/src/errors.ts` los códigos `FORBIDDEN`, `NOT_FOUND`, `CATEGORY_HAS_ACTIVE_PRODUCTS` y `CATEGORY_INACTIVE` (plan §6.2; RF-1, RF-9, RF-10)
+- [x] **T002 [contrato]** Añadir a `packages/contracts/src/errors.ts` los códigos `FORBIDDEN`, `NOT_FOUND`, `CATEGORY_HAS_ACTIVE_PRODUCTS` y `CATEGORY_INACTIVE` (plan §6.2; RF-1, RF-9, RF-10)
   Hecho cuando: las pruebas validan con `apiErrorSchema` los ejemplos de error de §6.2 del plan con los códigos nuevos y `npm run typecheck` pasa.
 - [ ] **T003 [contrato]** Escribir en `packages/contracts/src/menu.ts` las constantes de largo, `normalizeMenuName`, `menuNameKey`, `compareMenuNames`, `categoryNameSchema` y `productNameSchema` con sus mensajes (plan §5.1, §6.1, D-3, D-4; RF-2, RF-3, RF-6, RF-12). Depende de: T001
   Hecho cuando: las pruebas comprueban que «  Té   de   coca  » queda «Té de coca»; que «Café» y «cafe», «Pingüino» y «pinguino» tienen la misma clave y «Piña» y «Pina» no; que una «é» descompuesta vale lo mismo que la compuesta; que «Pina» se ordena antes que «Piña» y esta antes que «Pino»; y cada mensaje de nombre (vacío, solo espacios, carácter no admitido como emoji, comillas o salto de línea, y largo de 30 y 40).
