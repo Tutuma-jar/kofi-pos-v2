@@ -1,4 +1,4 @@
-import type { Role } from '@kofi/contracts';
+import type { Role, AccountInput } from '@kofi/contracts';
 import type { Queryable } from '../../shared/database/database.ts';
 
 // Acceso a la tabla users (RF-1, RF-9, RF-13).
@@ -51,4 +51,22 @@ export async function findUserByUsername(
   );
   const row = result.rows[0];
   return row ? toUserRecord(row) : null;
+}
+
+export async function insertUser(
+  db: Queryable,
+  input: AccountInput,
+  passwordHash: string,
+): Promise<UserRecord> {
+  const result = await db.query<UserRow>(
+    `INSERT INTO users AS u (username, display_name, role, password_hash)
+     VALUES ($1, $2, $3, $4) RETURNING ${USER_COLUMNS}`,
+    [input.username, input.displayName, input.role, passwordHash],
+  );
+  return toUserRecord(result.rows[0]!);
+}
+
+export async function listUsers(db: Queryable): Promise<UserRecord[]> {
+  const result = await db.query<UserRow>(`SELECT ${USER_COLUMNS} FROM users u ORDER BY u.username`);
+  return result.rows.map(toUserRecord);
 }

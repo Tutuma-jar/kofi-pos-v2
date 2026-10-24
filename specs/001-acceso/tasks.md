@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común y US1 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -61,29 +61,29 @@ Rama: `feat/001-acceso-definicion`.
 
 Rama: `feat/001-acceso-us1`.
 
-- [ ] **T020 [api] [P] [US1]** Escribir el ingreso en `auth.service.ts`: usuario normalizado, contraseña exacta, hash ficticio si el usuario no existe, sesión de 12 h y revocación de la sesión anterior del mismo navegador, todavía sin bloqueo (plan §5.1; RF-1, RF-2, RF-6, RNF-2). Depende de: T012, T014, T015
+- [x] **T020 [api] [P] [US1]** Escribir el ingreso en `auth.service.ts`: usuario normalizado, contraseña exacta, hash ficticio si el usuario no existe, sesión de 12 h y revocación de la sesión anterior del mismo navegador, todavía sin bloqueo (plan §5.1; RF-1, RF-2, RF-6, RNF-2). Depende de: T012, T014, T015
   Hecho cuando: las pruebas de integración cubren el ingreso correcto con `"  Ana "`, la contraseña con otra mayúscula, el usuario inexistente y la contraseña incorrecta (el mismo error), que `verifyPassword` se ejecuta exactamente una vez tanto con un usuario inexistente como con uno existente (espía, plan §8.3) y una sesión nueva que revoca la anterior.
-- [ ] **T021 [api] [P] [US1]** Escribir `POST /api/auth/login` en `auth.routes.ts`, con la cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age=648000`, D-15) y `@fastify/cookie` (D-8) (RF-1, RF-2, RF-3, RF-10, RNF-1). Depende de: T013, T020
+- [x] **T021 [api] [P] [US1]** Escribir `POST /api/auth/login` en `auth.routes.ts`, con la cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age=648000`, D-15) y `@fastify/cookie` (D-8) (RF-1, RF-2, RF-3, RF-10, RNF-1). Depende de: T013, T020
   Hecho cuando: las pruebas con `app.inject` cubren `200` con `Set-Cookie` y todos sus atributos, incluido `Max-Age=648000`, `401 INVALID_CREDENTIALS`, `400 VALIDATION_ERROR` para campos vacíos o solo con espacios (sin contar intento), y que la contraseña no aparece en los registros de la API.
-- [ ] **T022 [api] [P] [US1]** Escribir `resolveSession` (sin cookie, token desconocido o revocado → `SESSION_MISSING`), el hook `requireSession` (exportado en `modules/auth/index.ts`) y `GET /api/auth/session` (plan §5.2; RF-4, RF-5, RF-6, RF-8). Depende de: T013, T015
+- [x] **T022 [api] [P] [US1]** Escribir `resolveSession` (sin cookie, token desconocido o revocado → `SESSION_MISSING`), el hook `requireSession` (exportado en `modules/auth/index.ts`) y `GET /api/auth/session` (plan §5.2; RF-4, RF-5, RF-6, RF-8). Depende de: T013, T015
   Hecho cuando: las pruebas cubren `200` con `SessionUser`, `401 SESSION_MISSING` en los tres casos (con la cookie borrada), dos cookies de la misma cuenta como sesiones independientes y una ruta de prueba protegida que no ejecuta su manejador sin sesión.
-- [ ] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
+- [x] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
   Hecho cuando: las pruebas comprueban `204` con la cookie borrada, que después la sesión da `SESSION_MISSING`, que otra sesión de la misma cuenta sigue válida y que sin sesión también responde `204`.
-- [ ] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
+- [x] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
   Hecho cuando: las pruebas de integración crean una cuenta válida, rechazan cada dato fuera de «Datos de una cuenta» indicando cuál, y rechazan `ana` si ya existe `Ana`.
-- [ ] **T025 [api] [P] [US1]** Escribir `accounts.cli.ts` y el script `npm run accounts -w @kofi/api` con `create` y `list`; la contraseña se pide sin mostrarla y nunca se recibe como argumento (RF-13). Depende de: T024
+- [x] **T025 [api] [P] [US1]** Escribir `accounts.cli.ts` y el script `npm run accounts -w @kofi/api` con `create` y `list`; la contraseña se pide sin mostrarla y nunca se recibe como argumento (RF-13). Depende de: T024
   Hecho cuando: las pruebas ejecutan `create` y `list` con una entrada simulada y comprueban los mensajes en español, incluido el de usuario repetido.
-- [ ] **T026 [web] [P] [US1]** Escribir `LoginForm.tsx`: contraseña oculta, `maxLength` de 30 y 64, aviso del campo faltante con el esquema del contrato sin enviar, mensaje de la API, usuario conservado y contraseña vaciada tras un error, «No hay conexión. Inténtalo de nuevo» ante `NETWORK_ERROR` y envío con Intro (RF-1, RF-2, RF-3, RF-14, RNF-5). Depende de: T018
+- [x] **T026 [web] [P] [US1]** Escribir `LoginForm.tsx`: contraseña oculta, `maxLength` de 30 y 64, aviso del campo faltante con el esquema del contrato sin enviar, mensaje de la API, usuario conservado y contraseña vaciada tras un error, «No hay conexión. Inténtalo de nuevo» ante `NETWORK_ERROR` y envío con Intro (RF-1, RF-2, RF-3, RF-14, RNF-5). Depende de: T018
   Hecho cuando: las pruebas de componente, contra el cliente simulado, cubren el éxito, las credenciales incorrectas, los campos vacíos o solo con espacios (sin llamar al cliente), los límites de largo, la falta de conexión y el uso solo con teclado.
-- [ ] **T027 [web] [P] [US1]** Escribir `SessionProvider.tsx`, `useSession.ts` y `RequireSession.tsx`: la sesión se comprueba al abrir o recargar una ruta protegida y, ante `SESSION_MISSING` en cualquier respuesta, se va a `/ingresar` sin aviso (RF-4, RF-8). Depende de: T018, T019
+- [x] **T027 [web] [P] [US1]** Escribir `SessionProvider.tsx`, `useSession.ts` y `RequireSession.tsx`: la sesión se comprueba al abrir o recargar una ruta protegida y, ante `SESSION_MISSING` en cualquier respuesta, se va a `/ingresar` sin aviso (RF-4, RF-8). Depende de: T018, T019
   Hecho cuando: las pruebas de componente comprueban que sin sesión no se muestra el contenido protegido y se termina en `/ingresar`, y que un `401` en una operación hace lo mismo.
-- [ ] **T028 [web] [P] [US1]** Escribir `LoginPage.tsx`: si ya hay sesión, va a `/`; tras un ingreso correcto, va a `/` (RF-1, RF-6). Depende de: T026, T027
+- [x] **T028 [web] [P] [US1]** Escribir `LoginPage.tsx`: si ya hay sesión, va a `/`; tras un ingreso correcto, va a `/` (RF-1, RF-6). Depende de: T026, T027
   Hecho cuando: las pruebas de componente cubren las dos redirecciones con el cliente simulado.
-- [ ] **T029 [web] [P] [US1]** Escribir `AuthenticatedLayout.tsx` y `HomePage.tsx`: saludo con el nombre visible, rol («Dueño» o «Cajero») y «Cerrar sesión» sin confirmación, que lleva a `/ingresar`; al volver con `pageshow` persistido, se comprueba de nuevo la sesión (RF-5, RF-7, RF-8). Depende de: T027
+- [x] **T029 [web] [P] [US1]** Escribir `AuthenticatedLayout.tsx` y `HomePage.tsx`: saludo con el nombre visible, rol («Dueño» o «Cajero») y «Cerrar sesión» sin confirmación, que lleva a `/ingresar`; al volver con `pageshow` persistido, se comprueba de nuevo la sesión (RF-5, RF-7, RF-8). Depende de: T027
   Hecho cuando: las pruebas de componente cubren los dos roles, el cierre de sesión y la nueva comprobación de la sesión en `pageshow`.
-- [ ] **T030 [integración] [US1]** Cambiar el cliente simulado por el real en la aplicación y ampliar `e2e-server.ts` con PGlite y las cuentas de `e2e/fixtures.ts` creadas con `accounts.service` (RF-1 a RF-8, RF-13, RF-14). Depende de: T021, T022, T023, T024, T025, T026, T027, T028, T029
+- [x] **T030 [integración] [US1]** Cambiar el cliente simulado por el real en la aplicación y ampliar `e2e-server.ts` con PGlite y las cuentas de `e2e/fixtures.ts` creadas con `accounts.service` (RF-1 a RF-8, RF-13, RF-14). Depende de: T021, T022, T023, T024, T025, T026, T027, T028, T029
   Hecho cuando: la interfaz en `vite preview` inicia y cierra sesión contra la API de E2E, y `npm test` sigue pasando.
-- [ ] **T031 [integración] [US1]** Escribir `e2e/us1-iniciar-cerrar-sesion.spec.ts` con los 8 pasos de §8.2 del plan (RF-1 a RF-8, RF-14). Depende de: T030
+- [x] **T031 [integración] [US1]** Escribir `e2e/us1-iniciar-cerrar-sesion.spec.ts` con los 8 pasos de §8.2 del plan (RF-1 a RF-8, RF-14). Depende de: T030
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: proteger las cuentas (P2)

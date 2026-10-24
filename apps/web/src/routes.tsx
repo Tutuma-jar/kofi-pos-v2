@@ -1,7 +1,15 @@
 import { roleSchema, type Role } from '@kofi/contracts';
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
-import { HomePage, LoginPage } from './modules/auth/index.ts';
+import {
+  HomePage,
+  LoginPage,
+  SessionProvider,
+  RequireSession,
+  AuthenticatedLayout,
+  httpAuthClient,
+  type AuthClient,
+} from './modules/auth/index.ts';
 
 // Rutas de la interfaz (docs/architecture.md §6.6). Cada ruta protegida declara los roles que pueden
 // verla; por defecto, los dos. La interfaz solo usa esa lista para navegar (RF-11); los permisos
@@ -29,13 +37,26 @@ export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
   roles: route.roles ?? ALL_ROLES,
 }));
 
-export function AppRoutes() {
+export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) {
   return (
-    <Routes>
-      {[...publicRoutes, ...protectedRoutes].map(({ path, element }) => (
-        <Route key={path} path={path} element={element} />
-      ))}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <SessionProvider client={client}>
+      <Routes>
+        {publicRoutes.map(({ path, element }) => (
+          <Route key={path} path={path} element={element} />
+        ))}
+        {protectedRoutes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <RequireSession>
+                <AuthenticatedLayout>{element}</AuthenticatedLayout>
+              </RequireSession>
+            }
+          />
+        ))}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </SessionProvider>
   );
 }

@@ -1,8 +1,12 @@
-// Provisional: el saludo con el nombre visible, el rol y «Cerrar sesión» llega en US1 (T029).
+import { useSession } from '../components/useSession.ts';
+
 export function HomePage() {
+  const { user } = useSession();
+  if (!user) return null;
   return (
     <main>
       <h1>Kofi POS</h1>
+      <p>Hola, {user.displayName}</p>
     </main>
   );
 }

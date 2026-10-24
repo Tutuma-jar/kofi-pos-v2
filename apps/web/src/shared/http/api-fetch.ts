@@ -9,6 +9,14 @@ const UNEXPECTED_MESSAGE = 'Ocurrió un error. Inténtalo de nuevo';
 
 export type ApiErrorDetail = ApiError['error'];
 
+const unauthorizedListeners = new Set<(error: ApiFetchError) => void>();
+export function subscribeUnauthorized(listener: (error: ApiFetchError) => void): () => void {
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
+}
+
 export class ApiFetchError extends Error {
   // null si no llegó respuesta.
   readonly status: number | null;
@@ -69,7 +77,13 @@ export async function apiFetch<T>(
   const data: unknown = await response.json().catch(() => undefined);
   if (!response.ok) {
     const parsed = apiErrorSchema.safeParse(data);
-    throw parsed.success ? new ApiFetchError(response.status, parsed.data.error) : unexpected();
+    const error = parsed.success
+      ? new ApiFetchError(response.status, parsed.data.error)
+      : unexpected();
+    if (response.status === 401) {
+      for (const listener of unauthorizedListeners) listener(error);
+    }
+    throw error;
   }
   if (!schema) return;
   try {
