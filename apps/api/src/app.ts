@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
+import cookie from '@fastify/cookie';
 import { registerErrorHandler } from './shared/http/errors.ts';
 import { authPlugin } from './modules/auth/index.ts';
 import { systemClock, type Clock } from './shared/clock.ts';
@@ -16,6 +17,8 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
   const app = Fastify({ logger: deps.logger ?? true });
 
   registerErrorHandler(app);
+  app.register(cookie);
+  app.decorateRequest('sessionUser', null);
   // Ninguna respuesta de la API se guarda en caché (D-4): tienen datos de la sesión.
   app.addHook('onSend', async (_request, reply) => {
     reply.header('Cache-Control', 'no-store');
