@@ -69,7 +69,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas cubren `200` con `SessionUser`, `401 SESSION_MISSING` en los tres casos (con la cookie borrada), dos cookies de la misma cuenta como sesiones independientes y una ruta de prueba protegida que no ejecuta su manejador sin sesión.
 - [x] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
   Hecho cuando: las pruebas comprueban `204` con la cookie borrada, que después la sesión da `SESSION_MISSING`, que otra sesión de la misma cuenta sigue válida y que sin sesión también responde `204`.
-- [ ] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
+- [x] **T024 [api] [P] [US1]** Escribir `accounts.service.ts` con `create` y `list`, validando con `accountInputSchema` (RF-13). Depende de: T009, T014, T015
   Hecho cuando: las pruebas de integración crean una cuenta válida, rechazan cada dato fuera de «Datos de una cuenta» indicando cuál, y rechazan `ana` si ya existe `Ana`.
 - [ ] **T025 [api] [P] [US1]** Escribir `accounts.cli.ts` y el script `npm run accounts -w @kofi/api` con `create` y `list`; la contraseña se pide sin mostrarla y nunca se recibe como argumento (RF-13). Depende de: T024
   Hecho cuando: las pruebas ejecutan `create` y `list` con una entrada simulada y comprueban los mensajes en español, incluido el de usuario repetido.
