@@ -71,6 +71,13 @@ describe('eslint.config.js: no-restricted-imports', () => {
       ['apps/web/src/modules/sales/SalesPage.tsx', '../auth/components/useSession.ts'],
       ['apps/api/src/app.ts', './modules/auth/auth.routes.ts'],
       ['apps/api/src/modules/sales/sales.routes.ts', '../auth/auth.hook.ts'],
+      // Módulo menu (SPEC-002).
+      ['apps/web/src/routes.tsx', './modules/menu/pages/MenuAdminPage.tsx'],
+      ['apps/web/src/modules/auth/pages/HomePage.tsx', '../../menu/api/menu-client.ts'],
+      ['apps/web/src/modules/menu/pages/MenuPage.tsx', '../../auth/components/useSession.ts'],
+      ['apps/api/src/app.ts', './modules/menu/menu.routes.ts'],
+      ['apps/api/src/modules/menu/menu.routes.ts', '../auth/auth.hook.ts'],
+      ['apps/api/src/modules/sales/sales.service.ts', '../menu/menu.views.ts'],
     ])('%s no puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toHaveLength(1);
     });
@@ -84,6 +91,12 @@ describe('eslint.config.js: no-restricted-imports', () => {
       ['apps/api/src/modules/sales/sales.routes.ts', '../auth/index.ts'],
       ['apps/api/src/modules/auth/auth.routes.ts', './auth.service.ts'],
       ['apps/api/src/modules/auth/auth.routes.ts', '../../shared/http/errors.ts'],
+      ['apps/web/src/routes.tsx', './modules/menu/index.ts'],
+      ['apps/web/src/modules/menu/pages/MenuAdminPage.tsx', '../../auth/index.ts'],
+      ['apps/web/src/modules/menu/pages/MenuAdminPage.tsx', '../components/ProductForm.tsx'],
+      ['apps/api/src/app.ts', './modules/menu/index.ts'],
+      ['apps/api/src/modules/menu/menu.routes.ts', '../auth/index.ts'],
+      ['apps/api/src/modules/sales/sales.service.ts', '../menu/index.ts'],
     ])('%s sí puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toEqual([]);
     });
