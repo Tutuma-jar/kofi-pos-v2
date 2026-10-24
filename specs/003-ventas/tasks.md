@@ -24,7 +24,7 @@ Rama: `feat/003-ventas-definicion`.
 
 - [x] **T002 [contrato]** Añadir a `packages/contracts/src/errors.ts` el código `MENU_CHANGED` (plan §6.2; RF-7)
   Hecho cuando: las pruebas validan con `apiErrorSchema` el ejemplo de `409 MENU_CHANGED` de §6.2 del plan y `npm run typecheck` pasa.
-- [ ] **T003 [contrato]** Escribir `packages/contracts/src/datetime.ts` con `BOLIVIA_TIME_ZONE` y `formatDateTime`, y exportarlo desde `index.ts` (plan §5.6, D-7; RF-6, RF-11)
+- [x] **T003 [contrato]** Escribir `packages/contracts/src/datetime.ts` con `BOLIVIA_TIME_ZONE` y `formatDateTime`, y exportarlo desde `index.ts` (plan §5.6, D-7; RF-6, RF-11)
   Hecho cuando: las pruebas comprueban que `2026-10-24T18:05:12.000Z` se muestra «24/10/2026 14:05», `2027-01-05T13:30:00.000Z` «05/01/2027 09:30» y `2026-10-25T03:59:00.000Z` «24/10/2026 23:59» (el día de Bolivia, no el de UTC), con cualquier zona horaria en el proceso de pruebas.
 - [ ] **T004 [contrato]** Escribir en `packages/contracts/src/sales.ts` `SALE_MAX_LINES`, `SALE_MAX_QUANTITY`, `SALE_MESSAGES`, `saleDraftLineSchema`, `saleQuoteRequestSchema` y `registerSaleRequestSchema` (plan §6.1; RF-3, RF-5, RF-6, RF-8). Depende de: T001
   Hecho cuando: las pruebas validan las entradas de los ejemplos de §6.2 del plan y rechazan, con el mensaje de `SALE_MESSAGES` correspondiente, 0 y 100 unidades, 31 líneas, un producto repetido y un registro sin líneas; y `registerSaleRequestSchema` exige `unitPriceCents` y un `draftId` uuid.
