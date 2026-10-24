@@ -48,7 +48,7 @@ apps/
 │       │   ├── auth/            api/ components/ pages/ dev/
 │       │   ├── menu/
 │       │   ├── sales/           api/ components/ pages/ state/ dev/
-│       │   ├── dashboard/
+│       │   ├── dashboard/       api/ components/ pages/ state/ dev/
 │       │   └── history/
 │       ├── shared/              components/ http/ layout/ styles/
 │       ├── routes.tsx
@@ -62,7 +62,7 @@ apps/
         │   ├── sales/
         │   ├── dashboard/
         │   └── history/
-        ├── shared/              clock.ts config/ database/ http/
+        ├── shared/              clock.ts calendar.ts config/ database/ http/
         ├── app.ts               buildApp(deps): lo usan server.ts y las pruebas
         └── server.ts
 packages/
@@ -143,7 +143,7 @@ Se aplican desde que existen las aplicaciones (`001-acceso`):
 
 ## 6. Decisiones globales
 
-Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas) y [`specs/003-ventas/plan.md`](../specs/003-ventas/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
+Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas), [`specs/003-ventas/plan.md`](../specs/003-ventas/plan.md#7-decisiones-técnicas) y [`specs/004-dashboard/plan.md`](../specs/004-dashboard/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
 
 ### 6.1 Mismo origen
 
@@ -197,3 +197,4 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - En el contrato viaja como texto ISO 8601 en UTC (por ejemplo, `registeredAt: "2026-10-24T18:05:12.000Z"`).
 - Se muestra siempre con `formatDateTime` de `packages/contracts`, en hora de Bolivia (`America/La_Paz`): «24/10/2026 14:05», con día, mes, hora y minutos de dos cifras y la hora en formato de 24 horas.
 - Adoptado en SPEC-003 (D-7).
+- **Días y meses:** qué es «hoy» y «el mes en curso» en hora de Bolivia lo decide la API con `apps/api/src/shared/calendar.ts`, a partir de `clock.ts`, nunca la interfaz con la hora de la computadora. Las fechas sin hora y los meses viajan como `YYYY-MM-DD` y `YYYY-MM`, ya en hora de Bolivia, y se muestran con `formatDate` («24/10/2026») y `formatMonth` («Octubre de 2026») de `packages/contracts`. Adoptado en SPEC-004 (D-4, D-5).
