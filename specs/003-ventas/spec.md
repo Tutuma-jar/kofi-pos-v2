@@ -10,7 +10,7 @@ Depende de [SPEC-001 — Acceso](../001-acceso/spec.md), por la sesión, la iden
 
 Kofi es una cafetería pequeña, atendida por una o dos personas desde una computadora del local (ver [`docs/business-rules.md`](../../docs/business-rules.md#contexto)). Ventas es el tercer módulo de Kofi POS: en el mostrador, la persona que atiende arma la venta con los productos que pide la clientela, ve el total que tiene que cobrar y, una vez cobrada, la registra.
 
-Objetivo: que cada venta pagada quede registrada en el sistema de forma completa y exacta, sin que la persona que atiende tenga que hacer cuentas, para que el Dashboard (004) y el Historial (005) puedan construirse sobre ventas reales y bien definidas: qué se vendió, a qué precio, el total, quién la registró y cuándo.
+Objetivo: que cada venta pagada quede registrada en el sistema de forma completa y exacta, sin que la persona que atiende tenga que hacer cuentas, para que el Dashboard (004) y el Historial (005) puedan construirse sobre ventas reales y bien definidas: qué se vendió, a qué precio, el total, cómo se pagó, quién la registró y cuándo.
 
 ## 2. Usuarios
 
@@ -37,6 +37,7 @@ Objetivo: que cada venta pagada quede registrada en el sistema de forma completa
 | Quién la registró | La cuenta de la sesión con la que se registró, con su nombre visible y su rol en ese momento. Se conservan aunque después la cuenta cambie o se elimine. |
 | Líneas | De 1 a 30 líneas. Cada una con el nombre del producto, el nombre de su categoría y su precio unitario tal como estaban en el menú vigente al registrar la venta, la cantidad (un entero de 1 a 99) y el subtotal. Un mismo producto aparece en una sola línea. |
 | Total | La suma exacta de los subtotales. |
+| Medio de pago | «Efectivo» o «QR», los dos que acepta Kofi (ver [`docs/business-rules.md`](../../docs/business-rules.md#contexto)). Uno solo por venta. |
 
 Todos los importes se muestran en el formato de precios de SPEC-002 («Datos de un producto»): «Bs 12,50».
 
@@ -46,7 +47,7 @@ Todos los importes se muestran en el formato de precios de SPEC-002 («Datos de 
 
 Como **persona que atiende el mostrador (cajero o dueño)**, quiero **armar la venta con los productos del menú y sus cantidades, ver el total que calcula el sistema y registrarla cuando la clientela paga** para **cobrar lo correcto sin hacer cuentas y que la venta quede registrada para los resúmenes y reportes**.
 
-**Prueba independiente:** con un menú vigente que tiene «Café americano» a Bs 12,50 y «Empanada» a Bs 8,00, una sesión de cajero abre «Nueva venta», agrega dos veces el café y una vez la empanada: la venta en preparación muestra «Café americano × 2 · Bs 25,00», «Empanada × 1 · Bs 8,00» y el total «Bs 33,00». Al elegir «Registrar venta» aparece «Venta N.º 1 registrada · Bs 33,00 · [fecha y hora]» y la venta en preparación queda vacía. La venta registrada que el sistema entrega a otros módulos (RF-11) tiene el número 1, la fecha y la hora, el nombre y el rol del cajero, las dos líneas con sus precios y el total Bs 33,00. Si después el dueño cambia el precio del café, esa venta sigue igual. Pulsar dos veces seguidas «Registrar venta» registra una sola venta, y una venta sin productos no se puede registrar.
+**Prueba independiente:** con un menú vigente que tiene «Café americano» a Bs 12,50 y «Empanada» a Bs 8,00, una sesión de cajero abre «Nueva venta», agrega dos veces el café y una vez la empanada: la venta en preparación muestra «Café americano × 2 · Bs 25,00», «Empanada × 1 · Bs 8,00» y el total «Bs 33,00». Al elegir el medio de pago «Efectivo» y «Registrar venta» aparece «Venta N.º 1 registrada · Bs 33,00 · Efectivo · [fecha y hora]» y la venta en preparación queda vacía. La venta registrada que el sistema entrega a otros módulos (RF-11) tiene el número 1, la fecha y la hora, el nombre y el rol del cajero, las dos líneas con sus precios, el total Bs 33,00 y el medio de pago «Efectivo»; una segunda venta pagada con «QR» queda registrada con ese medio. Si después el dueño cambia el precio del café, esa venta sigue igual. Pulsar dos veces seguidas «Registrar venta» registra una sola venta, y una venta sin productos o sin medio de pago no se puede registrar.
 
 *Producto mínimo útil:* por sí sola, esta historia ya permite cobrar y registrar todas las ventas del local, que es lo que necesitan el Dashboard y el Historial.
 
@@ -99,14 +100,16 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 **RF-6. Registrar la venta** (HU-1)
 
 - El sistema deberá ofrecer la opción «Registrar venta» en la venta en preparación, para usarla cuando la clientela ya pagó.
-- Cuando la persona registra una venta en preparación con al menos una línea, el sistema deberá registrarla con los datos de «Datos de una venta registrada», mostrar «Venta N.º [número] registrada · [total] · [fecha y hora]» y dejar vacía la venta en preparación, lista para la siguiente.
+- El sistema deberá ofrecer en la venta en preparación la elección del medio de pago, «Efectivo» o «QR», sin ninguno elegido de antemano, y permitir cambiarla hasta registrar la venta.
+- Cuando la persona registra una venta en preparación con al menos una línea y un medio de pago elegido, el sistema deberá registrarla con los datos de «Datos de una venta registrada», mostrar «Venta N.º [número] registrada · [total] · [medio de pago] · [fecha y hora]» y dejar vacía la venta en preparación, sin medio de pago elegido, lista para la siguiente.
 - El sistema deberá mantener visible la confirmación de la última venta registrada hasta que se agregue un producto a la venta siguiente o se salga de la pantalla; al recargarla, la confirmación ya no se muestra.
 - Si la venta en preparación está vacía, entonces el sistema deberá no permitir registrarla; si aun así llega a intentarse, deberá rechazarla con el mensaje «Agrega al menos un producto».
+- Si no se eligió el medio de pago, entonces el sistema deberá no permitir registrar la venta; si aun así llega a intentarse, deberá rechazarla con el mensaje «Elige el medio de pago».
 
 **RF-7. Se cobra lo que se mostró** (HU-1)
 
 - Si al registrar la venta el precio vigente de alguno de sus productos es distinto del que se mostraba, o alguno ya no está en el menú vigente, entonces el sistema deberá no registrarla, actualizar la venta en preparación como indica RF-5 y mostrar «El menú cambió. Revisa la venta antes de registrarla».
-- El sistema deberá registrar cada venta con exactamente las líneas, las cantidades, los precios unitarios y el total que se mostraban al elegir «Registrar venta», y con el nombre de cada producto y el de su categoría tal como están en el menú vigente en ese momento (RF-5).
+- El sistema deberá registrar cada venta con exactamente las líneas, las cantidades, los precios unitarios, el total y el medio de pago que se mostraban al elegir «Registrar venta», y con el nombre de cada producto y el de su categoría tal como están en el menú vigente en ese momento (RF-5).
 
 **RF-8. Una venta se registra una sola vez** (HU-1)
 
@@ -127,7 +130,7 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 
 **RF-11. Ventas registradas para otros módulos** (HU-1)
 
-- El sistema deberá poder indicar en todo momento, para cada venta registrada, los datos de «Datos de una venta registrada»: número, fecha y hora, quién la registró, sus líneas y su total.
+- El sistema deberá poder indicar en todo momento, para cada venta registrada, los datos de «Datos de una venta registrada»: número, fecha y hora, quién la registró, sus líneas, su total y su medio de pago.
 - Cuando cambia el menú después de registrar una venta (un precio, un nombre, una categoría, o un producto o una categoría desactivados), el sistema deberá conservar la venta registrada exactamente como se registró.
 - Cuando cambia o se elimina la cuenta que registró una venta, el sistema deberá conservar en la venta el nombre visible y el rol que tenía al registrarla.
 
@@ -135,7 +138,7 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 
 **RF-12. Conservar la venta en preparación** (HU-2)
 
-- El sistema deberá conservar la venta en preparación de cada cuenta en cada navegador, con sus líneas y cantidades, hasta que se registre o se descarte (RF-13, RF-14), aunque se recargue la pantalla, se vaya a otra pantalla del sistema o se cierre y se vuelva a abrir la pestaña o el navegador.
+- El sistema deberá conservar la venta en preparación de cada cuenta en cada navegador, con sus líneas, sus cantidades y el medio de pago elegido, hasta que se registre o se descarte (RF-13, RF-14), aunque se recargue la pantalla, se vaya a otra pantalla del sistema o se cierre y se vuelva a abrir la pestaña o el navegador.
 - El sistema deberá mostrar la misma venta en preparación en todas las pestañas del mismo navegador con la misma cuenta: cuando cambia o se registra en una pestaña, las demás muestran la versión más reciente.
 - Cuando se vuelve a mostrar una venta en preparación conservada, el sistema deberá volver a calcularla con el menú vigente (RF-4 y RF-5).
 
@@ -156,7 +159,7 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 - **RNF-1. Idioma.** Todos los textos y mensajes para la persona están en español.
 - **RNF-2. Importes exactos.** Subtotales y totales son exactos al centavo: ninguna suma pierde ni gana centavos por redondeo, y el total registrado es siempre la suma de los subtotales de sus líneas.
 - **RNF-3. Rapidez.** Desde la computadora del local, con un menú de hasta 200 productos, en el 95 % de los casos: abrir «Nueva venta» tarda menos de 2 segundos, cada cambio de la venta en preparación muestra el total actualizado en menos de 1 segundo y registrar una venta tarda menos de 2 segundos. No cuenta la primera operación tras un período sin uso del sistema, mientras el servicio se reactiva (como en SPEC-001, RNF-4).
-- **RNF-4. Uso con teclado.** Se puede armar y registrar una venta solo con teclado: llegar a cada producto y a cada opción de las líneas, y elegirlos con Intro o la barra espaciadora.
+- **RNF-4. Uso con teclado.** Se puede armar y registrar una venta solo con teclado: llegar a cada producto, a cada opción de las líneas y al medio de pago, y elegirlos con Intro o la barra espaciadora.
 
 ## 6. Casos límite
 
@@ -167,6 +170,9 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 | Sumar a una línea con 99 unidades | No cambia y se avisa del máximo (RF-3). |
 | Agregar el producto distinto número 31 | No se agrega y se avisa del máximo (RF-3). |
 | Registrar una venta vacía | No se permite (RF-6). |
+| Registrar una venta sin elegir el medio de pago | No se permite (RF-6). |
+| Elegir «Efectivo», cambiarlo por «QR» y registrar | La venta queda registrada con «QR» (RF-6, RF-7). |
+| La clientela quiere pagar una parte en efectivo y otra con QR | No se admite: cada venta tiene un solo medio de pago (ver «Fuera de alcance»). |
 | Doble clic en «Registrar venta» | Se registra una sola venta (RF-8). |
 | Se corta la conexión al registrar y se reintenta; el primer intento sí llegó a registrarse | El reintento muestra la confirmación de esa misma venta, con su número, y no registra otra (RF-8). |
 | Se corta la conexión al registrar y se reintenta; el primer intento no llegó | El reintento la registra una vez (RF-8, RF-9). |
@@ -193,8 +199,10 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 ## 7. Fuera de alcance
 
 - Modificar o anular una venta registrada, o registrar devoluciones: las ventas registradas no cambian. Corregir una venta equivocada queda para una especificación propia.
-- Medio de pago, efectivo recibido y cálculo del cambio (ver «Dudas abiertas»).
-- Facturación, impuestos y comprobantes impresos o digitales (ver «Dudas abiertas»).
+- Efectivo recibido y cálculo del cambio: la persona da el cambio como hasta ahora.
+- Comprobar en el sistema que un pago con QR llegó: la persona lo comprueba como hasta ahora, antes de registrar la venta.
+- Pagos combinados (una parte en efectivo y otra con QR) y medios de pago distintos de efectivo y QR, como tarjetas.
+- Facturación, impuestos y comprobantes impresos o digitales: Kofi no emite factura.
 - Descuentos, promociones, propinas y precios distintos del precio vigente del menú.
 - Ventas a crédito, pagos parciales, cuentas por cobrar o ventas pendientes de pago: solo se registran ventas ya pagadas.
 - Mesas, nombres de clientes, notas por producto («sin azúcar»), pedidos para cocina y estados de preparación de un pedido.
@@ -213,11 +221,11 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 - Los números de las ventas registradas son 1, 2, 3… sin saltos ni repeticiones, aunque se registren desde dos navegadores a la vez.
 - Ningún cambio posterior del menú ni de las cuentas modifica una venta ya registrada.
 - Ninguna persona ve la venta en preparación de otra cuenta.
+- El 100 % de las ventas registradas indica su medio de pago, «Efectivo» o «QR».
 
 ## 9. Dudas abiertas
 
-- [NECESITA ACLARACIÓN] ¿Qué medios de pago acepta Kofi (efectivo, QR, tarjeta…) y quiere el dueño que cada venta registre con cuál se pagó o que el sistema calcule el cambio del efectivo? No bloquea ninguna historia de esta especificación: hasta aclararlo, una venta registrada no indica el medio de pago. Hace falta antes de especificar el Dashboard (004) si el resumen del día debe separar los importes por medio de pago.
-- [NECESITA ACLARACIÓN] ¿Kofi emite factura o nota fiscal por sus ventas? No bloquea ninguna historia: la facturación queda fuera de alcance. Si la emite, hará falta una especificación propia.
+Ninguna.
 
 ## 10. Aclaraciones
 
@@ -265,3 +273,11 @@ La persona delegó la definición completa de 003-ventas («Delego la definició
 
 - **Decisión delegada:** (Hallazgo 1) RF-13 descartaba la venta en preparación «cuando entra» otra cuenta, pero el plan la descarta cuando esa cuenta abre «Nueva venta». → Se descarta al abrir «Nueva venta» con otra cuenta. (Motivo: lo que importa es que otra cuenta nunca la vea, y es en esa pantalla donde se vería; el ingreso es de SPEC-001. Alternativa descartada: descartarla en el ingreso, que obligaría a `auth` a conocer las ventas.) (Aplicado en RF-13 y «Casos límite».)
 - **Decisión delegada:** (Hallazgo 4) La prueba independiente de HU-2 iba a «Ver menú», que es de la historia 3 de SPEC-002, no de la historia 1 de la que dependen las de Ventas. → Se va a la pantalla inicial y se vuelve. (Motivo: comprueba lo mismo, salir de «Nueva venta» y volver, sin otra dependencia. Alternativa descartada: depender también de SPEC-002 US3.) (Aplicado en HU-2.)
+
+**Respuestas a las dudas abiertas.** La persona respondió las dos dudas; los puntos que dejaron abiertos se decidieron en modo delegado, que sigue vigente para la definición.
+
+- **P:** ¿Qué medios de pago acepta Kofi? → **R:** Efectivo y QR. (Aplicado en «Datos de una venta registrada», RF-6 y «Fuera de alcance»; registrado también en `docs/business-rules.md`.)
+- **P:** ¿Kofi emite factura o nota fiscal? → **R:** No. (Aplicado en «Fuera de alcance» y `docs/business-rules.md`.)
+- **Decisión delegada:** Cada venta registrada guarda su medio de pago, «Efectivo» o «QR», desde la historia 1. (Motivo: el Dashboard (004) podrá separar el efectivo que debe haber en caja de lo cobrado por QR, y registrarlo desde la primera venta evita ventas sin medio de pago. Alternativa descartada: no registrarlo, o añadirlo en una historia posterior, que dejaría las primeras ventas sin ese dato.) (Aplicado en «Contexto y objetivo», «Datos de una venta registrada», HU-1, RF-6, RF-7, RF-11 y «Criterios de finalización».)
+- **Decisión delegada:** La persona elige el medio de pago antes de registrar, sin ninguno elegido de antemano, y puede cambiarlo hasta registrar; la elección se conserva con la venta en preparación. (Motivo: un valor por defecto haría que una venta por QR quedara como efectivo si la persona se olvida de cambiarlo, y la elección es un clic más. Alternativa descartada: «Efectivo» elegido de antemano.) (Aplicado en RF-6, RF-12 y «Casos límite».)
+- **Decisión delegada:** El efectivo recibido, el cálculo del cambio, la comprobación del pago QR y los pagos combinados quedan fuera. (Motivo: no hacen falta para registrar bien una venta pagada y cada uno trae reglas propias; la persona sigue dando el cambio y comprobando el QR como hasta ahora. Alternativa descartada: calcular el cambio a partir del efectivo recibido.) (Aplicado en «Fuera de alcance» y «Casos límite».)
