@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { AppRoutes } from './routes.tsx';
 import { httpAuthClient, type AuthClient } from './modules/auth/index.ts';
+import {
+  DashboardClientProvider,
+  httpDashboardClient,
+  type DashboardClient,
+} from './modules/dashboard/index.ts';
 import { httpMenuClient, MenuClientProvider, type MenuClient } from './modules/menu/index.ts';
 import { httpSalesClient, SalesClientProvider, type SalesClient } from './modules/sales/index.ts';
 import { requestedScenarios } from './scenarios.ts';
@@ -16,14 +21,17 @@ function renderApp(
   revision = 0,
   menuClient: MenuClient = httpMenuClient,
   salesClient: SalesClient = httpSalesClient,
+  dashboardClient: DashboardClient = httpDashboardClient,
 ) {
   root.render(
     <StrictMode>
       <MenuClientProvider client={menuClient}>
         <SalesClientProvider client={salesClient}>
-          <BrowserRouter>
-            <AppRoutes key={revision} client={client} />
-          </BrowserRouter>
+          <DashboardClientProvider client={dashboardClient}>
+            <BrowserRouter>
+              <AppRoutes key={revision} client={client} />
+            </BrowserRouter>
+          </DashboardClientProvider>
         </SalesClientProvider>
       </MenuClientProvider>
     </StrictMode>,
