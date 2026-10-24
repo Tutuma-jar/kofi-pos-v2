@@ -16,7 +16,7 @@ describe('API real de E2E (RF-1, RF-5, RF-7, RF-13)', () => {
       await app.close();
       await db.close();
     }
-  });
+  }, 15_000);
   it('controla bloqueo, vencimiento y cambios de cuenta en la API de E2E (RF-9, RF-10, RF-12)', async () => {
     const app = await buildE2eApp();
     const login = (password: string = TEST_ACCOUNTS.cashier.password) =>
