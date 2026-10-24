@@ -388,6 +388,7 @@ Decisiones técnicas tomadas por el agente al implementar Preparación y Base co
 | # | Tarea | Decisión delegada | Motivo | Alternativa descartada |
 | --- | --- | --- | --- | --- |
 | DD-1 | T001 | Prettier formatea el código y la configuración del monorepo, con `singleQuote` y `printWidth: 100`. `.prettierignore` excluye el Markdown y los archivos del flujo de trabajo (`scripts/`, `.githooks/`, `.github/`, `.agents/`, `.claude/`, `.codex/`) | Reformatear el Markdown cambiaría `docs/constitution.md`, que solo se modifica en su propio PR, y todas las tablas de la documentación. Reformatear `.codex/hooks.json` obligaría a volver a confiar en los hooks de Codex, y `scripts/` tiene su propio estilo compacto, cubierto por `npm run test:git` | Formatear todo el repositorio: modifica la constitución fuera de su PR y mezcla en esta tarea cambios ajenos al código |
+| DD-2 | T002 | Los imports relativos llevan la extensión `.ts` y `tsc` la reescribe a `.js` al compilar (`rewriteRelativeImportExtensions` en `tsconfig.base.json`). Cada paquete tiene un `tsconfig.json` para los tipos (incluye las pruebas, sin emitir) y un `tsconfig.build.json` que compila a `dist/` sin las pruebas | Node 24 ejecuta TypeScript solo si el import nombra el archivo `.ts` (D-13), y así el mismo estilo sirve en los tres paquetes | Escribir `.js` en los imports: Node no encuentra el archivo al ejecutar el código fuente en desarrollo |
 
 ## 8. Estrategia de tests
 
