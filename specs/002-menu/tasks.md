@@ -96,7 +96,7 @@ Rama: `feat/002-menu-us2`.
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada acción con «Cambios guardados», el escenario de categoría con productos activos, el escenario sin conexión y que no hay ninguna opción de eliminar.
 - [x] **T029 [web] [P] [US2]** Hacer que `ProductForm` no ofrezca categorías inactivas al crear ni al mover, y que al editar un producto de una categoría inactiva ofrezca la suya marcada «Inactiva» (plan §5.7; RF-5, RF-11). Depende de: T021
   Hecho cuando: las pruebas de componente cubren los dos casos con un menú simulado que tiene una categoría inactiva.
-- [ ] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
+- [x] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
 ## Fase 5 — US3: consultar el menú vigente (P3)
