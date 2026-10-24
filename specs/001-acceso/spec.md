@@ -132,7 +132,7 @@ Como **dueño**, quiero que **las sesiones venzan solas, que se frenen los inten
 - **RNF-1. Contraseñas protegidas.** Las contraseñas nunca se guardan, se registran ni se muestran en claro, ni siquiera a quien administra el sistema.
 - **RNF-2. Sin pistas sobre las cuentas.** Un intento fallido no revela si el usuario existe (RF-2). El mensaje de bloqueo (RF-9) solo aparece para cuentas existentes; se acepta porque el sistema funciona en un único local.
 - **RNF-3. Idioma.** Todos los textos y mensajes para la persona están en español.
-- **RNF-4. Rapidez.** En el 95 % de los ingresos y cierres de sesión hechos desde la computadora del local, el resultado aparece en menos de 2 segundos.
+- **RNF-4. Rapidez.** En el 95 % de los ingresos y cierres de sesión hechos desde la computadora del local, el resultado aparece en menos de 2 segundos. No cuenta el primer ingreso tras un período sin uso del sistema, mientras el servicio se reactiva: ese ingreso puede tardar alrededor de un minuto.
 - **RNF-5. Uso con teclado.** El ingreso se puede completar solo con teclado: pasar de un campo a otro y enviar con Intro.
 
 ## 6. Casos límite
@@ -173,7 +173,7 @@ Como **dueño**, quiero que **las sesiones venzan solas, que se frenen los inten
 
 ## 8. Criterios de finalización
 
-- Una persona con cuenta inicia sesión en menos de 15 segundos desde que ve la pantalla de ingreso.
+- Una persona con cuenta inicia sesión en menos de 15 segundos desde que ve la pantalla de ingreso, salvo en el primer ingreso tras un período sin uso del sistema (RNF-4).
 - Al abrir la pantalla inicial sin sesión, con la sesión cerrada, vencida o terminada por un cambio en la cuenta, en el 100 % de los casos no se ve información del negocio y se termina en la pantalla de ingreso.
 - Después de cerrar sesión, volver atrás no permite ver ni hacer nada sin iniciar sesión otra vez, y otra cuenta puede entrar en la misma computadora.
 - Tras 5 intentos fallidos en 15 minutos, el siguiente se rechaza aunque la contraseña sea correcta, y pasados 5 minutos el ingreso vuelve a funcionar.
@@ -222,3 +222,7 @@ La persona respondió a la primera pregunta: «sigue con todas tus recomendacion
 - **P:** (Hallazgo 15) ¿Qué significa «con conexión normal» en RNF-4? → **R:** Se mide como el 95 % de los ingresos y cierres hechos desde la computadora del local. (Aplicado en RNF-4.)
 - **P:** (Hallazgo 16) ¿Sobre qué pantallas se mide el 100 %? → **R:** Sobre la pantalla inicial, la única pantalla interna de esta especificación, en los cuatro casos: sin sesión, cerrada, vencida y terminada. (Aplicado en «Criterios de finalización».)
 - **P:** (Formato de RF-8) ¿Qué forma EARS corresponde a las sesiones de la misma cuenta? → **R:** La de estado («Mientras …»). (Aplicado en RF-8.)
+
+**Planificación.** El servicio de la API usará el plan gratuito de Render, que se suspende tras 15 minutos sin tráfico y tarda alrededor de un minuto en reactivarse.
+
+- **P:** Con el plan gratuito, el primer ingreso tras un período sin uso no cumple RNF-4 ni el criterio de 15 segundos. ¿Se corrige la especificación o el plan? → **R:** La especificación: ese primer ingreso queda fuera de ambos límites. (Aplicado en RNF-4 y «Criterios de finalización».)
