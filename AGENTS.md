@@ -104,7 +104,7 @@ Consulta solo lo pertinente a la tarea.
 
 ### 7. Compatibilidad
 
-El equipo trabaja en Windows: una persona con la app de Claude y otra con la app de Codex. Todo lo que se añada al flujo (hooks, scripts, configuración) debe funcionar en ambas apps tras clonar y ejecutar `npm install`, estar escrito en Node sin depender de Bash ni de PowerShell, usar saltos de línea LF, no usar enlaces simbólicos y configurarse para las dos herramientas en el mismo cambio.
+El equipo trabaja en Windows: una persona con la app de Claude y otra con la app de Codex. Todo lo que se añada al flujo (hooks, scripts, configuración) debe funcionar en ambas apps tras clonar y ejecutar `npm install`, estar escrito en Node sin depender de Bash ni de PowerShell, usar saltos de línea LF, no usar enlaces simbólicos y configurarse para las dos herramientas en el mismo cambio. Si cambias `.codex/hooks.json`, indica en el PR que quien use Codex debe volver a confiar en los hooks en Settings → Hooks.
 
 ## Comandos
 

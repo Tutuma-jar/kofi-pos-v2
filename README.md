@@ -42,7 +42,9 @@ Una vez por computadora (Windows):
 3. GitHub CLI: `winget install GitHub.cli` y luego `gh auth login`
 4. Identidad de Git: `git config --global user.name "…"` y `git config --global user.email "…"`
 5. En la app de Codex: usar el agente nativo de Windows y marcar el proyecto como de confianza
-6. Confiar en los hooks de agente del proyecto: en Claude, revisarlos en `/hooks`; en Codex, en **Settings → Hooks**
+6. Confiar en los hooks de agente del proyecto:
+   - En Claude, aceptar el aviso de confianza de la carpeta al abrir el proyecto. Para verlos, `/hooks` en Claude Code desde la terminal (`claude`); la app de escritorio no tiene ese comando.
+   - En Codex, revisar y confiar en `SessionStart` y `PreToolUse` en **Settings → Hooks**. Codex pide hacerlo de nuevo cada vez que cambia `.codex/hooks.json`, y mientras tanto no ejecuta los hooks que cambiaron.
 
 ## Instalación
 
@@ -89,6 +91,8 @@ Cada especificación se entrega **por historias priorizadas**: un PR de definici
 | --- | --- |
 | `SessionStart` | Entrega la constitución al agente y le avisa si falta preparar el entorno |
 | `PreToolUse` | Impide que el agente salte los hooks de Git, haga force push, publique en `develop` o `main` o fusione PR |
+
+Si un cambio modifica `.codex/hooks.json`, cada persona que use Codex debe volver a confiar en los hooks en **Settings → Hooks** y abrir una sesión nueva.
 
 ## Skills de terceros
 
