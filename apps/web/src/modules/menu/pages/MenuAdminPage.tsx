@@ -7,6 +7,7 @@ import { MenuAdminList } from '../components/MenuAdminList.tsx';
 import { CategoryForm } from '../components/CategoryForm.tsx';
 import type { Category, AdminProduct } from '@kofi/contracts';
 import { ProductForm } from '../components/ProductForm.tsx';
+import { SaveStatus, type SaveState } from '../components/SaveStatus.tsx';
 
 type Editor =
   { kind: 'category'; category?: Category } | { kind: 'product'; product?: AdminProduct };
@@ -17,6 +18,37 @@ export function MenuAdminPage() {
   const [categories, setCategories] = useState<AdminMenuCategory[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>(null);
+  function handleFailure(error: unknown) {
+    setSaveState(null);
+    if (error instanceof ApiFetchError) {
+      if (error.status === 403) {
+        navigate('/', { replace: true, state: { notice: error.message } });
+        return;
+      }
+      if (error.code === 'NETWORK_ERROR') {
+        setSaveState('offline');
+        return;
+      }
+      if (error.status === 401 || error.code === 'VALIDATION_ERROR') return;
+    }
+    setError(error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo');
+  }
+  async function save(operation: () => Promise<unknown>) {
+    setError(null);
+    setSaveState('saving');
+    await operation();
+    setSaveState('saved');
+    setEditor(null);
+    try {
+      setCategories(await client.getAdminMenu());
+    } catch (error) {
+      if (error instanceof ApiFetchError && (error.status === 401 || error.status === 403))
+        handleFailure(error);
+      else
+        setError('Los cambios se guardaron, pero no se pudo actualizar el menú. Vuelve a abrirlo');
+    }
+  }
   useEffect(() => {
     let active = true;
     void client
@@ -40,6 +72,7 @@ export function MenuAdminPage() {
       <h1>Administrar menú</h1>
       <Link to="/">Volver al inicio</Link>
       {error && <p role="alert">{error}</p>}
+      <SaveStatus state={saveState} />
       {categories ? (
         <>
           {editor?.kind === 'category' ? (
@@ -47,12 +80,14 @@ export function MenuAdminPage() {
               key={editor.category?.id ?? 'new'}
               category={editor.category}
               onCancel={() => setEditor(null)}
-              onSave={async (input) => {
-                if (editor.category) await client.renameCategory(editor.category.id, input);
-                else await client.createCategory(input);
-                setCategories(await client.getAdminMenu());
-                setEditor(null);
-              }}
+              onFailure={handleFailure}
+              onSave={(input) =>
+                save(() =>
+                  editor.category
+                    ? client.renameCategory(editor.category.id, input)
+                    : client.createCategory(input),
+                )
+              }
             />
           ) : editor?.kind === 'product' ? (
             <ProductForm
@@ -60,12 +95,14 @@ export function MenuAdminPage() {
               product={editor.product}
               categories={categories}
               onCancel={() => setEditor(null)}
-              onSave={async (input) => {
-                if (editor.product) await client.updateProduct(editor.product.id, input);
-                else await client.createProduct(input);
-                setCategories(await client.getAdminMenu());
-                setEditor(null);
-              }}
+              onFailure={handleFailure}
+              onSave={(input) =>
+                save(() =>
+                  editor.product
+                    ? client.updateProduct(editor.product.id, input)
+                    : client.createProduct(input),
+                )
+              }
             />
           ) : (
             <>

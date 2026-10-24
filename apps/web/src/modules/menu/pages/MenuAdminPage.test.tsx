@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
+import { userEvent } from '@testing-library/user-event';
 import { MenuClientProvider } from '../api/MenuClientProvider.tsx';
 import { createMenuDemoClient, type MenuScenarioId } from '../dev/menu-demo-client.ts';
 import { MenuAdminPage } from './MenuAdminPage.tsx';
@@ -55,5 +56,47 @@ describe('administración del menú (RF-1, RF-2)', () => {
       'status',
     );
     expect(screen.queryByRole('heading', { name: 'Administrar menú' })).not.toBeInTheDocument();
+  });
+  it('confirma el guardado y recarga la lista al crear una categoría', async () => {
+    mount('empty');
+    await userEvent.click(await screen.findByRole('button', { name: 'Crear categoría' }));
+    await userEvent.keyboard('Bebidas{Enter}');
+    expect(await screen.findByText('Cambios guardados')).toHaveAttribute('role', 'status');
+    expect(await screen.findByRole('heading', { name: 'Bebidas' })).toBeVisible();
+    expect(screen.queryByLabelText('Nombre de la categoría')).not.toBeInTheDocument();
+  });
+  it.each(['categoría', 'producto'])(
+    'conserva lo escrito y avisa de la falta de conexión al guardar %s',
+    async (entity) => {
+      const client = mount();
+      await userEvent.click(await screen.findByRole('button', { name: `Crear ${entity}` }));
+      await userEvent.type(
+        screen.getByLabelText(
+          entity === 'categoría' ? 'Nombre de la categoría' : 'Nombre del producto',
+        ),
+        'Chocolate',
+      );
+      client.setScenario('offline');
+      await userEvent.click(screen.getByRole('button', { name: `Guardar ${entity}` }));
+      expect(
+        await screen.findByText('No hay conexión. Los cambios no se guardaron'),
+      ).toHaveAttribute('role', 'alert');
+      expect(
+        screen.getByLabelText(
+          entity === 'categoría' ? 'Nombre de la categoría' : 'Nombre del producto',
+        ),
+      ).toHaveValue('Chocolate');
+      expect(screen.queryByText('Cambios guardados')).not.toBeInTheDocument();
+    },
+  );
+  it('vuelve al inicio también si el permiso se pierde al guardar', async () => {
+    const client = mount();
+    await userEvent.click(await screen.findByRole('button', { name: 'Crear categoría' }));
+    client.setScenario('forbidden');
+    await userEvent.keyboard('Bebidas{Enter}');
+    expect(await screen.findByText('No tienes permiso para administrar el menú')).toHaveAttribute(
+      'role',
+      'status',
+    );
   });
 });

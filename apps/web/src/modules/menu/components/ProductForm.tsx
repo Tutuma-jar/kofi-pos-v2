@@ -13,9 +13,10 @@ interface Props {
   categories: readonly Category[];
   onSave(input: ProductInput): Promise<unknown>;
   onCancel(): void;
+  onFailure?(error: unknown): void;
 }
 
-export function ProductForm({ product, categories, onSave, onCancel }: Props) {
+export function ProductForm({ product, categories, onSave, onCancel, onFailure }: Props) {
   const id = useId();
   const [name, setName] = useState(product?.name ?? '');
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? '');
@@ -34,8 +35,9 @@ export function ProductForm({ product, categories, onSave, onCancel }: Props) {
       await onSave({ name, categoryId, price });
     } catch (error) {
       if (error instanceof ApiFetchError && error.error.fields) setFields(error.error.fields);
-      else
+      else if (!onFailure)
         setError(error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo');
+      onFailure?.(error);
     } finally {
       setSaving(false);
     }

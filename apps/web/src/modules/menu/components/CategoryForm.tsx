@@ -6,9 +6,10 @@ interface Props {
   category?: Category;
   onSave(input: CategoryInput): Promise<unknown>;
   onCancel(): void;
+  onFailure?(error: unknown): void;
 }
 
-export function CategoryForm({ category, onSave, onCancel }: Props) {
+export function CategoryForm({ category, onSave, onCancel, onFailure }: Props) {
   const id = useId();
   const [name, setName] = useState(category?.name ?? '');
   const [saving, setSaving] = useState(false);
@@ -25,8 +26,9 @@ export function CategoryForm({ category, onSave, onCancel }: Props) {
     } catch (error) {
       if (error instanceof ApiFetchError && error.error.fields)
         setFieldError(error.error.fields.name);
-      else
+      else if (!onFailure)
         setError(error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo');
+      onFailure?.(error);
     } finally {
       setSaving(false);
     }
