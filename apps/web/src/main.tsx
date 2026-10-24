@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import { AppRoutes } from './routes.tsx';
 import { httpAuthClient, type AuthClient } from './modules/auth/index.ts';
 import { httpMenuClient, MenuClientProvider, type MenuClient } from './modules/menu/index.ts';
+import { httpSalesClient, SalesClientProvider, type SalesClient } from './modules/sales/index.ts';
 import { requestedScenarios } from './scenarios.ts';
 
 const container = document.getElementById('root');
@@ -14,13 +15,16 @@ function renderApp(
   client: AuthClient = httpAuthClient,
   revision = 0,
   menuClient: MenuClient = httpMenuClient,
+  salesClient: SalesClient = httpSalesClient,
 ) {
   root.render(
     <StrictMode>
       <MenuClientProvider client={menuClient}>
-        <BrowserRouter>
-          <AppRoutes key={revision} client={client} />
-        </BrowserRouter>
+        <SalesClientProvider client={salesClient}>
+          <BrowserRouter>
+            <AppRoutes key={revision} client={client} />
+          </BrowserRouter>
+        </SalesClientProvider>
       </MenuClientProvider>
     </StrictMode>,
   );
