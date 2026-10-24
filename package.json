@@ -15,11 +15,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run build:contracts && vitest run",
+    "test:e2e": "npm run build:contracts && npm run build -w @kofi/web && playwright test",
     "test:git": "node --test scripts/git-rules.test.mjs",
     "build": "npm run build:contracts && npm run build -w @kofi/api && npm run build -w @kofi/web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",

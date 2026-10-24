@@ -18,3 +18,7 @@ build/
 .agents/skills/emil-design-eng/
 .claude/settings.local.json
 .impeccable/config.local.json
+
+# Resultados de Playwright
+test-results/
+playwright-report/

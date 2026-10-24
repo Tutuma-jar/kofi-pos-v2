@@ -34,3 +34,7 @@ jobs:
         run: npm run test:git
       - name: Build
         run: npm run build --if-present
+      - name: Instalar Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Pruebas de punta a punta
+        run: npm run test:e2e
