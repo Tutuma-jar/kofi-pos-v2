@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
+import { httpMenuClient, MenuClientProvider } from './modules/menu/index.ts';
 import { AppRoutes } from './routes.tsx';
 
 const container = document.getElementById('root');
@@ -9,9 +10,11 @@ const root = createRoot(container);
 
 root.render(
   <StrictMode>
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <MenuClientProvider client={httpMenuClient}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </MenuClientProvider>
   </StrictMode>,
 );
 
