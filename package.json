@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "test": "npm run build:contracts && vitest run",
     "test:e2e": "npm run build:contracts && npm run build -w @kofi/web && playwright test",
-    "test:git": "node --test scripts/git-rules.test.mjs",
+    "test:git": "node --test scripts/git-rules.test.mjs scripts/agent-hooks/guard-commands.test.mjs",
     "build": "npm run build:contracts && npm run build -w @kofi/api && npm run build -w @kofi/web"
   },
   "devDependencies": {
