@@ -34,6 +34,10 @@ jobs:
         run: npm run test:git
       - name: Build
         run: npm run build --if-present
+      - name: Probar la detección de módulos de desarrollo
+        run: npm run test:build
+      - name: Comprobar que el build web excluye desarrollo
+        run: npm run check:web-build
       - name: Instalar Chromium para Playwright
         run: npx playwright install --with-deps chromium
       - name: Pruebas de punta a punta

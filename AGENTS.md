@@ -153,6 +153,8 @@ Requisitos: Node 24 y npm 11.
 | Pruebas con Vitest¹ | `npm run test` |
 | Pruebas de extremo a extremo con Playwright¹ ² | `npm run test:e2e` |
 | Compilar¹ | `npm run build` |
+| Comprobar que el build web excluye desarrollo | `npm run check:web-build` |
+| Probar la detección de módulos de desarrollo | `npm run test:build` |
 | Pruebas de las reglas de Git y del guardián de comandos | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |
 

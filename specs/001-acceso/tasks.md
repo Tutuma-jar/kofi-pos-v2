@@ -115,7 +115,7 @@ Rama: `feat/001-acceso-us2`.
 
 Rama: `feat/001-acceso-pulido`.
 
-- [ ] **T041 [integración]** Añadir a la CI la comprobación de que el build de `apps/web` no contiene nada de `dev/`, con un script en Node (`docs/architecture.md` §5). Depende de: T040
+- [x] **T041 [integración]** Añadir a la CI la comprobación de que el build de `apps/web` no contiene nada de `dev/`, con un script en Node (`docs/architecture.md` §5). Depende de: T040
   Hecho cuando: el script falla si se importa `ScenarioPicker` fuera de `dev/` y pasa con el build actual, y la CI lo ejecuta.
 - [ ] **T042 [integración]** Desplegar la versión completa en Render y comprobarla, con el Blueprint apuntando a esta rama y su base de Neon propia (`docs/architecture.md` §6.5): migraciones al arrancar, cuentas creadas con `npm run accounts` (contraseñas entregadas en privado, sin escribirlas en ningún archivo) e ingreso y cierre de sesión a través de la reescritura. Requiere a una persona con acceso a Render y a Neon. Depende de: T041
   Hecho cuando: la cookie `kofi_session` llega con sus atributos a través del dominio del sitio estático, se inicia y se cierra sesión con una cuenta creada con la CLI y `/api/health` responde `200`.

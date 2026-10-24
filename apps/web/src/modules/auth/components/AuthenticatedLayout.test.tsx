@@ -14,25 +14,27 @@ describe('pantalla inicial y sesión (RF-5, RF-7, RF-8)', () => {
   async function mount(scenario: ScenarioId = 'owner') {
     const client = createAuthDemoClient(scenario);
     await client.login({ username: 'ana', password: 'prueba de cafe' });
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <SessionProvider client={client}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <RequireSession>
-                  <AuthenticatedLayout>
-                    <HomePage />
-                  </AuthenticatedLayout>
-                </RequireSession>
-              }
-            />
-            <Route path="/ingresar" element={<h1>Ingresar</h1>} />
-          </Routes>
-        </SessionProvider>
-      </MemoryRouter>,
-    );
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <SessionProvider client={client}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <RequireSession>
+                    <AuthenticatedLayout>
+                      <HomePage />
+                    </AuthenticatedLayout>
+                  </RequireSession>
+                }
+              />
+              <Route path="/ingresar" element={<h1>Ingresar</h1>} />
+            </Routes>
+          </SessionProvider>
+        </MemoryRouter>,
+      );
+    });
     await screen.findByRole('button', { name: 'Cerrar sesión' });
     return client;
   }
