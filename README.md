@@ -31,6 +31,8 @@ docs/                constitución, reglas de negocio y arquitectura
 specs/               una carpeta por funcionalidad: spec.md, plan.md y tasks.md
 ```
 
+Cada PR hacia `develop` debe pasar la check `technical-checks` (tipos, lint, formato, pruebas y build).
+
 ## Requisitos
 
 Una vez por computadora (Windows):
