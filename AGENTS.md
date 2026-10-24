@@ -157,4 +157,4 @@ Requisitos: Node 24 y npm 11.
 | Ver los hooks de Git | `npm run hooks` |
 
 ¹ Compila antes `@kofi/contracts`.
-² Necesita Chromium de Playwright: `npx playwright install chromium`.
+² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
