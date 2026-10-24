@@ -9,12 +9,12 @@ function CurrentPath() {
   return <output aria-label="ruta actual">{useLocation().pathname}</output>;
 }
 
-async function renderAt(path: string) {
+async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
   const user = {
     id: '4c1f2b7e-8d3a-4f5b-9c6d-1e2f3a4b9a2e',
     username: 'ana',
     displayName: 'Ana Quispe',
-    role: 'owner' as const,
+    role,
   };
   const client: AuthClient = {
     async login() {
@@ -76,12 +76,24 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { name: 'Menú' })).toBeInTheDocument();
   });
 
+  // SPEC-003 Ventas (plan §3, D-11; RF-1).
+  it.each(['owner', 'cashier'] as const)(
+    '/ventas/nueva muestra la nueva venta con una sesión de %s',
+    async (role) => {
+      await renderAt('/ventas/nueva', role);
+
+      expect(await screen.findByRole('heading', { name: 'Nueva venta' })).toBeInTheDocument();
+      expect(screen.getByLabelText('ruta actual')).toHaveTextContent('/ventas/nueva');
+    },
+  );
+
   it('las rutas protegidas declaran sus roles y el enlace de la pantalla inicial', () => {
     expect(protectedRoutes.map(({ path, roles, homeLink }) => ({ path, roles, homeLink }))).toEqual(
       [
         { path: '/', roles: ['owner', 'cashier'], homeLink: undefined },
         { path: '/menu/administrar', roles: ['owner'], homeLink: 'Administrar menú' },
         { path: '/menu', roles: ['owner', 'cashier'], homeLink: 'Ver menú' },
+        { path: '/ventas/nueva', roles: ['owner', 'cashier'], homeLink: 'Nueva venta' },
       ],
     );
   });

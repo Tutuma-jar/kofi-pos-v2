@@ -16,6 +16,9 @@ export const ERROR_CODES = {
   NOT_FOUND: 'NOT_FOUND',
   CATEGORY_HAS_ACTIVE_PRODUCTS: 'CATEGORY_HAS_ACTIVE_PRODUCTS',
   CATEGORY_INACTIVE: 'CATEGORY_INACTIVE',
+  // SPEC-003 Ventas (plan §6.2): el precio o la disponibilidad de un producto cambió antes de
+  // registrar la venta.
+  MENU_CHANGED: 'MENU_CHANGED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

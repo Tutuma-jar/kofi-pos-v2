@@ -60,6 +60,20 @@ describe('apiErrorSchema', () => {
           'Reactiva la categoría “Bebidas calientes” o mueve el producto a otra antes de reactivarlo',
       },
     },
+    // SPEC-003 Ventas (plan §6.2).
+    {
+      error: {
+        code: 'MENU_CHANGED',
+        message: 'El menú cambió. Revisa la venta antes de registrarla',
+      },
+    },
+    {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Revisa los datos',
+        fields: { lines: 'Una venta puede tener como máximo 99 unidades de cada producto' },
+      },
+    },
   ])('acepta el ejemplo $error.code', (example) => {
     expect(apiErrorSchema.parse(example)).toEqual(example);
   });
@@ -101,6 +115,7 @@ describe('ERROR_CODES', () => {
       'NOT_FOUND',
       'CATEGORY_HAS_ACTIVE_PRODUCTS',
       'CATEGORY_INACTIVE',
+      'MENU_CHANGED',
     ]);
   });
 });

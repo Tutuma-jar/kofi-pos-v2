@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import { AppRoutes } from './routes.tsx';
 import { httpAuthClient, type AuthClient } from './modules/auth/index.ts';
 import { httpMenuClient, MenuClientProvider, type MenuClient } from './modules/menu/index.ts';
+import { httpSalesClient, SalesClientProvider, type SalesClient } from './modules/sales/index.ts';
 import { requestedScenarios } from './scenarios.ts';
 
 const container = document.getElementById('root');
@@ -14,13 +15,16 @@ function renderApp(
   client: AuthClient = httpAuthClient,
   revision = 0,
   menuClient: MenuClient = httpMenuClient,
+  salesClient: SalesClient = httpSalesClient,
 ) {
   root.render(
     <StrictMode>
       <MenuClientProvider client={menuClient}>
-        <BrowserRouter>
-          <AppRoutes key={revision} client={client} />
-        </BrowserRouter>
+        <SalesClientProvider client={salesClient}>
+          <BrowserRouter>
+            <AppRoutes key={revision} client={client} />
+          </BrowserRouter>
+        </SalesClientProvider>
       </MenuClientProvider>
     </StrictMode>,
   );
@@ -30,12 +34,13 @@ const scenarios = requestedScenarios(location.search);
 
 // Escenarios de desarrollo (docs/architecture.md §4.5): import() dinámico bajo import.meta.env.DEV,
 // para que el build de producción no los incluya. Sin ?escenarios=…, se usa la API real
-// (SPEC-001 DD-17, SPEC-002 D-10). Cambiar de escenario vuelve a montar las rutas.
-if (import.meta.env.DEV && (scenarios.acceso || scenarios.menu)) {
+// (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10). Cambiar de escenario vuelve a montar las rutas.
+if (import.meta.env.DEV && (scenarios.acceso || scenarios.menu || scenarios.ventas)) {
   let authClient: AuthClient = httpAuthClient;
   let menuClient: MenuClient = httpMenuClient;
+  let salesClient: SalesClient = httpSalesClient;
   let revision = 0;
-  const remount = () => renderApp(authClient, ++revision, menuClient);
+  const remount = () => renderApp(authClient, ++revision, menuClient, salesClient);
   const pickers: ReactNode[] = [];
 
   if (scenarios.acceso) {
@@ -57,8 +62,18 @@ if (import.meta.env.DEV && (scenarios.acceso || scenarios.menu)) {
     menuClient = menuDemoClient;
     pickers.push(<ScenarioPicker key="menu" client={menuDemoClient} onChange={remount} />);
   }
+  if (scenarios.ventas) {
+    const [{ ScenarioPicker }, { createSalesDemoClient, loadStoredSalesScenario }] =
+      await Promise.all([
+        import('./modules/sales/dev/ScenarioPicker.tsx'),
+        import('./modules/sales/dev/sales-demo-client.ts'),
+      ]);
+    const salesDemoClient = createSalesDemoClient(loadStoredSalesScenario());
+    salesClient = salesDemoClient;
+    pickers.push(<ScenarioPicker key="ventas" client={salesDemoClient} onChange={remount} />);
+  }
 
-  renderApp(authClient, revision, menuClient);
+  renderApp(authClient, revision, menuClient, salesClient);
   const picker = document.body.appendChild(document.createElement('div'));
   createRoot(picker).render(<StrictMode>{pickers}</StrictMode>);
 } else {

@@ -9,6 +9,7 @@ Kofi POS es el sistema web de punto de venta de Kofi, una cafetería ficticia qu
 - Negocio pequeño, atendido por una o dos personas.
 - Una sola sucursal.
 - Se usa desde una computadora del local, con conexión.
+- Cobra en efectivo y con QR, y no emite factura (SPEC-003).
 
 ## Módulos
 

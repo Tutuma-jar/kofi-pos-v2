@@ -91,6 +91,7 @@ render.yaml                      despliegue en Render (§6.5)
 - **Mismo nombre de dominio en las dos aplicaciones y en el contrato:** `auth`, `menu`, `sales`, `dashboard` y `history`.
 - **Nombres del negocio, en inglés:** `menu` y no `catalog`, porque en una cafetería se habla del menú. Los componentes de interfaz que también se llamen «menú» (navegación, desplegables) usan nombres específicos, como `NavMenu`, y nunca van dentro de `modules/menu/`.
 - **Un módulo no importa los archivos internos de otro.** Lo común va a `shared/`.
+- **Datos de otro módulo en la API:** un módulo puede recibir como función, desde `app.ts`, lo que exporta el `index.ts` de otro (por ejemplo, Ventas recibe `getCurrentMenu` del menú), para probarse sin él y no depender de cuándo se implementa (SPEC-003, D-1).
 - **Superficie pública:** cada módulo, en las dos aplicaciones, expone un `index.ts`, y los demás módulos importan solo de ahí. Una regla `no-restricted-imports` de ESLint lo comprueba.
 - **Pruebas junto al código:** `*.test.ts` (unitarias) y `*.integration.test.ts` (integración).
 
@@ -142,7 +143,7 @@ Se aplican desde que existen las aplicaciones (`001-acceso`):
 
 ## 6. Decisiones globales
 
-Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
+Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas) y [`specs/003-ventas/plan.md`](../specs/003-ventas/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
 
 ### 6.1 Mismo origen
 
@@ -156,6 +157,7 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - Toda ruta protegida de cualquier módulo usa `requireSession`, que exporta el módulo `auth` de la API. Ante una sesión inválida responde `401` con `SESSION_MISSING`, `SESSION_EXPIRED` o `SESSION_TERMINATED`.
 - Las respuestas de la API llevan `Cache-Control: no-store`.
 - Una ruta restringida por rol responde `403 FORBIDDEN` con el mensaje de su módulo (por ejemplo, «No tienes permiso para administrar el menú»), y la interfaz muestra ese mensaje. La comprobación del rol vive en el módulo, después de `requireSession` (SPEC-002, D-9).
+- **Trabajo sin guardar al terminar la sesión:** `SessionProvider` recibe `onSessionEnd(reason)` desde `routes.tsx` y lo llama al cerrar sesión (`'logout'`) y cuando la sesión termina por un cambio de la cuenta (`'terminated'`), no al vencer. Cada módulo decide ahí qué descarta, sin modificar `auth` (SPEC-003, D-9).
 
 ### 6.3 Errores
 
@@ -188,3 +190,10 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - Los importes en bolivianos se guardan (`integer`) y viajan en el contrato como **centavos enteros** (por ejemplo, `priceCents: 1250`), para que las sumas sean exactas.
 - Se muestran siempre con `formatPrice` de `packages/contracts`: «Bs 12,50», con dos decimales, coma decimal y sin separador de miles. Formatear no es calcular: las sumas y los totales los hace la API (constitución, principio 3).
 - Adoptado en SPEC-002 (D-2).
+
+### 6.8 Fechas y horas
+
+- La API toma la hora solo de `shared/clock.ts` (§6.4) y la guarda como `timestamptz`.
+- En el contrato viaja como texto ISO 8601 en UTC (por ejemplo, `registeredAt: "2026-10-24T18:05:12.000Z"`).
+- Se muestra siempre con `formatDateTime` de `packages/contracts`, en hora de Bolivia (`America/La_Paz`): «24/10/2026 14:05», con día, mes, hora y minutos de dos cifras y la hora en formato de 24 horas.
+- Adoptado en SPEC-003 (D-7).

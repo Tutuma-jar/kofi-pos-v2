@@ -12,6 +12,7 @@ import {
   canView,
 } from './modules/auth/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
+import { NewSalePage } from './modules/sales/index.ts';
 
 // Rutas de la interfaz (docs/architecture.md §6.6). Cada ruta protegida declara los roles que pueden
 // verla; por defecto, los dos. La interfaz solo usa esa lista para navegar (RF-11) y para no mostrar
@@ -46,6 +47,8 @@ const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
     homeLink: 'Administrar menú',
   },
   { path: '/menu', element: <MenuPage />, homeLink: 'Ver menú' },
+  // SPEC-003 D-11: /ventas queda libre para el Historial (005).
+  { path: '/ventas/nueva', element: <NewSalePage />, homeLink: 'Nueva venta' },
 ];
 
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
