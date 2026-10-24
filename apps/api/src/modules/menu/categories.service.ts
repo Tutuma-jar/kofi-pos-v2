@@ -6,9 +6,41 @@ import {
   findCategoryByNameKey,
   insertCategory,
   updateCategoryName,
+  countActiveProducts,
+  setCategoryActive,
 } from './categories.repository.ts';
 
 const duplicateName = 'Ya existe una categoría con ese nombre';
+
+function categoryHasProducts(count: number) {
+  return new AppError(
+    409,
+    'CATEGORY_HAS_ACTIVE_PRODUCTS',
+    `Esta categoría tiene ${count} ${count === 1 ? 'producto activo' : 'productos activos'}. Desactívalos o muévelos a otra categoría antes`,
+  );
+}
+
+async function changeCategoryActive(db: Database, id: string, active: boolean) {
+  try {
+    return await db.transaction(async (tx) => {
+      const category = await findCategoryById(tx, id, { lock: 'update' });
+      if (!category) throw new AppError(404, 'NOT_FOUND', 'No se encontró la categoría');
+      if (category.active === active) return category;
+      if (!active) {
+        const count = await countActiveProducts(tx, id);
+        if (count) throw categoryHasProducts(count);
+      }
+      return (await setCategoryActive(tx, id, active))!;
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code === 'KM002')
+      throw categoryHasProducts(await countActiveProducts(db, id));
+    throw error;
+  }
+}
+
+export const deactivateCategory = (db: Database, id: string) => changeCategoryActive(db, id, false);
+export const reactivateCategory = (db: Database, id: string) => changeCategoryActive(db, id, true);
 
 export async function saveCategory(db: Database, input: { name?: unknown }, id?: string) {
   const parsed = categoryNameSchema.safeParse(input.name);
