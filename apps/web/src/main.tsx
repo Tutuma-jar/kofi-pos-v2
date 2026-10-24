@@ -42,13 +42,18 @@ const scenarios = requestedScenarios(location.search);
 
 // Escenarios de desarrollo (docs/architecture.md §4.5): import() dinámico bajo import.meta.env.DEV,
 // para que el build de producción no los incluya. Sin ?escenarios=…, se usa la API real
-// (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10). Cambiar de escenario vuelve a montar las rutas.
-if (import.meta.env.DEV && (scenarios.acceso || scenarios.menu || scenarios.ventas)) {
+// (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8). Cambiar de escenario vuelve a
+// montar las rutas.
+if (
+  import.meta.env.DEV &&
+  (scenarios.acceso || scenarios.menu || scenarios.ventas || scenarios.dashboard)
+) {
   let authClient: AuthClient = httpAuthClient;
   let menuClient: MenuClient = httpMenuClient;
   let salesClient: SalesClient = httpSalesClient;
+  let dashboardClient: DashboardClient = httpDashboardClient;
   let revision = 0;
-  const remount = () => renderApp(authClient, ++revision, menuClient, salesClient);
+  const remount = () => renderApp(authClient, ++revision, menuClient, salesClient, dashboardClient);
   const pickers: ReactNode[] = [];
 
   if (scenarios.acceso) {
@@ -80,8 +85,20 @@ if (import.meta.env.DEV && (scenarios.acceso || scenarios.menu || scenarios.vent
     salesClient = salesDemoClient;
     pickers.push(<ScenarioPicker key="ventas" client={salesDemoClient} onChange={remount} />);
   }
+  if (scenarios.dashboard) {
+    const [{ ScenarioPicker }, { createDashboardDemoClient, loadStoredDashboardScenario }] =
+      await Promise.all([
+        import('./modules/dashboard/dev/ScenarioPicker.tsx'),
+        import('./modules/dashboard/dev/dashboard-demo-client.ts'),
+      ]);
+    const dashboardDemoClient = createDashboardDemoClient(loadStoredDashboardScenario());
+    dashboardClient = dashboardDemoClient;
+    pickers.push(
+      <ScenarioPicker key="dashboard" client={dashboardDemoClient} onChange={remount} />,
+    );
+  }
 
-  renderApp(authClient, revision, menuClient, salesClient);
+  renderApp(authClient, revision, menuClient, salesClient, dashboardClient);
   const picker = document.body.appendChild(document.createElement('div'));
   createRoot(picker).render(<StrictMode>{pickers}</StrictMode>);
 } else {
