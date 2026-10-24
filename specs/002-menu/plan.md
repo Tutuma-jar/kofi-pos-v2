@@ -293,7 +293,7 @@ Ubicación: **`packages/contracts/src/menu.ts`** (esquemas de Zod, tipos derivad
 | `PRICE_MAX_CENTS` | `100000` | RF-6 |
 | `normalizeMenuName`, `menuNameKey`, `compareMenuNames` | §5.1 | RF-2, RF-3, RF-6 |
 | `formatPrice`, `formatPriceInput` | §5.2 | RNF-2 |
-| `categoryNameSchema` | `string` → normalizado; mensajes: «Escribe el nombre de la categoría», «El nombre solo puede tener letras, números, espacios y los signos . , - ' ( ) & /», «El nombre de la categoría tiene como máximo 30 caracteres» | RF-3 |
+| `categoryNameSchema` | `string` → normalizado; mensajes: «Escribe el nombre de la categoría», «El nombre solo puede tener letras, números, espacios y los signos . , - ' ( ) & /», «El nombre de la categoría tiene como máximo 30 caracteres» (este último no llega a verse en la interfaz, que impide escribir más; textos registrados en «Aclaraciones» de `spec.md`) | RF-3 |
 | `productNameSchema` | Igual, con «Escribe el nombre del producto» y «El nombre del producto tiene como máximo 40 caracteres» | RF-6 |
 | `categoryIdSchema` | `string`: vacío → «Elige una categoría»; no es un uuid → «Elige una categoría activa» | RF-6 |
 | `priceSchema` | `string` → centavos (`parsePrice`, §5.2), con los cuatro mensajes de RF-6 | RF-6 |
@@ -361,7 +361,7 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 | D-7 | **Rutas de acción** (`POST …/deactivate` y `…/reactivate`) y **`PUT`** para editar, con todos los datos del formulario. `api-fetch.ts` pasa a admitir `PUT` | Cada acción tiene sus reglas y mensajes (RF-9, RF-10). El formulario siempre envía todos sus campos, así que `PUT` describe bien la edición | `PATCH` con `active` en el cuerpo: mezcla editar con activar y complica los mensajes. Todo con `POST`: oculta qué ruta modifica y cuál crea | RF-5, RF-9, RF-10 |
 | D-8 | **La pantalla inicial recibe sus enlaces de `routes.tsx`:** cada ruta protegida puede declarar `homeLink` (su texto) y `HomePage` muestra los que su rol puede ver. También muestra un aviso que llegue en `location.state.notice` | `auth` no conoce los módulos siguientes: Ventas y Reportes añadirán sus enlaces sin tocar `HomePage`. La lista `roles` ya existe (`docs/architecture.md` §6.6) | Escribir los enlaces dentro de `HomePage`: cada módulo tendría que modificar `auth`. Moverla a `shared/`, como preveía el plan de SPEC-001: `shared/` dependería del módulo `auth` | RF-1, RF-13 |
 | D-9 | **El rechazo al cajero lo decide la API:** `MenuAdminPage` pide la administración y, ante `403`, vuelve a `/` con el mensaje de la API. La ruta declara `roles: ['owner']` solo para no mostrar el enlace y para el regreso de SPEC-001 | Los permisos reales viven en la API (`docs/architecture.md` §6.6, principio 3) y el texto es el que la API devuelve | Bloquear la ruta en la interfaz con un texto propio: duplicaría el mensaje y no protegería nada | RF-1 |
-| D-10 | **`MenuClientProvider`:** la interfaz obtiene el cliente del menú (real o simulado) de un contexto de React | Las páginas y las pruebas usan el mismo código con cualquiera de los dos clientes (`docs/architecture.md` §4.5); la integración de cada historia es cambiar el cliente del proveedor | Importar el cliente real dentro de cada componente: las pruebas tendrían que interceptar `fetch` | RF-2, RF-14 |
+| D-10 | **`MenuClientProvider`:** la interfaz obtiene el cliente del menú de un contexto de React, que siempre recibe el cliente (sin valor por defecto). El build de producción provee el cliente real. En desarrollo, `main.tsx` provee el cliente simulado hasta la integración de US1 (T023); desde entonces provee el real, y el selector de escenarios del menú permite volver al simulado | Las páginas y las pruebas usan el mismo código con cualquiera de los dos clientes (`docs/architecture.md` §4.5); la integración es cambiar el cliente que provee `main.tsx` en desarrollo | Importar el cliente real dentro de cada componente: las pruebas tendrían que interceptar `fetch`. Un cliente por defecto en el contexto: una página fuera del proveedor usaría la API sin que se note | RF-2, RF-14 |
 | D-11 | **Escenarios de desarrollo del menú:** el cliente simulado guarda el menú en memoria y aplica solo lo necesario para recorrer las pantallas; los errores se fuerzan con escenarios («Menú vacío», «Menú cargado», «Nombre repetido», «Categoría con productos activos», «Sin permiso», «Sin conexión») | Permite trabajar la interfaz sin la API ni las reglas de negocio, que viven solo en la API (principio 3) | Reimplementar las reglas en el cliente simulado: duplicaría la lógica de la API en la interfaz | RF-1–RF-10, RF-14 |
 | D-12 | **Medición de RNF-3 con 200 productos** cargados por `apps/api/test/seed-menu.ts` en la base de un despliegue de comprobación (`docs/architecture.md` §6.5), nunca en la de producción | RNF-3 fija el tamaño del menú; un script repetible evita cargarlos a mano | Medir con el menú real: todavía no existe (duda abierta de `spec.md`) | RNF-3 |
 
@@ -452,3 +452,14 @@ Afectan a todo el proyecto. En modo delegado se aplican en este mismo PR y se in
 1. **Importes (§6.7, nuevo; D-2):** los importes en BOB se guardan y viajan como centavos enteros, y se muestran con `formatPrice` de `packages/contracts` («Bs 12,50», sin separador de miles).
 2. **Permisos por rol (§6.2; D-9):** una ruta de la API restringida por rol responde `403 FORBIDDEN` con el mensaje del módulo, y la interfaz muestra ese mensaje.
 3. **Enlaces de la pantalla inicial (§6.6; D-8):** cada ruta protegida puede declarar `homeLink`, y la pantalla inicial muestra los enlaces que el rol de la sesión puede ver.
+
+## 10. Cambios tras el análisis de consistencia
+
+Correcciones del 2026-10-24 a los hallazgos menores del análisis (ninguno bloqueante):
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 | `MenuClientProvider` siempre recibe el cliente; `main.tsx` provee el simulado en desarrollo hasta T023 y el real en producción | §7 (D-10); `tasks.md` T011, T012, T023 |
+| 2 | T023 depende también de SPEC-001 T030 | `tasks.md` |
+| 3 | Desactivar y reactivar también confirman con «Cambios guardados» o avisan de la falta de conexión (RF-7) | `tasks.md` T028 |
+| 4 | Los textos de largo máximo en la API y de «No se encontró…» quedan registrados en «Aclaraciones» de `spec.md` | §6.1; `spec.md` |

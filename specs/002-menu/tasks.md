@@ -1,6 +1,6 @@
 # Tareas — SPEC-002 Menú
 
-Estado: aprobadas (modo delegado), pendientes de análisis · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -39,10 +39,10 @@ Rama: `feat/002-menu-definicion`.
   Hecho cuando: una prueba comprueba una petición `PUT` con cuerpo JSON, y las pruebas existentes siguen pasando.
 - [ ] **T010 [web] [P]** Escribir `modules/menu/api/menu-client.ts`: interfaz `MenuClient` con las 10 operaciones del contrato y su cliente HTTP real sobre `api-fetch` (plan §6.2; RF-1 a RF-6, RF-9, RF-10, RF-14). Depende de: T005, T009
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada operación, que las respuestas se validan con los esquemas del contrato y que un `ApiError` se propaga.
-- [ ] **T011 [web] [P]** Escribir `modules/menu/api/MenuClientProvider.tsx` y `useMenuClient`: el cliente en uso por contexto, el real por defecto (plan D-10). Depende de: T010
-  Hecho cuando: una prueba de componente comprueba que sin proveedor se usa el cliente real y que con un proveedor se usa el que recibe.
-- [ ] **T012 [web] [P]** Escribir `modules/menu/dev/`: `fixtures.ts`, `menu-demo-client.ts` (implementa `MenuClient` con el menú en memoria) y `ScenarioPicker.tsx` con los escenarios menú vacío, menú cargado, nombre repetido, categoría con productos activos, sin permiso y sin conexión, montado solo en desarrollo desde `main.tsx` (plan D-11; RF-1 a RF-10, RF-14). Depende de: T010
-  Hecho cuando: las pruebas validan con los esquemas del contrato todos los datos y errores del cliente simulado, comprueban que crear y editar cambian el menú en memoria, y el build de producción no contiene el selector del menú.
+- [ ] **T011 [web] [P]** Escribir `modules/menu/api/MenuClientProvider.tsx` y `useMenuClient`: el cliente en uso por contexto, que el proveedor siempre recibe (plan D-10). `main.tsx` provee el cliente real fuera de desarrollo. Depende de: T010
+  Hecho cuando: una prueba de componente comprueba que `useMenuClient` devuelve el cliente del proveedor y falla con un error claro fuera de él, y el build de producción usa el cliente real.
+- [ ] **T012 [web] [P]** Escribir `modules/menu/dev/`: `fixtures.ts`, `menu-demo-client.ts` (implementa `MenuClient` con el menú en memoria) y `ScenarioPicker.tsx` con los escenarios menú vacío, menú cargado, nombre repetido, categoría con productos activos, sin permiso y sin conexión. En desarrollo, `main.tsx` provee el cliente simulado a la aplicación y monta el selector (plan D-10, D-11; RF-1 a RF-10, RF-14). Depende de: T011
+  Hecho cuando: las pruebas validan con los esquemas del contrato todos los datos y errores del cliente simulado, comprueban que crear y editar cambian el menú en memoria y que cambiar de escenario cambia sus respuestas, y el build de producción no contiene el selector ni el cliente simulado del menú.
 - [ ] **T013 [web] [P]** Añadir a `routes.tsx` el campo `homeLink` y las rutas `/menu` («Ver menú», los dos roles) y `/menu/administrar` («Administrar menú», `roles: ['owner']`), con páginas provisionales exportadas desde `modules/menu/index.ts` (plan §3, D-8; RF-1, RF-13). Depende de: T001
   Hecho cuando: una prueba de componente navega a las dos rutas y comprueba sus `roles` y su `homeLink`.
 
@@ -68,7 +68,7 @@ Rama: `feat/002-menu-us1`. Empieza cuando `feat/001-acceso-us1` esté en `develo
   Hecho cuando: las pruebas de componente cubren crear, editar con la precarga, los mensajes de cada campo con lo escrito conservado, el aviso sin categorías activas y el uso solo con teclado.
 - [ ] **T022 [web] [P] [US1]** Escribir `SaveStatus.tsx` y el flujo de guardado de la página: «Cambios guardados» y lista recargada, o «No hay conexión. Los cambios no se guardaron» con lo escrito conservado (plan §5.7; RF-7). Depende de: T020, T021
   Hecho cuando: las pruebas de componente cubren un guardado correcto con la lista actualizada y el escenario sin conexión.
-- [ ] **T023 [integración] [US1]** Registrar `menuPlugin` en `app.ts`, usar el cliente real en `MenuClientProvider` y añadir a `e2e-server.ts` la ruta de prueba `POST /api/__test/menu`, que carga un menú con los servicios del módulo (plan §8.2; RF-1 a RF-7). Depende de: T017, T018, T019, T020, T021, T022
+- [ ] **T023 [integración] [US1]** Registrar `menuPlugin` en `app.ts`, hacer que `main.tsx` provea en desarrollo el cliente real (el selector de escenarios del menú permite volver al simulado, plan D-10) y añadir a `e2e-server.ts` la ruta de prueba `POST /api/__test/menu`, que carga un menú con los servicios del módulo (plan §8.2; RF-1 a RF-7). Depende de: T017, T018, T019, T020, T021, T022, SPEC-001 T030
   Hecho cuando: la interfaz en `vite preview` administra el menú contra la API de E2E, una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y `npm test` sigue pasando.
 - [ ] **T024 [integración] [US1]** Escribir `e2e/menu-us1-armar-menu.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-7). Depende de: T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
@@ -83,8 +83,8 @@ Rama: `feat/002-menu-us2`.
   Hecho cuando: las pruebas de integración cubren desactivar sin productos activos y con solo inactivos, el `409` con 1 y con 3 productos, la carrera simulada con `KM002`, reactivar dejando inactivos sus productos inactivos y renombrar una inactiva.
 - [ ] **T027 [api] [P] [US2]** Añadir a `menu.routes.ts` las rutas de acción `…/deactivate` y `…/reactivate` de categorías y productos (plan §6.2; RF-1, RF-9, RF-10). Depende de: T017, T025, T026
   Hecho cuando: las pruebas con `app.inject` cubren las cuatro rutas, sus `409` y `404`, y el `403` para el cajero.
-- [ ] **T028 [web] [P] [US2]** Añadir a `MenuAdminList` las acciones desactivar y reactivar de cada categoría y producto, sin confirmación y sin opción de eliminar, con el mensaje de la API junto a la fila (RF-9, RF-10, RF-12). Depende de: T019
-  Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada acción, el escenario de categoría con productos activos y que no hay ninguna opción de eliminar.
+- [ ] **T028 [web] [P] [US2]** Añadir a `MenuAdminList` las acciones desactivar y reactivar de cada categoría y producto, sin confirmación y sin opción de eliminar, con el mensaje de la API junto a la fila, y el flujo de guardado de `SaveStatus` («Cambios guardados» o falta de conexión) (RF-7, RF-9, RF-10, RF-12). Depende de: T019, T022
+  Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada acción con «Cambios guardados», el escenario de categoría con productos activos, el escenario sin conexión y que no hay ninguna opción de eliminar.
 - [ ] **T029 [web] [P] [US2]** Hacer que `ProductForm` no ofrezca categorías inactivas al crear ni al mover, y que al editar un producto de una categoría inactiva ofrezca la suya marcada «Inactiva» (plan §5.7; RF-5, RF-11). Depende de: T021
   Hecho cuando: las pruebas de componente cubren los dos casos con un menú simulado que tiene una categoría inactiva.
 - [ ] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
@@ -122,7 +122,7 @@ Rama: `feat/002-menu-pulido`.
 | RF-4 | T005, T008, T015, T017, T021, T024 |
 | RF-5 | T008, T015, T017, T021, T024, T029 |
 | RF-6 | T003, T004, T005, T015, T017, T021, T024 |
-| RF-7 | T014, T015, T017, T022, T024 |
+| RF-7 | T014, T015, T017, T022, T024, T028 |
 | RF-8 | T006, T014, T015, T026 |
 | RF-9 | T002, T008, T025, T027, T028, T030 |
 | RF-10 | T002, T006, T007, T026, T027, T028, T030 |
