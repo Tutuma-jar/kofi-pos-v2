@@ -1,6 +1,7 @@
 // API para las pruebas de punta a punta (playwright.config.ts). Nunca se despliega.
 import { buildApp } from '../src/app.ts';
 import { createAccountsService } from '../src/modules/auth/index.ts';
+import { saveCategory, saveProduct } from '../src/modules/menu/index.ts';
 import { createFakeClock } from '../src/shared/clock.ts';
 import { createTestDatabase } from './test-database.ts';
 import { TEST_ACCOUNTS } from '../../../e2e/fixtures.ts';
@@ -12,6 +13,18 @@ const accountActionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('update'), changes: z.unknown() }).strict(),
   z.object({ action: z.literal('delete') }).strict(),
 ]);
+const menuFixtureSchema = z
+  .object({
+    categories: z.array(
+      z
+        .object({
+          name: z.string(),
+          products: z.array(z.object({ name: z.string(), price: z.string() }).strict()).default([]),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
 
 export async function buildE2eApp() {
   const db = await createTestDatabase();
@@ -20,6 +33,17 @@ export async function buildE2eApp() {
     for (const input of Object.values(TEST_ACCOUNTS)) await accounts.create(input);
     const clock = createFakeClock(new Date('2026-10-24T08:00:00-04:00'));
     const app = buildApp({ db, clock, logger: false });
+    // Restablecer solo datos efímeros de E2E; cada alta recorre los servicios del módulo.
+    app.post('/api/__test/menu', async (request) => {
+      const fixture = validate(menuFixtureSchema, request.body);
+      await db.transaction((tx) => tx.exec('DELETE FROM products; DELETE FROM categories;'));
+      for (const input of fixture.categories) {
+        const category = await saveCategory(db, { name: input.name });
+        for (const product of input.products)
+          await saveProduct(db, { ...product, categoryId: category.id });
+      }
+      return { ok: true };
+    });
     // Controles exclusivos del servidor de pruebas; buildApp nunca los registra.
     app.post('/api/__test/clock', async (request) => {
       const { advanceMilliseconds } = validate(clockSchema, request.body);

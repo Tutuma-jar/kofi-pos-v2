@@ -10,11 +10,60 @@ describe('API real de E2E (RF-1, RF-5, RF-7, RF-13)', () => {
     const db = await createTestDatabase();
     const app = buildApp({ db, logger: false, production: true });
     try {
-      for (const url of ['/api/__test/clock', '/api/__test/accounts/ana'])
+      for (const url of ['/api/__test/clock', '/api/__test/accounts/ana', '/api/__test/menu'])
         expect((await app.inject({ method: 'POST', url, payload: {} })).statusCode).toBe(404);
+      expect((await app.inject({ url: '/api/menu/admin' })).statusCode).toBe(401);
     } finally {
       await app.close();
       await db.close();
+    }
+  }, 15_000);
+  it('carga y restablece el menú con los servicios y lo administra mediante la API real (Menú RF-1 a RF-7)', async () => {
+    const app = await buildE2eApp();
+    try {
+      const load = await app.inject({
+        method: 'POST',
+        url: '/api/__test/menu',
+        payload: {
+          categories: [
+            {
+              name: '  Bebidas   calientes ',
+              products: [{ name: 'Café americano', price: '12,5' }],
+            },
+          ],
+        },
+      });
+      expect(load.statusCode).toBe(200);
+      const login = await app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { username: TEST_ACCOUNTS.owner.username, password: TEST_ACCOUNTS.owner.password },
+      });
+      const cookie = String(login.headers['set-cookie']).split(';')[0]!;
+      let response = await app.inject({ url: '/api/menu/admin', headers: { cookie } });
+      expect(response.statusCode).toBe(200);
+      const menu = response.json().categories;
+      expect(menu[0]).toMatchObject({
+        name: 'Bebidas calientes',
+        products: [{ name: 'Café americano', priceCents: 1250, active: true }],
+      });
+      response = await app.inject({
+        method: 'PUT',
+        url: `/api/menu/products/${menu[0].products[0].id}`,
+        headers: { cookie },
+        payload: { name: 'Café americano', categoryId: menu[0].id, price: '13' },
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.json().product.priceCents).toBe(1300);
+      expect(
+        (await app.inject({ method: 'POST', url: '/api/__test/menu', payload: { categories: [] } }))
+          .statusCode,
+      ).toBe(200);
+      expect(
+        (await app.inject({ url: '/api/menu/admin', headers: { cookie } })).json().categories,
+      ).toEqual([]);
+    } finally {
+      await app.close();
     }
   }, 15_000);
   it('controla bloqueo, vencimiento y cambios de cuenta en la API de E2E (RF-9, RF-10, RF-12)', async () => {

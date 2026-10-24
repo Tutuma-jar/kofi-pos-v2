@@ -9,9 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../../app.ts';
 import { createTestDatabase } from '../../../test/test-database.ts';
 import type { Database } from '../../shared/database/database.ts';
-import { systemClock } from '../../shared/clock.ts';
 import { createAccountsService } from '../auth/index.ts';
-import { menuPlugin } from './menu.routes.ts';
 
 const missingId = '11111111-1111-4111-8111-111111111111';
 const adminRoutes = [
@@ -46,7 +44,6 @@ describe('rutas del menú (RF-1 a RF-7)', () => {
         password: 'solo pruebas de menu',
       });
     app = buildApp({ db, logger: false });
-    app.register(menuPlugin, { db, clock: systemClock });
     const login = async (username: string) =>
       String(
         (
