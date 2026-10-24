@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "node scripts/git-hooks/install.mjs && node scripts/sync-skills.mjs",
+    "prepare": "node scripts/git-hooks/install.mjs && node scripts/sync-skills.mjs && node scripts/sync-agents.mjs",
     "hooks": "node scripts/git-hooks/status.mjs",
     "test:git": "node --test scripts/git-rules.test.mjs"
   }
