@@ -44,7 +44,7 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: las pruebas cubren el reloj falso (fijar y adelantar) y el error de configuración cuando falta `DATABASE_URL`.
 - [x] **T013 [api] [P]** Escribir `shared/http/errors.ts` (`AppError` y manejador que responde con el formato común, `500 INTERNAL_ERROR` sin detalles), `shared/http/validate.ts` y la cabecera `Cache-Control: no-store` en todas las respuestas (D-4). Depende de: T008, T003
   Hecho cuando: las pruebas comprueban un `AppError`, un error inesperado (`500` sin la traza) y un cuerpo inválido (`400 VALIDATION_ERROR` con `fields`), y que todas las respuestas llevan `no-store`.
-- [ ] **T014 [api] [P]** Escribir `passwords.service.ts` con `scrypt` de `node:crypto` (plan §5.4, D-3; RF-1, RNF-1). Depende de: T003
+- [x] **T014 [api] [P]** Escribir `passwords.service.ts` con `scrypt` de `node:crypto` (plan §5.4, D-3; RF-1, RNF-1). Depende de: T003
   Hecho cuando: las pruebas comprueban que el hash no contiene la contraseña, que dos hash de la misma contraseña son distintos, que se verifica la correcta, se rechaza otra (incluida una diferencia de mayúsculas) y se verifica con los parámetros guardados.
 - [ ] **T015 [api] [P]** Escribir `users.repository.ts` y `sessions.repository.ts`: buscar cuenta por usuario (con `FOR UPDATE`), crear sesión con `sha256(token)`, buscar sesión por token con su cuenta y revocar (RF-1, RF-6, RF-7). Depende de: T011
   Hecho cuando: las pruebas de integración crean y encuentran una sesión por su token, comprueban que el token no se guarda en claro y que una sesión revocada se lee con `revoked_at`.
