@@ -22,3 +22,6 @@ build/
 # Resultados de Playwright
 test-results/
 playwright-report/
+
+# Enlace local del CLI de Neon (organización, proyecto y rama de cada persona)
+.neon
