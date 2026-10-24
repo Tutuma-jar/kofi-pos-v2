@@ -534,4 +534,3 @@ El hallazgo 2 (ninguna tarea crea el script `migrate`) es de `tasks.md`; el plan
 ### Decisiones delegadas de US2
 
 Decisión delegada DD-19 (T032): el ingreso devuelve internamente el rechazo desde la transacción y lo lanza después del commit. Así los fallos y el bloqueo persisten de forma atómica bajo el bloqueo de fila. Se descarta lanzar el error dentro de la transacción porque desharía el intento fallido. El reloj se lee después de adquirir la fila para decidir con la hora de cada intento serializado. No cambia el contrato.
-

@@ -37,6 +37,11 @@ export function createAuthService({ db, clock }: AuthDeps) {
       if (!session || session.revokedAt || !session.user) {
         throw new AppError(401, 'SESSION_MISSING', 'Inicia sesión para continuar');
       }
+      if (clock.now() >= session.expiresAt) {
+        throw new AppError(401, 'SESSION_EXPIRED', 'Tu sesión venció. Vuelve a iniciar sesión', {
+          userId: session.user.id,
+        });
+      }
       return toSessionUser(session.user);
     },
     async login(input: LoginRequest, previousToken?: string) {

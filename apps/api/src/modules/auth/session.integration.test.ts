@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../../app.ts';
 import { createTestDatabase } from '../../../test/test-database.ts';
-import { createFakeClock } from '../../shared/clock.ts';
+import { createFakeClock, type FakeClock } from '../../shared/clock.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { createAuthService } from './auth.service.ts';
 import { requireSession } from './auth.hook.ts';
@@ -14,6 +14,7 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
   let app: FastifyInstance;
   let db: Database;
   let auth: ReturnType<typeof createAuthService>;
+  let clock: FakeClock;
   const handler = vi.fn(async () => ({ saved: true }));
   beforeEach(async () => {
     db = await createTestDatabase();
@@ -22,7 +23,7 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
       VALUES ('ana', 'Ana Quispe', 'owner', $1)`,
       [await hashPassword('prueba de cafe')],
     );
-    const clock = createFakeClock(NOW);
+    clock = createFakeClock(NOW);
     auth = createAuthService({ db, clock });
     app = buildApp({ db, clock, logger: false });
     app.post('/api/protected', { preHandler: requireSession(auth) }, handler);
@@ -39,6 +40,32 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
       url: '/api/auth/session',
       headers: token ? { cookie: `kofi_session=${token}` } : {},
     });
+
+  it('vence exactamente a las doce horas pese a la actividad y no ejecuta cambios (RF-10, RF-11)', async () => {
+    const { token, user } = await login();
+    clock.advance((11 * 60 + 59) * 60_000);
+    expect((await session(token)).statusCode).toBe(200);
+    clock.advance(60_000);
+    const response = await session(token);
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: {
+        code: 'SESSION_EXPIRED',
+        message: 'Tu sesión venció. Vuelve a iniciar sesión',
+        userId: user.id,
+      },
+    });
+    expect(String(response.headers['set-cookie'])).toContain('Max-Age=0');
+    const operation = await app.inject({
+      method: 'POST',
+      url: '/api/protected',
+      headers: { cookie: `kofi_session=${token}` },
+    });
+    expect(operation.statusCode).toBe(401);
+    expect(operation.json().error.code).toBe('SESSION_EXPIRED');
+    expect(handler).not.toHaveBeenCalled();
+    expect((await session()).json().error).not.toHaveProperty('userId');
+  });
 
   it('devuelve solo la identidad pública de la sesión', async () => {
     const { token, user } = await login();
