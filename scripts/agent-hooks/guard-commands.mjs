@@ -8,6 +8,9 @@ const command = input?.tool_input?.command;
 if (typeof command !== 'string') process.exit(0);
 
 // Divide en subcomandos por operadores de shell y en palabras, quitando comillas.
+// Limitación conocida: también analiza el cuerpo de los heredocs, así que una línea de un mensaje
+// que empiece por un comando prohibido (por ejemplo, «git add -f … .env») se bloquea. Se acepta
+// porque falla del lado seguro: se reescribe esa línea o se usa `git commit -F <archivo>`.
 const segments = command.split(/&&|\|\||;|\||\n/).map((s) =>
   (s.match(/"[^"]*"|'[^']*'|\S+/g) ?? []).map((w) => w.replace(/^["']|["']$/g, '')));
 
