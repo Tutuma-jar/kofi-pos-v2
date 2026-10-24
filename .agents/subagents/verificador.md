@@ -24,8 +24,10 @@ Recibes únicamente «Verifica SPEC-NNN (PR #M).». No asumas nada más: obtén 
    - `-pulido` o sin sufijo → **todos** los RF de `spec.md` y sus criterios de finalización.
 
    Si existe `quickstart.md`, sigue sus pasos del alcance como comprobación manual adicional.
-4. **Comprobaciones:** ejecuta las comprobaciones de «Comandos» de `AGENTS.md` que existan (`npm run typecheck`, `npm run lint`, `npm test`, `npm run build`…) y consulta `gh pr checks M`.
-5. **RF por RF:** para cada requisito del alcance, identifica el test o los tests que lo cubren, ejecútalos y anota el resultado. Si un RF no tiene test o su test falla, dilo claramente.
+4. **Comprobaciones:** ejecuta cada comprobación una sola vez.
+   - **CI del mismo commit.** Consulta `gh pr checks M` y el commit que comprobó la CI (`gh pr view M --json headRefOid,statusCheckRollup`). Si `technical-checks` pasó sobre el mismo commit que verificas, toma de ahí los tipos, el lint, el formato, el build y las pruebas de punta a punta, sin repetirlos en local, y anótalo en «Comprobaciones ejecutadas» con el enlace al run. Si falló, está pendiente o es de otro commit, ejecuta en local las comprobaciones de «Comandos» de `AGENTS.md` que existan.
+   - **Tests en local, siempre.** Ejecuta `npm test` una vez, guardando el resultado de cada test en un archivo de la carpeta temporal del sistema (`node -p "require('node:os').tmpdir()"`), fuera del repositorio: `npm test -- --reporter=default --reporter=json --outputFile.json=<archivo>`.
+5. **RF por RF:** para cada requisito del alcance, identifica el test o los tests que lo cubren y toma su resultado del archivo del paso 4, sin volver a ejecutarlos. Vuelve a ejecutar un test solo si su resultado no aparece en ese archivo. Si un RF no tiene test o su test falla, dilo claramente.
 6. **Trazabilidad inversa:** señala comportamientos del diff que no correspondan a ningún RF.
 7. **Criterios de finalización:** solo en el alcance completo, comprueba cada uno de `spec.md`.
 8. **Constitución:** comprueba cada principio contra el diff.
@@ -36,7 +38,7 @@ Recibes únicamente «Verifica SPEC-NNN (PR #M).». No asumas nada más: obtén 
 
     El veredicto va como comentario, no como «approve» de GitHub, porque los agentes usan la cuenta de la persona y GitHub no permite aprobar un PR propio.
 11. **Veredicto:** si el alcance está cumplido, `gh pr ready M`; si no, deja el PR en borrador.
-12. **Limpieza:** borra el archivo temporal y comprueba que `git status --porcelain` no muestra cambios tuyos.
+12. **Limpieza:** borra los archivos temporales (el del comentario y el de resultados de los tests) y comprueba que `git status --porcelain` no muestra cambios tuyos.
 13. **Respuesta:** al agente principal, solo el veredicto y el enlace al comentario.
 
 ## Formato del comentario
