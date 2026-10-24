@@ -32,6 +32,10 @@ services:
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/web
     staticPublishPath: apps/web/dist
     routes:
+      # /api/* no incluye /api a secas, que sin su propia regla caería en /index.html.
+      - type: rewrite
+        source: /api
+        destination: https://kofi-api.onrender.com/api
       - type: rewrite
         source: /api/*
         destination: https://kofi-api.onrender.com/api/*
