@@ -27,7 +27,7 @@ Se planifica con la **versión 2.0.0** de [`docs/constitution.md`](../../docs/co
 | 3. Lógica separada de la interfaz | Sí | Subtotales, total, avisos de cambios del menú, límites y número de venta se calculan en la API (`sales.pricing.ts`, `sales.service.ts`). La interfaz envía qué productos y cuántas unidades eligió la persona, y muestra los importes y los mensajes que devuelve la API; los formatea con `formatPrice` y `formatDateTime` del contrato, que no calculan importes (D-3). El cliente simulado de `dev/` multiplica precio por cantidad para que las pantallas se puedan recorrer sin la API, pero no llega al build de producción (`docs/architecture.md` §4.5) y sus cifras no son oficiales (D-10). El contrato vive en `packages/contracts/src/sales.ts`. |
 | 4. Tests primero | Sí | Cada RF tiene al menos un test automatizado (§8.5), que se escribe antes del código de su tarea. |
 | 5. Persistencia segura | Sí | Solo la capa `shared/database` de la API toca la base. Registrar una venta (número, venta y líneas) es una sola transacción (RF-9). La base garantiza además que el total es la suma de las líneas, que el subtotal es precio por cantidad, que los números no se repiten y que una venta registrada no cambia (§4, D-4). La venta en preparación se guarda en el navegador, sin importes oficiales ni datos de la sesión (D-8). Esta especificación no añade secretos. |
-| 6. Idioma | Sí | Código e identificadores en inglés (`sales`, `saleLines`, `totalCents`). Los mensajes al usuario están en español y los devuelve la API. Importes en bolivianos (centavos enteros, `docs/architecture.md` §6.7) y fechas en hora de Bolivia (`formatDateTime`, D-7). |
+| 6. Idioma | Sí | Código e identificadores en inglés (`sales`, `saleLines`, `totalCents`, medios de pago `cash` y `qr`). Los mensajes al usuario están en español y los devuelve la API. Importes en bolivianos (centavos enteros, `docs/architecture.md` §6.7) y fechas en hora de Bolivia (`formatDateTime`, D-7). |
 
 Todos los principios se cumplen sin excepciones.
 
@@ -68,6 +68,7 @@ apps/web/src/
         ├── components/
         │   ├── ProductPicker.tsx        productos para vender, por categoría                 RF-2, RF-3
         │   ├── SaleDraftLines.tsx       líneas con «+», «−» y «Quitar», total y avisos       RF-3–RF-5
+        │   ├── PaymentMethodPicker.tsx  «Efectivo» o «QR», sin valor por defecto             RF-6
         │   ├── SaleConfirmation.tsx     «Venta N.º … registrada · … · …»                    RF-6
         │   └── DiscardSaleDialog.tsx    confirmación de «Descartar venta»                    RF-14
         ├── pages/
@@ -113,6 +114,7 @@ La migración inserta la fila con `last_number = 0`.
 | `registered_by_name` | `text` | `NOT NULL`, `CHECK (char_length BETWEEN 1 AND 40)`: nombre visible al registrar |
 | `registered_by_role` | `text` | `NOT NULL`, `CHECK (IN ('owner', 'cashier'))`: rol al registrar |
 | `total_cents` | `integer` | `NOT NULL`, `CHECK (total_cents >= 1)` |
+| `payment_method` | `text` | `NOT NULL`, `CHECK (IN ('cash', 'qr'))`: efectivo o QR (D-13) |
 
 Índice sobre `registered_at` para las consultas por fecha del Dashboard y el Historial.
 
@@ -145,9 +147,9 @@ id    last_number
 true  2
 
 sales
-id        number  draft_id  registered_at           registered_by_user_id  registered_by_name  registered_by_role  total_cents
-9b1c…-a0  1       4f2e…-11  2026-10-24 18:05:12+00  7d3a…-c9               Ana                 cashier             3300
-e07d…-5b  2       c8a9…-02  2026-10-24 18:09:40+00  NULL                   Luis                cashier             1250   ← cuenta eliminada
+id        number  draft_id  registered_at           registered_by_user_id  registered_by_name  registered_by_role  total_cents  payment_method
+9b1c…-a0  1       4f2e…-11  2026-10-24 18:05:12+00  7d3a…-c9               Ana                 cashier             3300         cash
+e07d…-5b  2       c8a9…-02  2026-10-24 18:09:40+00  NULL                   Luis                cashier             1250         qr     ← cuenta eliminada
 
 sale_lines
 sale_id   position  product_id  product_name    category_name      unit_price_cents  quantity  subtotal_cents
@@ -200,8 +202,9 @@ La interfaz arma la lista deseada (agregar, «+», «−», «Quitar») y la env
 ### 5.3 Registrar la venta (RF-6 a RF-11)
 
 ```text
-POST /api/sales { draftId, lines }:                          # cada línea con unitPriceCents (lo que se mostraba)
+POST /api/sales { draftId, paymentMethod, lines }:           # cada línea con unitPriceCents (lo que se mostraba)
   validate(registerSaleRequestSchema)                        # vacía → 400 { fields.lines: «Agrega al menos un producto» }
+                                                             # sin medio → 400 { fields.paymentMethod: «Elige el medio de pago» }
   user ← request.sessionUser                                 # requireSession (SPEC-001)
   previa ← findSaleByDraftId(db, draftId)
   if previa:                                                 # RF-8: reintento o doble clic, sin mirar el menú
@@ -213,7 +216,7 @@ POST /api/sales { draftId, lines }:                          # cada línea con u
   try:
     sale ← db.transaction(tx →
       number ← UPDATE sale_counter SET last_number = last_number + 1 RETURNING last_number   # bloquea la fila
-      insertSale(tx, { number, draftId, registeredAt: clock.now(), user, priced })           # venta y líneas
+      insertSale(tx, { number, draftId, registeredAt: clock.now(), user, paymentMethod, priced })   # venta y líneas
     )
     return 201 { sale }
   on unique_violation(sales_draft_id_key):                   # el otro clic ganó entre la búsqueda y el INSERT
@@ -223,12 +226,14 @@ POST /api/sales { draftId, lines }:                          # cada línea con u
 - **Número sin saltos (RF-10).** El `UPDATE` de `sale_counter` bloquea su única fila hasta el fin de la transacción: dos registros a la vez se ordenan, y si uno falla, su `ROLLBACK` deshace también el número. Para un local con una o dos personas, registrar de a una venta no demora a nadie.
 - **Precio vigente (RF-7).** Se lee justo antes de la transacción y se compara con lo que se mostraba. Si el dueño guarda un precio nuevo en ese mismo instante, la venta queda con el precio que estaba vigente al leerlo, que es el que se cobró; leerlo dentro de la transacción no cambiaría nada, porque Ventas no bloquea el menú (en `READ COMMITTED`, cada lectura ve lo ya confirmado).
 - **Ante `409 MENU_CHANGED`**, la interfaz vuelve a pedir el cálculo (§5.2) con las mismas líneas, muestra el mensaje y los avisos de cada línea, y deja que la persona registre de nuevo (RF-7).
+- **Medio de pago (RF-6, RF-8).** Se guarda el de la petición. Un reintento con el mismo `draftId` devuelve la venta ya registrada con su medio de pago, aunque la petición traiga otro.
 - **Quién (RF-11).** Se guardan `user.id`, `user.displayName` y `user.role` de la sesión; si después la cuenta se elimina, `registered_by_user_id` pasa a `NULL` y el nombre y el rol quedan.
 
 ### 5.4 Venta en preparación en la interfaz (RF-3 a RF-9, RF-12 a RF-14)
 
 ```text
-estado: { draftId, lines (las del último cálculo), totalCents, notices, menu, busy, error, confirmation }
+estado: { draftId, lines (las del último cálculo), totalCents, notices, menu, paymentMethod (null al empezar),
+          busy, error, confirmation }
 
 abrir NewSalePage:    guardada ← draftStore.load(user.id)           # otra cuenta → se descarta (RF-13)
                       draftId ← guardada?.draftId ?? crypto.randomUUID()
@@ -239,8 +244,10 @@ calcular(deseadas):   busy; r ← client.quote({ lines: deseadas })
                       ok              → lines, totalCents, notices, menu ← r; draftStore.save(user.id, draftId, r.lines)
                       VALIDATION_ERROR → mostrar fields.lines; nada cambia                    # RF-3
                       NETWORK_ERROR    → «No hay conexión. Inténtalo de nuevo»; nada cambia   # RF-9
-registrar:            busy (sin cambios mientras tanto, RF-8); s ← client.register({ draftId, lines })
-                      ok           → confirmation ← s; draftStore.clear(); draftId nuevo; lines ← []
+elegir medio de pago: paymentMethod ← 'cash' | 'qr'; draftStore.save(…)                     # RF-6, RF-12
+registrar:            deshabilitado sin líneas o sin paymentMethod (RF-6)
+                      busy (sin cambios mientras tanto, RF-8); s ← client.register({ draftId, paymentMethod, lines })
+                      ok           → confirmation ← s; draftStore.clear(); draftId nuevo; lines ← []; paymentMethod ← null
                       MENU_CHANGED → mostrar el mensaje; calcular(lines)                      # RF-7
                       NETWORK_ERROR→ «No hay conexión. Inténtalo de nuevo: la venta no se registrará dos veces»
                                      se conservan draftId y lines: el reintento usa el mismo draftId (RF-8)
@@ -255,7 +262,7 @@ descartar:            DiscardSaleDialog → draftStore.clear(); draftId nuevo; l
 
 ```text
 draftStore (localStorage, clave kofi:sales:draft):
-  guarda { userId, draftId, lines: [{ productId, productName, quantity, unitPriceCents }] }  # sin totales
+  guarda { userId, draftId, paymentMethod, lines: [{ productId, productName, quantity, unitPriceCents }] }  # sin totales
   load(userId):  d ← leer; si d.userId ≠ userId: borrar y devolver null; si no, d
   save / clear:  escribir o borrar; las demás pestañas reciben el evento storage y vuelven a leer   # RF-12
   si localStorage no está disponible o tiene datos inválidos: se comporta como vacío
@@ -291,14 +298,17 @@ Ubicación: **`packages/contracts/src/sales.ts`** (esquemas de Zod y tipos), **`
 | `SALE_MAX_LINES` | `30` | RF-3 |
 | `SALE_MAX_QUANTITY` | `99` | RF-3 |
 | `SALE_MESSAGES` | Textos de la API: `maxQuantity` «Una venta puede tener como máximo 99 unidades de cada producto», `maxLines` «Una venta puede tener como máximo 30 productos distintos», `empty` «Agrega al menos un producto», `menuChanged` «El menú cambió. Revisa la venta antes de registrarla», `draftTaken` «Esta venta ya se registró desde otra cuenta»; y dos que solo se ven si se esquiva la interfaz: `invalidLine` «Revisa los productos de la venta» (cantidad menor que 1, precio o identificador inválidos, producto repetido) e `invalidSale` «Revisa los datos de la venta» (`draftId` inválido) | RF-3, RF-6–RF-8 |
+| `PAYMENT_METHODS` | `['cash', 'qr']` (D-13) | RF-6 |
+| `paymentMethodSchema` | `enum` de `PAYMENT_METHODS`; falta o valor desconocido → `SALE_MESSAGES.paymentMethod` «Elige el medio de pago» | RF-6 |
+| `formatPaymentMethod` | `'cash'` → «Efectivo», `'qr'` → «QR» | RF-6 |
 | `BOLIVIA_TIME_ZONE` | `'America/La_Paz'` | Datos de una venta registrada |
 | `formatDateTime` | §5.6 | RF-6 |
 | `saleDraftLineSchema` | `{ productId: uuid, productName: string 1–40, quantity: int 1–99 (maxQuantity), unitPriceCents?: int 1–100000 }` | RF-3, RF-5 |
 | `saleQuoteRequestSchema` | `{ lines: saleDraftLine[] }`, como máximo 30 (maxLines) y sin `productId` repetidos | RF-3, RF-4 |
-| `registerSaleRequestSchema` | `{ draftId: uuid, lines: saleDraftLine[] }` con `unitPriceCents` obligatorio, de 1 (empty) a 30 líneas y sin repetidos | RF-6–RF-8 |
+| `registerSaleRequestSchema` | `{ draftId: uuid, paymentMethod: PaymentMethod, lines: saleDraftLine[] }` con `unitPriceCents` obligatorio, de 1 (empty) a 30 líneas y sin repetidos | RF-6–RF-8 |
 | `saleLineSchema` | `{ productId: uuid, productName: string, categoryName: string, quantity: int 1–99, unitPriceCents: int 1–100000, subtotalCents: int ≥ 1 }` | RF-4, RF-11 |
 | `saleQuoteSchema` | `{ lines: SaleLine[] (≤ 30), totalCents: int ≥ 0, notices: string[], menu: CurrentMenuResponse['categories'] }` | RF-2, RF-4, RF-5 |
-| `saleSchema` | `{ id: uuid, number: int ≥ 1, registeredAt: string ISO 8601 con zona, registeredBy: { userId: uuid \| null, displayName: string, role: Role }, lines: SaleLine[] (1–30), totalCents: int ≥ 1 }` | RF-6, RF-11 |
+| `saleSchema` | `{ id: uuid, number: int ≥ 1, registeredAt: string ISO 8601 con zona, registeredBy: { userId: uuid \| null, displayName: string, role: Role }, lines: SaleLine[] (1–30), totalCents: int ≥ 1, paymentMethod: PaymentMethod }` | RF-6, RF-11 |
 | `saleResponseSchema` | `{ sale: Sale }` | RF-6, RF-8 |
 
 `menu` reutiliza el esquema `currentMenuResponseSchema` de `menu.ts` (SPEC-002): es el menú vigente, agrupado y ordenado como lo entrega `getCurrentMenu`.
@@ -310,7 +320,7 @@ Las dos usan `requireSession` (SPEC-001) y pueden responder sus tres `401` (`SES
 | Ruta | Entrada | Respuesta correcta | Errores propios | RF |
 | --- | --- | --- | --- | --- |
 | `POST /api/sales/quote` | `saleQuoteRequestSchema` | `200 saleQuoteSchema`: líneas calculadas, total, avisos y productos para vender | `400 VALIDATION_ERROR` (`fields.lines`: límites de RF-3) | RF-2–RF-5, RF-12 |
-| `POST /api/sales` | `registerSaleRequestSchema` | `201 saleResponseSchema` si se registró ahora; `200 saleResponseSchema` si esa venta en preparación ya estaba registrada | `400 VALIDATION_ERROR` (`fields.lines`: vacía o límites; `fields.draftId`: registrada desde otra cuenta), `409 MENU_CHANGED` | RF-6–RF-11 |
+| `POST /api/sales` | `registerSaleRequestSchema` | `201 saleResponseSchema` si se registró ahora; `200 saleResponseSchema` si esa venta en preparación ya estaba registrada | `400 VALIDATION_ERROR` (`fields.lines`: vacía o límites; `fields.paymentMethod`: sin medio de pago; `fields.draftId`: registrada desde otra cuenta), `409 MENU_CHANGED` | RF-6–RF-11 |
 
 `400 VALIDATION_ERROR` lleva `message: "Revisa los datos"`, como en SPEC-001 y SPEC-002; todos los fallos de las líneas se informan en `fields.lines` con un solo mensaje, el primero de RF-3 o RF-6 que se incumpla. El texto de `fields.draftId` es «Esta venta ya se registró desde otra cuenta»: solo aparece si se esquiva la interfaz.
 
@@ -334,12 +344,16 @@ POST /api/sales/quote   { "lines": [ { "productId": "c4e1…-07", "productName":
 400                     { "error": { "code": "VALIDATION_ERROR", "message": "Revisa los datos",
                           "fields": { "lines": "Una venta puede tener como máximo 99 unidades de cada producto" } } }
 
-POST /api/sales         { "draftId": "4f2e…-11", "lines": [
+POST /api/sales         { "draftId": "4f2e…-11", "paymentMethod": "cash", "lines": [
                           { "productId": "c4e1…-07", "productName": "Café americano", "quantity": 2, "unitPriceCents": 1250 },
                           { "productId": "a3f0…-5d", "productName": "Empanada", "quantity": 1, "unitPriceCents": 800 } ] }
 201                     { "sale": { "id": "9b1c…-a0", "number": 1, "registeredAt": "2026-10-24T18:05:12.000Z",
                           "registeredBy": { "userId": "7d3a…-c9", "displayName": "Ana", "role": "cashier" },
-                          "lines": [ … las dos líneas calculadas … ], "totalCents": 3300 } }
+                          "lines": [ … las dos líneas calculadas … ], "totalCents": 3300, "paymentMethod": "cash" } }
+
+POST /api/sales         { "draftId": "c8a9…-02", "lines": [ … ] }          (sin paymentMethod)
+400                     { "error": { "code": "VALIDATION_ERROR", "message": "Revisa los datos",
+                          "fields": { "paymentMethod": "Elige el medio de pago" } } }
 
 POST /api/sales         (el mismo cuerpo otra vez)
 200                     { "sale": { "id": "9b1c…-a0", "number": 1, … } }
@@ -374,6 +388,7 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 | D-9 | **`SessionProvider` recibe `onSessionEnd(reason)`** desde `routes.tsx` y lo llama al cerrar sesión (`'logout'`) y ante `SESSION_TERMINATED` (`'terminated'`), no al vencer; `routes.tsx` le pasa `discardStoredSaleDraft` de `modules/sales/index.ts` | `auth` no conoce a `sales`, y otros módulos podrán añadir lo suyo en `routes.tsx` sin tocar `auth`, como con `homeLink` (SPEC-002 D-8) | Que `sales` detecte el cierre leyendo la sesión: no distingue un cierre de un vencimiento. Un registro global en `shared/`: efectos al importar un módulo, difíciles de probar | RF-13 |
 | D-10 | **`SalesClientProvider` y escenarios de desarrollo:** como en SPEC-002 (D-10, D-11), la interfaz obtiene el cliente de un contexto que siempre lo recibe; `main.tsx` provee el real, también en desarrollo, y el simulado con su selector solo con `?escenarios=ventas`, combinable (`?escenarios=acceso,menu,ventas`). El cliente simulado tiene un menú en memoria, multiplica precio por cantidad para responder `quote`, numera las ventas y valida con los esquemas del contrato; los escenarios son «Menú cargado», «Menú vacío», «Cambió un precio», «Producto retirado», «Sin conexión» y «Respuesta perdida» | Permite trabajar la interfaz sin la API (`docs/architecture.md` §4.5) y recorrer los avisos de RF-5 y RF-7. Las cifras oficiales solo las calcula la API; el cliente simulado no llega al build | Respuestas fijas por escenario sin cálculo: no se podría armar una venta en la pantalla. Reimplementar las reglas completas de la API: duplicaría su lógica | RF-2–RF-9 |
 | D-11 | **Ruta `/ventas/nueva`** con `homeLink: 'Nueva venta'` y los dos roles | Sigue `docs/architecture.md` §6.6; deja `/ventas` libre para el Historial | `/venta` o `/ventas`: se confundiría con la consulta de ventas de 005 | RF-1 |
+| D-13 | **Medio de pago con códigos estables en inglés** (`'cash'`, `'qr'`) en la base y el contrato, y **`formatPaymentMethod` en el contrato** para mostrarlos («Efectivo», «QR»). Es obligatorio en `POST /api/sales` y no tiene valor por defecto; la interfaz lo guarda con la venta en preparación | Como los roles (`owner`, `cashier`) y los códigos de error: los datos no dependen del texto que se muestra, y Dashboard e Historial agruparán por código. Un `CHECK` en la base impide otros valores. Sin valor por defecto, una venta por QR nunca queda como efectivo por olvido (spec, «Aclaraciones») | Guardar el texto «Efectivo»/«QR»: cambiar un texto obligaría a migrar datos. Una tabla de medios de pago: hoy son dos fijos y la especificación no pide administrarlos | RF-6, RF-7, RF-11, RF-12 |
 | D-12 | **Medición de RNF-3** en un despliegue de comprobación con los 200 productos de `seed-menu.ts` (SPEC-002 T034), nunca en producción | RNF-3 fija el tamaño del menú y el script ya existirá; mide abrir, cambiar y registrar | Medir con el menú real: todavía no existe (duda abierta de SPEC-002) | RNF-3 |
 
 ### 7.1 Dependencias
@@ -399,13 +414,13 @@ Los de SPEC-001 y SPEC-002:
 
 1. Con un menú cargado (Café americano Bs 12,50; Empanada Bs 8,00), ingresar como cajero → «Nueva venta» → se ven las categorías y los productos con su precio (RF-1, RF-2).
 2. Elegir dos veces el café y una la empanada → «Café americano × 2 · Bs 25,00», «Empanada × 1 · Bs 8,00» y «Bs 33,00»; «−» deshabilitado en la empanada (RF-3, RF-4).
-3. «Registrar venta» con doble clic → «Venta N.º 1 registrada · Bs 33,00 · [fecha y hora del reloj de la API de pruebas]» y venta vacía; la API de pruebas tiene una sola venta, con el cajero, las dos líneas y el total (RF-6, RF-8, RF-11).
-4. Agregar el café; el dueño cambia su precio a Bs 13,00 (petición con su sesión) → «Registrar venta» → «El menú cambió…» y «Cambió el precio de “Café americano”: ahora cuesta Bs 13,00»; registrar de nuevo → venta N.º 2 por Bs 13,00; la venta N.º 1 sigue en Bs 12,50 (RF-5, RF-7, RF-11).
+3. «Registrar venta» deshabilitado sin medio de pago; elegir «Efectivo» y «Registrar venta» con doble clic → «Venta N.º 1 registrada · Bs 33,00 · Efectivo · [fecha y hora del reloj de la API de pruebas]» y venta vacía, sin medio de pago elegido; la API de pruebas tiene una sola venta, con el cajero, las dos líneas, el total y `cash` (RF-6, RF-8, RF-11).
+4. Agregar el café; el dueño cambia su precio a Bs 13,00 (petición con su sesión) → elegir «QR» y «Registrar venta» → «El menú cambió…» y «Cambió el precio de “Café americano”: ahora cuesta Bs 13,00»; registrar de nuevo → venta N.º 2 por Bs 13,00 con «QR»; la venta N.º 1 sigue en Bs 12,50 y con `cash` (RF-5, RF-6, RF-7, RF-11).
 5. Cortar la red y agregar un producto → «No hay conexión. Inténtalo de nuevo» y la venta sin cambios (RF-9).
 
 **US2 — No perder la venta en preparación** (`e2e/sales-us2-conservar-venta.spec.ts`)
 
-1. Armar una venta de dos productos, recargar, ir a la pantalla inicial y volver → las mismas líneas; una segunda pestaña muestra la misma venta (RF-12).
+1. Armar una venta de dos productos y elegir «QR», recargar, ir a la pantalla inicial y volver → las mismas líneas y «QR» elegido; una segunda pestaña muestra la misma venta (RF-12).
 2. Adelantar el reloj de la API 12 horas, agregar un producto → ingreso con el aviso de SPEC-001; volver a entrar con la misma cuenta → «Nueva venta» con la venta conservada (RF-13).
 3. Cerrar sesión y volver a entrar → «Nueva venta» vacía (RF-13).
 4. Armar una venta, adelantar el reloj 12 horas para que venza la sesión y entrar con otra cuenta → «Nueva venta» vacía; volver a entrar con la primera cuenta → también vacía, porque se descartó (RF-13).
@@ -437,13 +452,13 @@ La API de E2E carga el menú con la ruta de SPEC-002 (`POST /api/__test/menu`, 0
 | RF-3 | límites 99 y 30 con sus mensajes; repetidos rechazados | agregar, sumar, «−» deshabilitado en 1, «Quitar», mensaje de límite | US1-2 |
 | RF-4 | `priceDraft`: subtotales y total; venta vacía → `Bs 0,00` | `SaleDraftLines` muestra lo calculado; acciones deshabilitadas mientras calcula | US1-2 |
 | RF-5 | avisos de precio, retiro y producto recién agregado no disponible; nombre nuevo sin aviso | avisos visibles hasta el siguiente cambio | US1-4 |
-| RF-6 | `201` con número, fecha, cuenta, líneas y total; vacía → `400` | `SaleConfirmation` con `formatDateTime`; venta vacía | US1-3 |
+| RF-6 | `201` con número, fecha, cuenta, líneas, total y medio de pago; vacía o sin medio de pago → `400` | `PaymentMethodPicker` sin valor por defecto; `SaleConfirmation` con `formatPaymentMethod` y `formatDateTime`; registrar deshabilitado sin líneas o sin medio de pago | US1-3, US1-4 |
 | RF-7 | `409 MENU_CHANGED` sin registrar; con nombre nuevo se registra | mensaje y nuevo cálculo tras el `409` | US1-4 |
 | RF-8 | mismo `draftId` → `200` con la misma venta, aunque el menú cambie; carrera simulada | acciones deshabilitadas mientras registra; reintento con el mismo `draftId` | US1-3 |
 | RF-9 | un fallo a mitad no deja venta ni consume número; `KS001` | mensajes sin conexión al cambiar y al registrar | US1-5 |
 | RF-10 | números 1, 2, 3 consecutivos; un fallo no deja hueco | — | — |
 | RF-11 | `listRegisteredSales`; la venta no cambia tras cambiar el menú; eliminar la cuenta deja nombre y rol; `KS002` | — | US1-3, US1-4 |
-| RF-12 | — | `draft-store`: recarga, otra pestaña (`storage`), datos inválidos | US2-1 |
+| RF-12 | — | `draft-store`: recarga con líneas y medio de pago, otra pestaña (`storage`), datos inválidos | US2-1 |
 | RF-13 | — | `draft-store` con otra cuenta; `SessionProvider` llama a `onSessionEnd` al cerrar y ante `SESSION_TERMINATED`, no al vencer | US2-2 a US2-4 |
 | RF-14 | — | `DiscardSaleDialog`: «Volver» y «Descartar» | US2-5 |
 
@@ -466,3 +481,18 @@ Correcciones del 2026-10-24 a los hallazgos menores del análisis (ninguno bloqu
 | 3 | T021 depende también de la edición del menú (SPEC-002 T017) | `tasks.md` |
 | 4 | La prueba de HU-2 sale a la pantalla inicial, no a «Ver menú» (SPEC-002 US3) | `spec.md` HU-2, §8.2 |
 | 5 | RNF-1 en la cobertura de `tasks.md` | `tasks.md` |
+
+## 11. Cambios tras las respuestas a las dudas abiertas
+
+El 2026-10-24 la persona respondió que Kofi cobra en efectivo y con QR y que no emite factura. `spec.md` añadió el medio de pago a cada venta registrada (RF-6, RF-7, RF-11, RF-12). En este plan:
+
+| Cambio | Dónde |
+| --- | --- |
+| Columna `sales.payment_method` (`'cash'` o `'qr'`) | §4 |
+| `paymentMethod` en el registro, en la venta y en la venta en preparación guardada | §5.3 a §5.5 |
+| `PAYMENT_METHODS`, `paymentMethodSchema`, `formatPaymentMethod` y el texto «Elige el medio de pago»; `paymentMethod` en `registerSaleRequestSchema` y `saleSchema`, con su `400` | §6.1, §6.2 |
+| `PaymentMethodPicker.tsx` | §3 |
+| D-13 | §7 |
+| E2E y cobertura de RF-6 y RF-12 | §8.2, §8.5 |
+
+Como la Base común ya estaba implementada, `tasks.md` añade sus tareas de corrección (T028 a T031). La migración `003_sales.sql` se corrige en su sitio: todavía no está en `develop` ni en ninguna base.
