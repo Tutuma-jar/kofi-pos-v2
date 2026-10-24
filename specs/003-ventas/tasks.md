@@ -45,7 +45,7 @@ Rama: `feat/003-ventas-definicion`.
 
 **Correcciones tras las respuestas a las dudas abiertas** (Kofi cobra en efectivo y con QR; plan §11):
 
-- [ ] **T028 [contrato]** Añadir a `sales.ts` `PAYMENT_METHODS`, `paymentMethodSchema`, `formatPaymentMethod` y el texto `SALE_MESSAGES.paymentMethod`, y `paymentMethod` en `registerSaleRequestSchema` y `saleSchema` (plan §6.1, §6.2, D-13; RF-6, RF-11). Depende de: T005
+- [x] **T028 [contrato]** Añadir a `sales.ts` `PAYMENT_METHODS`, `paymentMethodSchema`, `formatPaymentMethod` y el texto `SALE_MESSAGES.paymentMethod`, y `paymentMethod` en `registerSaleRequestSchema` y `saleSchema` (plan §6.1, §6.2, D-13; RF-6, RF-11). Depende de: T005
   Hecho cuando: las pruebas aceptan `cash` y `qr`, rechazan un registro sin medio de pago o con `card` con «Elige el medio de pago» bajo `paymentMethod`, exigen `paymentMethod` en una venta, comprueban que `formatPaymentMethod` da «Efectivo» y «QR», y validan los ejemplos de §6.2 del plan.
 - [ ] **T029 [api] [P]** Añadir la columna `payment_method` a `003_sales.sql`, corrigiendo la migración en su sitio (plan §4, §11, D-13; RF-6, RF-11). Depende de: T006
   Hecho cuando: las pruebas de integración guardan una venta con `cash` y otra con `qr` y rechazan una sin medio de pago o con otro valor, y las demás pruebas de la migración siguen pasando.

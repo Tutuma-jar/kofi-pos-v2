@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatPaymentMethod,
+  PAYMENT_METHODS,
+  paymentMethodSchema,
   registerSaleRequestSchema,
   SALE_MAX_LINES,
   SALE_MAX_QUANTITY,
@@ -51,6 +54,7 @@ describe('límites de una venta (RF-3)', () => {
       empty: 'Agrega al menos un producto',
       menuChanged: 'El menú cambió. Revisa la venta antes de registrarla',
       draftTaken: 'Esta venta ya se registró desde otra cuenta',
+      paymentMethod: 'Elige el medio de pago',
     });
   });
 });
@@ -120,36 +124,52 @@ describe('saleQuoteRequestSchema (RF-3, RF-4)', () => {
 
 describe('registerSaleRequestSchema (RF-6 a RF-8)', () => {
   it('acepta el ejemplo del plan', () => {
-    const request = { draftId: DRAFT, lines: [americano, empanada] };
+    const request = { draftId: DRAFT, paymentMethod: 'cash', lines: [americano, empanada] };
     expect(registerSaleRequestSchema.parse(request)).toEqual(request);
   });
 
   it('rechaza una venta sin líneas con su mensaje', () => {
-    expect(firstMessage(registerSaleRequestSchema.safeParse({ draftId: DRAFT, lines: [] }))).toBe(
-      SALE_MESSAGES.empty,
-    );
+    expect(
+      firstMessage(
+        registerSaleRequestSchema.safeParse({ draftId: DRAFT, paymentMethod: 'cash', lines: [] }),
+      ),
+    ).toBe(SALE_MESSAGES.empty);
   });
 
   it('exige el precio que se mostraba en cada línea', () => {
     const withoutPrice = { productId: AMERICANO, productName: 'Café americano', quantity: 2 };
-    const result = registerSaleRequestSchema.safeParse({ draftId: DRAFT, lines: [withoutPrice] });
+    const result = registerSaleRequestSchema.safeParse({
+      draftId: DRAFT,
+      paymentMethod: 'cash',
+      lines: [withoutPrice],
+    });
     expect(firstMessage(result)).toBe(SALE_MESSAGES.invalidLine);
   });
 
   it('rechaza 31 líneas y un producto repetido', () => {
     const lines = Array.from({ length: 31 }, (_, index) => lineAt(index));
-    expect(firstMessage(registerSaleRequestSchema.safeParse({ draftId: DRAFT, lines }))).toBe(
-      SALE_MESSAGES.maxLines,
-    );
     expect(
       firstMessage(
-        registerSaleRequestSchema.safeParse({ draftId: DRAFT, lines: [americano, americano] }),
+        registerSaleRequestSchema.safeParse({ draftId: DRAFT, paymentMethod: 'qr', lines }),
+      ),
+    ).toBe(SALE_MESSAGES.maxLines);
+    expect(
+      firstMessage(
+        registerSaleRequestSchema.safeParse({
+          draftId: DRAFT,
+          paymentMethod: 'qr',
+          lines: [americano, americano],
+        }),
       ),
     ).toBe(SALE_MESSAGES.invalidLine);
   });
 
   it.each([undefined, 'venta-1'])('rechaza el draftId %s', (draftId) => {
-    const result = registerSaleRequestSchema.safeParse({ draftId, lines: [americano] });
+    const result = registerSaleRequestSchema.safeParse({
+      draftId,
+      paymentMethod: 'cash',
+      lines: [americano],
+    });
     expect(result.error?.issues[0]).toMatchObject({
       path: ['draftId'],
       message: SALE_MESSAGES.invalidSale,
@@ -188,6 +208,7 @@ describe('respuestas de las ventas (RF-2, RF-4, RF-6, RF-11)', () => {
     registeredBy: { userId: ANA, displayName: 'Ana', role: 'cashier' },
     lines: quotedLines,
     totalCents: 3300,
+    paymentMethod: 'cash',
   };
 
   it('saleQuoteSchema acepta el ejemplo del plan', () => {
@@ -237,6 +258,8 @@ describe('respuestas de las ventas (RF-2, RF-4, RF-6, RF-11)', () => {
     ['con un rol desconocido', { registeredBy: { ...sale.registeredBy, role: 'admin' } }],
     ['con número 0', { number: 0 }],
     ['con total 0', { totalCents: 0 }],
+    ['sin medio de pago', { paymentMethod: undefined }],
+    ['con un medio de pago desconocido', { paymentMethod: 'card' }],
   ])('saleSchema rechaza una venta %s', (_case, change) => {
     expect(saleSchema.safeParse({ ...sale, ...change }).success).toBe(false);
   });
@@ -247,4 +270,31 @@ describe('respuestas de las ventas (RF-2, RF-4, RF-6, RF-11)', () => {
       false,
     );
   });
+});
+
+describe('medio de pago (RF-6, RF-11; plan D-13)', () => {
+  it('son efectivo y QR, con sus textos', () => {
+    expect(PAYMENT_METHODS).toEqual(['cash', 'qr']);
+    expect(formatPaymentMethod('cash')).toBe('Efectivo');
+    expect(formatPaymentMethod('qr')).toBe('QR');
+  });
+
+  it.each(['cash', 'qr'])('acepta %s', (method) => {
+    expect(paymentMethodSchema.parse(method)).toBe(method);
+  });
+
+  it.each([undefined, '', 'card', 'efectivo'])(
+    'rechaza un registro con el medio de pago %j',
+    (paymentMethod) => {
+      const result = registerSaleRequestSchema.safeParse({
+        draftId: DRAFT,
+        paymentMethod,
+        lines: [americano],
+      });
+      expect(result.error?.issues[0]).toMatchObject({
+        path: ['paymentMethod'],
+        message: SALE_MESSAGES.paymentMethod,
+      });
+    },
+  );
 });
