@@ -38,8 +38,8 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: las pruebas validan los ejemplos de §6 del plan, `"  Ana "` queda como `"ana"`, una contraseña solo con espacios se rechaza, se respetan los límites de «Datos de una cuenta» y `npm run typecheck` pasa.
 - [ ] **T010 [api] [P]** Escribir la interfaz `Database` (`query`, `transaction`) con el adaptador de `pg` y el de PGlite, y el helper `apps/api/test/test-database.ts` (D-6, D-7). Depende de: T003
   Hecho cuando: una prueba de integración ejecuta una consulta y una transacción que se deshace ante un error, sobre PGlite.
-- [ ] **T011 [api] [P]** Escribir `migrate.ts` (tabla `schema_migrations`, aplica en orden las pendientes) y `001_auth.sql`: `users`, `failed_logins`, `sessions` y el disparador de `session_version` (plan §4; datos de RF-9, RF-10 y RF-12). Depende de: T010
-  Hecho cuando: las pruebas de integración aplican las migraciones dos veces sin error, rechazan un `username` que no cumple el `CHECK` y comprueban que cambiar `role` o `password_hash` sube `session_version` y cambiar `display_name` no.
+- [ ] **T011 [api] [P]** Escribir `migrate.ts` (tabla `schema_migrations`, aplica en orden las pendientes), el script `npm run migrate -w @kofi/api` (plan §3) y `001_auth.sql`: `users`, `failed_logins`, `sessions` y el disparador de `session_version` (plan §4; datos de RF-9, RF-10 y RF-12). Depende de: T010, T012
+  Hecho cuando: las pruebas de integración aplican las migraciones dos veces sin error, rechazan un `username` que no cumple el `CHECK` y comprueban que cambiar `role` o `password_hash` sube `session_version` y cambiar `display_name` no; además, `npm run migrate -w @kofi/api` aplica las migraciones contra la base de `DATABASE_URL`.
 - [ ] **T012 [api] [P]** Escribir `shared/clock.ts` (`Clock` real y falso para pruebas) y `shared/config/env.ts` (`DATABASE_URL`, `PORT` y `NODE_ENV` validados con Zod), con `apps/api/.env.example`. Depende de: T003
   Hecho cuando: las pruebas cubren el reloj falso (fijar y adelantar) y el error de configuración cuando falta `DATABASE_URL`.
 - [ ] **T013 [api] [P]** Escribir `shared/http/errors.ts` (`AppError` y manejador que responde con el formato común, `500 INTERNAL_ERROR` sin detalles), `shared/http/validate.ts` y la cabecera `Cache-Control: no-store` en todas las respuestas (D-4). Depende de: T008, T003
@@ -63,8 +63,8 @@ Rama: `feat/001-acceso-us1`.
 
 - [ ] **T020 [api] [P] [US1]** Escribir el ingreso en `auth.service.ts`: usuario normalizado, contraseña exacta, hash ficticio si el usuario no existe, sesión de 12 h y revocación de la sesión anterior del mismo navegador, todavía sin bloqueo (plan §5.1; RF-1, RF-2, RF-6, RNF-2). Depende de: T012, T014, T015
   Hecho cuando: las pruebas de integración cubren el ingreso correcto con `"  Ana "`, la contraseña con otra mayúscula, el usuario inexistente y la contraseña incorrecta (el mismo error), que `verifyPassword` se ejecuta exactamente una vez tanto con un usuario inexistente como con uno existente (espía, plan §8.3) y una sesión nueva que revoca la anterior.
-- [ ] **T021 [api] [P] [US1]** Escribir `POST /api/auth/login` en `auth.routes.ts`, con la cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Secure` en producción, `Max-Age`) y `@fastify/cookie` (D-8) (RF-1, RF-2, RF-3, RNF-1). Depende de: T013, T020
-  Hecho cuando: las pruebas con `app.inject` cubren `200` con `Set-Cookie`, `401 INVALID_CREDENTIALS`, `400 VALIDATION_ERROR` para campos vacíos o solo con espacios (sin contar intento), y que la contraseña no aparece en los registros de la API.
+- [ ] **T021 [api] [P] [US1]** Escribir `POST /api/auth/login` en `auth.routes.ts`, con la cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age=648000`, D-15) y `@fastify/cookie` (D-8) (RF-1, RF-2, RF-3, RF-10, RNF-1). Depende de: T013, T020
+  Hecho cuando: las pruebas con `app.inject` cubren `200` con `Set-Cookie` y todos sus atributos, incluido `Max-Age=648000`, `401 INVALID_CREDENTIALS`, `400 VALIDATION_ERROR` para campos vacíos o solo con espacios (sin contar intento), y que la contraseña no aparece en los registros de la API.
 - [ ] **T022 [api] [P] [US1]** Escribir `resolveSession` (sin cookie, token desconocido o revocado → `SESSION_MISSING`), el hook `requireSession` (exportado en `modules/auth/index.ts`) y `GET /api/auth/session` (plan §5.2; RF-4, RF-5, RF-6, RF-8). Depende de: T013, T015
   Hecho cuando: las pruebas cubren `200` con `SessionUser`, `401 SESSION_MISSING` en los tres casos (con la cookie borrada), dos cookies de la misma cuenta como sesiones independientes y una ruta de prueba protegida que no ejecuta su manejador sin sesión.
 - [ ] **T023 [api] [P] [US1]** Escribir `POST /api/auth/logout` (plan §5.3; RF-7, RF-8). Depende de: T022
@@ -106,7 +106,7 @@ Rama: `feat/001-acceso-us2`.
   Hecho cuando: las pruebas cubren, con una ruta de prueba: la misma cuenta, otra cuenta, una ruta desconocida, una ruta que el rol no puede ver, el vencimiento detectado al recargar (sin cuenta en memoria), que el dato se borra tras usarlo, al cerrar sesión y ante `SESSION_TERMINATED`, y que un `SESSION_MISSING` posterior no lo borra.
 - [ ] **T039 [integración] [US2]** Añadir a `e2e-server.ts` las rutas de prueba `POST /api/__test/clock` y `POST /api/__test/accounts/:username`, que no existen en `app.ts` (RF-9, RF-10, RF-12). Depende de: T032, T033, T034, T035, T036, T037, T038
   Hecho cuando: una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y las rutas de prueba adelantan el reloj y cambian una cuenta en la API de E2E.
-- [ ] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan (RF-9 a RF-12). Depende de: T039
+- [ ] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2 contra la API real de E2E.
 
 ## Fase 5 — Pulido
@@ -135,7 +135,7 @@ Rama: `feat/001-acceso-pulido`.
 | RF-7 | T015, T023, T029, T031 |
 | RF-8 | T022, T023, T027, T029, T031 |
 | RF-9 | T011, T032, T036, T040 |
-| RF-10 | T011, T033, T036, T037, T040 |
+| RF-10 | T011, T021, T033, T036, T037, T040 |
 | RF-11 | T008, T019, T033, T038, T040 |
 | RF-12 | T011, T034, T035, T036, T037, T040 |
 | RF-13 | T009, T024, T025, T035 |
