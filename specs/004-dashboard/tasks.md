@@ -16,7 +16,7 @@ Estado: aprobadas y analizadas (modo delegado, sin bloqueantes) · Fecha: 2026-1
 
 Rama: `feat/004-dashboard-definicion`.
 
-- [ ] **T001 [integración]** Crear el módulo `dashboard` vacío en las dos aplicaciones: `apps/api/src/modules/dashboard/index.ts` y `apps/web/src/modules/dashboard/index.ts`, con su prueba de humo, y añadir a `eslint.config.test.ts` los casos de `dashboard` (otro módulo no puede importar sus archivos internos, sí su `index.ts`; `dashboard` tampoco puede importar los internos de `sales`) (plan §3)
+- [x] **T001 [integración]** Crear el módulo `dashboard` vacío en las dos aplicaciones: `apps/api/src/modules/dashboard/index.ts` y `apps/web/src/modules/dashboard/index.ts`, con su prueba de humo, y añadir a `eslint.config.test.ts` los casos de `dashboard` (otro módulo no puede importar sus archivos internos, sí su `index.ts`; `dashboard` tampoco puede importar los internos de `sales`) (plan §3)
   Hecho cuando: las pruebas de las reglas de lint pasan con los casos nuevos, y `npm run lint` y `npm run typecheck` pasan.
 
 ## Fase 2 — Base común
