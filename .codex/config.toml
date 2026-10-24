@@ -1,0 +1,6 @@
+# Configuración de Codex para Kofi POS. Se carga solo si el proyecto está marcado como de confianza.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = true   # npm install y comprobaciones que descargan

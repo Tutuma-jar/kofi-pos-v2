@@ -48,7 +48,7 @@ Una vez por computadora (Windows):
 ```bash
 git clone https://github.com/Tutuma-jar/kofi-pos-v2.git
 cd kofi-pos-v2
-npm install
+npm install   # dependencias y hooks de Git
 ```
 
 ## Flujo de trabajo
@@ -69,6 +69,18 @@ Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones, con
 | 8. Integrar | Una persona revisa y fusiona con squash merge |
 
 Cada especificación se entrega **por historias priorizadas**: un PR de definición (con el contrato), un PR por historia (`feat/NNN-<nombre>-usN`) y un PR de pulido. Dentro de cada historia, la interfaz (contra un cliente simulado del contrato) y la API avanzan en paralelo, y la historia cierra integrada y probada de punta a punta.
+
+### Hooks de Git
+
+| Hook | Qué hace |
+| --- | --- |
+| `post-checkout` | Coloca cada rama nueva sobre `origin/develop` actualizado |
+| `pre-commit` | Impide commits en `develop` y `main` y commits con secretos |
+| `prepare-commit-msg` | Agrega `Refs: SPEC-NNN` según la rama |
+| `pre-push` | Valida el nombre de la rama e impide pushes a `develop` o `main` y el force push |
+| `post-merge` | Avisa si cambiaron las dependencias |
+
+`npm run hooks` muestra si están activos.
 
 ## Skills de terceros
 

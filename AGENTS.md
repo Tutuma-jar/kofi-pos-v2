@@ -16,7 +16,8 @@ Nunca hagas force push, push a `develop` o `main`, ni merge de PR. Ningún dato 
 
 ### 0. Preparación
 
-Si `gh auth status` falla, pide a la persona que ejecute `gh auth login` antes de publicar cambios.
+1. Si `git config core.hooksPath` no devuelve `.githooks`, ejecuta `npm install`.
+2. Si `gh auth status` falla, pide a la persona que ejecute `gh auth login` antes de publicar cambios.
 
 ### 1. Desarrollo guiado por especificaciones
 
@@ -42,7 +43,7 @@ Ramas, commits, títulos y descripciones de PR en español. Solo quedan en ingl�
 - En la rama de una historia trabajan las dos personas, cada una en su frente. Antes de publicar, integra lo de la otra con `git pull` (merge, nunca rebase).
 - Trabajo fuera de una especificación (configuración, documentación general): `<tipo>/<descripcion>`, por ejemplo `chore/configurar-ci`. `feat` y `fix` siempre llevan número.
 - Tipos: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`, `style`. Descripción en kebab-case, sin tildes ni `ñ`, de 1 a 5 palabras; máximo 60 caracteres.
-- Crea la rama sobre `origin/develop` actualizado: `git fetch origin` y luego `git switch --no-track -c <rama> origin/develop`. Si la rama ya existe en GitHub (por ejemplo, la historia que empezó la otra persona), únete con `git fetch` y `git switch <rama>`, sin `-c`.
+- Crea la rama desde donde estés con `git switch -c <rama>`: el hook `post-checkout` la coloca sobre `origin/develop` actualizado. Si la rama ya existe en GitHub (por ejemplo, la historia que empezó la otra persona), únete con `git fetch` y `git switch <rama>`, sin `-c`.
 - Nunca trabajes ni hagas commits en `develop` o `main`.
 
 ### 3. Commits
@@ -58,7 +59,7 @@ Refs: SPEC-NNN (T<nnn>)
 ```
 
 - Resumen en infinitivo, minúscula inicial, sin punto final, máximo 72 caracteres.
-- La línea `Refs: SPEC-NNN (T<nnn>)` va en los commits de las ramas de una especificación, con su número y su tarea (por ejemplo, `Refs: SPEC-001 (T005)`). Fuera de una especificación no lleva `Refs`.
+- En las ramas de una especificación, el hook `prepare-commit-msg` añade `Refs: SPEC-NNN` si falta; tú añades la tarea (`Refs: SPEC-001 (T005)`). Fuera de una especificación no lleva `Refs`.
 - Agrega archivos de forma explícita y revisa el diff: sin secretos, `.env` ni archivos temporales.
 
 ### 4. Pull Requests
@@ -103,4 +104,6 @@ Requisitos: Node 24 y npm 11.
 
 | Acción | Comando |
 | --- | --- |
-| Instalar dependencias | `npm install` |
+| Instalar dependencias (activa los hooks de Git) | `npm install` |
+| Pruebas de las reglas de Git | `npm run test:git` |
+| Ver los hooks de Git | `npm run hooks` |

@@ -1,0 +1,40 @@
+# Reglas de comandos de Codex para Kofi POS. Se cargan solo si el proyecto está marcado como de confianza.
+# Son una comodidad, no la barrera de seguridad: el force push y el push a develop o main los detiene el hook pre-push.
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log", "fetch", "pull", "switch", "add", "commit"]],
+    decision = "allow",
+    match = ["git status --short", "git commit -F msg.txt"],
+)
+prefix_rule(pattern = ["git", "config", "core.hooksPath"], decision = "allow")
+prefix_rule(pattern = ["git", "merge", "origin/develop"], decision = "allow")
+prefix_rule(
+    pattern = ["git", "push", ["-u", "origin"]],
+    decision = "allow",
+    match = ["git push -u origin feat/001-acceso", "git push origin feat/001-acceso"],
+)
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease"]],
+    decision = "forbidden",
+    justification = "No se reescribe la historia publicada: integra con git merge.",
+)
+prefix_rule(
+    pattern = ["git", "push", "origin", ["develop", "main", "HEAD:develop", "HEAD:main"]],
+    decision = "forbidden",
+    justification = "develop y main solo reciben cambios por PR.",
+)
+prefix_rule(
+    pattern = ["git", "push", "-u", "origin", ["develop", "main", "HEAD:develop", "HEAD:main"]],
+    decision = "forbidden",
+    justification = "develop y main solo reciben cambios por PR.",
+)
+prefix_rule(
+    pattern = ["gh", "pr", ["create", "edit", "view", "list", "ready", "checks", "checkout", "comment"]],
+    decision = "allow",
+)
+prefix_rule(pattern = ["gh", "auth", "status"], decision = "allow")
+prefix_rule(
+    pattern = ["gh", "pr", "merge"],
+    decision = "forbidden",
+    justification = "El merge lo hace una persona.",
+)
+prefix_rule(pattern = ["npm", ["install", "run", "test"]], decision = "allow")

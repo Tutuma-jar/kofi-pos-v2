@@ -4,5 +4,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "prepare": "node scripts/git-hooks/install.mjs",
+    "hooks": "node scripts/git-hooks/status.mjs",
+    "test:git": "node --test scripts/git-rules.test.mjs"
+  }
 }
