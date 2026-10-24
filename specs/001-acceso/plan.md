@@ -375,6 +375,7 @@ Todas se instalan en su última versión estable al crear el paquete, y la versi
 | `@kofi/web` | `vite` | desarrollo | Principio 1 |
 | `@kofi/web` | `@vitejs/plugin-react` | desarrollo | Plugin oficial de Vite para React: compila JSX y recarga los componentes sin perder el estado. Sin él, Vite no entiende React |
 | `@kofi/web` | `@types/react`, `@types/react-dom` | desarrollo | Tipos de TypeScript de React, que no los incluye |
+| `@kofi/web` | `@types/node` | desarrollo | Tipos de Node para `vite.config.ts` y `vitest.config.ts`, que leen `process.env` (DD-3) |
 | `@kofi/web` | `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | desarrollo | D-10. `@testing-library/jest-dom` agrega aserciones legibles sobre el DOM («está visible», «tiene el valor») |
 
 Agregar cualquier otra dependencia exige actualizar este plan o el de la especificación que la necesite.
@@ -389,6 +390,7 @@ Decisiones técnicas tomadas por el agente al implementar Preparación y Base co
 | --- | --- | --- | --- | --- |
 | DD-1 | T001 | Prettier formatea el código y la configuración del monorepo, con `singleQuote` y `printWidth: 100`. `.prettierignore` excluye el Markdown y los archivos del flujo de trabajo (`scripts/`, `.githooks/`, `.github/`, `.agents/`, `.claude/`, `.codex/`) | Reformatear el Markdown cambiaría `docs/constitution.md`, que solo se modifica en su propio PR, y todas las tablas de la documentación. Reformatear `.codex/hooks.json` obligaría a volver a confiar en los hooks de Codex, y `scripts/` tiene su propio estilo compacto, cubierto por `npm run test:git` | Formatear todo el repositorio: modifica la constitución fuera de su PR y mezcla en esta tarea cambios ajenos al código |
 | DD-2 | T002 | Los imports relativos llevan la extensión `.ts` y `tsc` la reescribe a `.js` al compilar (`rewriteRelativeImportExtensions` en `tsconfig.base.json`). Cada paquete tiene un `tsconfig.json` para los tipos (incluye las pruebas, sin emitir) y un `tsconfig.build.json` que compila a `dist/` sin las pruebas | Node 24 ejecuta TypeScript solo si el import nombra el archivo `.ts` (D-13), y así el mismo estilo sirve en los tres paquetes | Escribir `.js` en los imports: Node no encuentra el archivo al ejecutar el código fuente en desarrollo |
+| DD-3 | T004 | El proxy de `/api` se configura igual para `vite` y `vite preview`, con destino `API_PROXY_TARGET` (por defecto `http://localhost:3000`). La configuración de Vite y Vitest se comprueba con `tsconfig.node.json` y tipos de Node (`@types/node` 24 en `@kofi/web`); el código de `src/` usa `tsconfig.json`, con los tipos del navegador. `@types/node` se fija en la versión 24 en las dos aplicaciones | La E2E (T006) necesita apuntar `vite preview` a su propia API sin chocar con la de desarrollo, y el código del navegador no debe ver los tipos de Node | Destino fijo en `localhost:3000`: la E2E chocaría con la API de desarrollo en marcha. Un solo `tsconfig` con tipos de Node: el código del navegador podría usar `process` sin error de tipos |
 
 ## 8. Estrategia de tests
 
