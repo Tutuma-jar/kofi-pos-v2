@@ -79,7 +79,7 @@ Rama: `feat/002-menu-us1`. La historia 1 de Acceso ya está en `develop` (#15).
   Hecho cuando: las pruebas de componente cubren un guardado correcto con la lista actualizada y el escenario sin conexión.
 - [x] **T023 [integración] [US1]** Registrar `menuPlugin` en `app.ts`, comprobar que la aplicación usa el cliente real del menú sin `?escenarios=menu` (plan D-10) y añadir a `e2e-server.ts` la ruta de prueba `POST /api/__test/menu`, que carga un menú con los servicios del módulo (plan §8.2; RF-1 a RF-7). Depende de: T017, T018, T019, T020, T021, T022, SPEC-001 T030 (ya en `develop`)
   Hecho cuando: la interfaz en `vite preview` administra el menú contra la API de E2E, una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y `npm test` sigue pasando.
-- [ ] **T024 [integración] [US1]** Escribir `e2e/menu-us1-armar-menu.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-7). Depende de: T023
+- [x] **T024 [integración] [US1]** Escribir `e2e/menu-us1-armar-menu.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-7). Depende de: T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: sacar del menú lo que no se ofrece (P2)
