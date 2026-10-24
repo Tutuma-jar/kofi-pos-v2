@@ -23,7 +23,7 @@ Rama: `feat/004-dashboard-definicion`.
 
 Rama: `feat/004-dashboard-definicion`.
 
-- [ ] **T002 [contrato]** Añadir a `packages/contracts/src/datetime.ts` `formatDate` y `formatMonth` (plan §6.1, D-5; RF-2, RF-9, RF-10)
+- [x] **T002 [contrato]** Añadir a `packages/contracts/src/datetime.ts` `formatDate` y `formatMonth` (plan §6.1, D-5; RF-2, RF-9, RF-10)
   Hecho cuando: las pruebas comprueban que `2026-10-24` se muestra «24/10/2026» y `2027-01-05` «05/01/2027», y que `2026-10` se muestra «Octubre de 2026», `2027-01` «Enero de 2027» y `2026-12` «Diciembre de 2026», con cualquier zona horaria en el proceso de pruebas.
 - [ ] **T003 [contrato]** Escribir `packages/contracts/src/dashboard.ts` con `DASHBOARD_ROLES`, `DASHBOARD_MESSAGES`, `DASHBOARD_TOP_PRODUCTS`, `boliviaDateSchema`, `boliviaMonthSchema`, `paymentMethodTotalSchema`, `topProductSchema`, `periodSummarySchema`, `todaySummarySchema`, `dayTotalSchema` y `monthSummarySchema`, y exportarlo desde `index.ts` (plan §6.1, §6.2, D-6; RF-1 a RF-10). Depende de: T001
   Hecho cuando: las pruebas validan las respuestas de los ejemplos de §6.2 del plan (con y sin ventas, y la del mes) y el `403` con `apiErrorSchema`; rechazan `byPaymentMethod` en otro orden o con un solo medio, más de 5 productos, un promedio `null` con ventas o un número sin ventas, una fecha `2026-02-30`, un mes `2026-13`, un `asOf` sin zona horaria y un mes sin días o con 32; y `npm run typecheck` pasa.
