@@ -21,17 +21,35 @@ Nunca hagas force push, push a `develop` o `main`, ni merge de PR. Ningún dato 
 
 ### 1. Desarrollo guiado por especificaciones
 
-Toda funcionalidad sigue este ciclo, y la persona aprueba cada paso antes del siguiente:
+Toda funcionalidad sigue este ciclo. La persona aprueba cada paso antes del siguiente, salvo que delegue sus decisiones (ver «Modo delegado»):
 
-`spec.md` → revisión de QA → `plan.md` → `tasks.md` → análisis de consistencia → implementación tarea a tarea → verificación.
+| Paso | Lo hace | Resultado |
+| --- | --- | --- |
+| 1. Especificar | skill `especificar` | `spec.md` |
+| 2. Revisión de QA | skill `revisar-spec` | Hallazgos resueltos en `spec.md` |
+| 3. Planificar | skill `planificar` | `plan.md`, con el contrato |
+| 4. Desglosar | skill `desglosar` | `tasks.md` |
+| 5. Analizar | skill `analizar` | Informe de consistencia |
+| 6. Implementar | skill `implementar`, una tarea cada vez | Código, tests y casilla marcada |
+| 7. Verificar | subagente `verificador` (regla 6) | Comentario y veredicto en el PR |
 
+- Cuando la persona aprueba un paso, o al terminarlo en modo delegado, invoca la skill del siguiente sin esperar a que te lo pidan.
 - Cada funcionalidad vive en `specs/NNN-<nombre>/` (`NNN` con tres dígitos, consecutivo).
 - **Historias priorizadas:** `tasks.md` se organiza en fases verticales (Preparación, Base común, una fase por historia en orden P1, P2…, Pulido). Cada historia se integra y se prueba completa.
 - **Contrato primero:** `plan.md` define el contrato y la fase «Base común» lo escribe en `packages/contracts`. Dentro de cada historia, la interfaz (`[web]`, contra un cliente simulado del contrato en `dev/`) y la API (`[api]`) avanzan en paralelo (`[P]`), sin esperarse; la tarea `[integración]` cierra la historia.
 - No implementes con hallazgos bloqueantes del análisis ni con `[NECESITA ACLARACIÓN]` abiertos que afecten a la historia.
-- No escribas código sin `spec.md` y `plan.md` aprobados.
-- Implementa **una tarea a la vez**: primero sus tests y después el código. Al terminarla, márcala en `tasks.md`, haz su commit y detente, salvo que la persona pida continuar.
-- Si algo del código no encaja con la especificación, detente y propón corregir una de las dos.
+- No escribas código sin `spec.md` y `plan.md` aprobados. En modo delegado, solo las tareas de Preparación y Base común se implementan antes de que se apruebe la definición, en su mismo PR, y se aprueban junto con ella al fusionarlo.
+- Implementa **una tarea a la vez**: primero sus tests y después el código. Al terminarla, márcala en `tasks.md`, haz su commit y detente, salvo que la persona pida continuar o estés en modo delegado.
+- Si algo del código no encaja con la especificación, detente y propón corregir una de las dos; en modo delegado, aplica «Bloqueos y correcciones».
+
+### Modo delegado
+
+La persona puede delegar sus decisiones con un pedido explícito, por ejemplo «delego 001-acceso» o «delego la definición de 002-menu». Vale para lo que indique hasta que diga lo contrario. Mientras dure:
+
+- **No preguntes:** decide cada punto con tu recomendación y regístralo como «Decisión delegada», con la decisión, el motivo y la alternativa descartada. Las de negocio van en «Aclaraciones» de `spec.md`; las técnicas, en «Decisiones técnicas» de `plan.md`; las demás, en «Observaciones» del PR.
+- **No te detengas** entre pasos ni entre tareas: haz el commit de cada paso, publica la rama, actualiza el PR y sigue con el siguiente.
+- Todo lo decidido queda aprobado al fusionar el PR que lo contiene (constitución, principio 2). Ninguna historia empieza antes de que se fusione el PR de definición, y el merge siempre lo hace una persona.
+- Detente igualmente en los casos que indica «Bloqueos y correcciones».
 
 ### Idioma
 
@@ -90,6 +108,21 @@ Cuando todas las casillas de la fase de tu rama (definición, historia o pulido)
 1. Delega en el subagente `verificador` con este mensaje exacto, sin añadir nada: `Verifica SPEC-NNN (PR #M).`
 2. Cuando termine, comprueba que `git status --porcelain` no muestra cambios nuevos; si los hay, descártalos sin commitearlos e infórmalo.
 3. Informa su veredicto. Si aprobó, el PR ya está listo para que una persona lo revise.
+
+### Bloqueos y correcciones
+
+- **Vuelve al documento que tiene el problema**, corrígelo con la skill que le corresponde y rehaz solo lo que depende de él, en la misma rama y el mismo PR. Los documentos se actualizan en su sitio; el historial queda en Git.
+- **«Cambios requeridos» del verificador:** añade tareas de corrección a `tasks.md` (por ejemplo, `T012 Corregir RF-4: …`), impleméntalas como cualquier otra y vuelve a delegar en el verificador, que edita su mismo comentario.
+- **Si cambia el contrato durante una historia:** actualiza `plan.md` y `packages/contracts` en el PR de esa historia y dilo en «Observaciones», porque afecta al frente de la otra persona.
+- **Una funcionalidad nueva** va en una especificación nueva: no amplíes la que está en marcha.
+
+En modo delegado resuelves solo los fallos técnicos (tests, CI, lint, tipos, build), las incoherencias entre documentos, los «Cambios requeridos», las ambigüedades de negocio y los cambios de contrato. Te detienes siempre, también en modo delegado, y lo informas a la persona cuando:
+
+- el mismo fallo técnico persiste tras dos intentos, o el verificador pide cambios por tercera vez;
+- falta un dato que solo conocen las personas (por ejemplo, precios o cómo trabaja el local): márcalo `[NECESITA ACLARACIÓN]` en lugar de suponerlo;
+- hay más de 3 `[NECESITA ACLARACIÓN]` abiertos, o alguno afecta a la historia en curso;
+- algo entra en conflicto con la constitución;
+- el pedido amplía el alcance de la especificación.
 
 ### Documentación
 

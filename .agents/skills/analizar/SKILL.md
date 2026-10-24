@@ -1,7 +1,6 @@
 ---
 name: analizar
-description: Paso 5 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /analizar o $analizar.
-disable-model-invocation: true
+description: Paso 5 del ciclo SDD de Kofi POS. Comprueba, sin modificar archivos, la consistencia entre constitución, spec.md, plan.md y tasks.md. Usar cuando tasks.md está terminado y antes de implementar, o cuando la persona pida el análisis.
 ---
 
 # Analizar
@@ -31,7 +30,8 @@ Si falta alguno, detente y dilo.
 
 3. **Hallazgos.** Numera cada hallazgo, indica dónde está y clasifícalo como **bloqueante** (impide implementar) o **menor**. Si una comprobación no tiene hallazgos, escribe «Ninguno».
 4. **Informe.** Entrega el informe a la persona: la tabla, la lista de hallazgos y el total de bloqueantes y menores.
-5. **PR.** Con la aprobación de la persona, pega el informe resumido en la sección «Verificación» de la descripción del PR de definición.
+5. **PR.** Con la aprobación de la persona (o, en modo delegado, directamente), pega el informe resumido en la sección «Verificación» de la descripción del PR de definición.
+6. **Bloqueantes en modo delegado.** Aplica «Bloqueos y correcciones» de `AGENTS.md`: corrige cada documento con la skill que le corresponde (`especificar`, `planificar` o `desglosar`) y vuelve a analizar. Si tras dos rondas siguen quedando bloqueantes, detente e infórmalo.
 
 ## Salida
 
@@ -39,7 +39,7 @@ El informe de consistencia. Mientras tenga hallazgos bloqueantes, no se implemen
 
 ## Límites
 
-- **No modifica ningún archivo** del repositorio ni hace commits. Las correcciones se hacen con la skill que corresponde al documento (`/especificar`, `/planificar` o `/desglosar`), con la aprobación de la persona.
-- No propone soluciones: solo detecta y clasifica.
+- **No modifica ningún archivo** del repositorio ni hace commits. Las correcciones se hacen con la skill que corresponde al documento (`especificar`, `planificar` o `desglosar`), con la aprobación de la persona o en modo delegado.
+- El informe no propone soluciones: solo detecta y clasifica.
 - No inventa requisitos ni datos técnicos: los obtiene del repositorio.
-- Termina pidiendo la aprobación de la persona, sin pasar al paso siguiente (`/implementar`).
+- Termina pidiendo la aprobación de la persona. Sin bloqueantes, y con su aprobación o en modo delegado, sigue con la skill `implementar` para las tareas de Preparación y Base común.

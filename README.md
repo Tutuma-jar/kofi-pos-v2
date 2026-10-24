@@ -58,7 +58,7 @@ npm install   # dependencias, hooks de Git, skills y subagente del proyecto
 
 Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.
 
-Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones, con aprobación de una persona en cada paso:
+Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones. El agente invoca la skill de cada paso cuando le toca, y una persona aprueba cada paso antes del siguiente o delega sus decisiones (por ejemplo, «delego 001-acceso»): en ese caso el agente decide con sus recomendaciones, las registra y todo se revisa en el PR antes de fusionarlo. Las skills también se pueden invocar a mano:
 
 | Paso | Cómo |
 | --- | --- |

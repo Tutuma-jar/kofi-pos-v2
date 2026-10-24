@@ -1,7 +1,6 @@
 ---
 name: planificar
-description: Paso 3 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /planificar o $planificar.
-disable-model-invocation: true
+description: Paso 3 del ciclo SDD de Kofi POS. Escribe el plan.md de una especificación, con el control de la constitución y el contrato. Usar cuando la spec.md está revisada, o cuando la persona pida el plan.
 ---
 
 # Planificar
@@ -11,10 +10,10 @@ Escribe el `plan.md` de una especificación: el cómo, empezando por el control 
 ## Entrada
 
 - `docs/constitution.md`, `docs/business-rules.md` y `docs/architecture.md`.
-- `specs/NNN-<nombre>/spec.md`, ya revisada y aprobada por la persona.
+- `specs/NNN-<nombre>/spec.md`, ya revisada y aprobada por la persona (en modo delegado, revisada con `revisar-spec`).
 - El código existente de los módulos afectados.
 
-Si falta alguno de esos documentos, o la persona no confirma que la especificación está aprobada, detente y dilo.
+Si falta alguno de esos documentos, o la especificación no está aprobada (ni revisada, en modo delegado), detente y dilo.
 
 ## Procedimiento
 
@@ -27,24 +26,24 @@ Si falta alguno de esos documentos, o la persona no confirma que la especificaci
       | --- | --- | --- |
       | 1. Stack mínimo | Sí | Sin dependencias nuevas |
 
-      Si algún principio no se cumple sin una justificación que la persona apruebe, **detente**: el plan no se puede desglosar.
+      Si algún principio no se cumple sin una justificación que la persona apruebe, **detente**: el plan no se puede desglosar. Esto vale también en modo delegado.
    3. **Módulos afectados y estructura**, según `docs/architecture.md`.
    4. **Modelo de datos**, con un ejemplo.
    5. **Algoritmos relevantes**, en pseudocódigo.
    6. **Contrato de la API** de toda la especificación (rutas, entradas, salidas y errores) y su ubicación en `packages/contracts` (`packages/contracts/src/<módulo>.ts`). Es la única fuente del contrato entre interfaz y API.
-   7. **Decisiones técnicas** justificadas, cada una con la alternativa descartada. Toda dependencia nueva se justifica aquí (principio 1).
+   7. **Decisiones técnicas** justificadas, cada una con la alternativa descartada. Toda dependencia nueva se justifica aquí (principio 1). En modo delegado, márcalas como decisiones delegadas.
    8. **Estrategia de tests**, incluida la prueba de punta a punta de cada historia.
-3. **Decisiones globales.** Si alguna decisión afecta a todo el proyecto, propón el cambio a `docs/architecture.md`. Solo se aplica, en este mismo PR, si la persona lo aprueba.
-4. **Aprobación.** Muestra el plan y pide su aprobación; el contrato lo revisan las dos personas. Aplica los cambios que pidan hasta que lo aprueben.
-5. **Commit y PR.** Con la aprobación, haz el commit `docs(<scope>): planificar <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Plan aprobado».
+3. **Decisiones globales.** Si alguna decisión afecta a todo el proyecto, propón el cambio a `docs/architecture.md`. Solo se aplica, en este mismo PR, si la persona lo aprueba; en modo delegado, aplícalo y dilo en «Observaciones» del PR.
+4. **Aprobación.** Muestra el plan y pide su aprobación; el contrato lo revisan las dos personas. Aplica los cambios que pidan hasta que lo aprueben. En modo delegado no la pidas: el plan y el contrato se aprueban al fusionar el PR de definición.
+5. **Commit y PR.** Con la aprobación (o, en modo delegado, al terminar), haz el commit `docs(<scope>): planificar <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Plan aprobado».
 
 ## Salida
 
-`specs/NNN-<nombre>/plan.md` con el formato anterior y, si la persona lo aprobó, el cambio en `docs/architecture.md`.
+`specs/NNN-<nombre>/plan.md` con el formato anterior y, si la persona lo aprobó o en modo delegado, el cambio en `docs/architecture.md`.
 
 ## Límites
 
 - No escribe código, ni siquiera el contrato: eso lo hacen las tareas de la fase «Base común».
 - No continúa si un principio de la constitución no se cumple sin justificación aprobada.
-- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio.
-- Termina pidiendo la aprobación de la persona, sin pasar al paso siguiente (`/desglosar`).
+- No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio. En modo delegado decide con su recomendación y lo registra.
+- Termina pidiendo la aprobación de la persona. Con su aprobación, o en modo delegado, sigue con la skill `desglosar`.
