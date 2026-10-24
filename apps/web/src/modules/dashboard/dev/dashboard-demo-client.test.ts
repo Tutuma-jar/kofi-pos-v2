@@ -100,7 +100,7 @@ describe('createDashboardDemoClient (plan D-8)', () => {
 
     const error = await rejection(client.today());
     expect(error.status).toBe(403);
-    expect(error.error).toEqual({ code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbidden });
+    expect(error.error).toEqual({ code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbiddenMonth });
     expect(await rejection(client.month())).toMatchObject({ status: 403 });
   });
 

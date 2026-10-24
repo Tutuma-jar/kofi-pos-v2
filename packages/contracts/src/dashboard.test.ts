@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import * as contracts from './index.ts';
 import {
   apiErrorSchema,
   boliviaDateSchema,
   boliviaMonthSchema,
   DASHBOARD_MESSAGES,
-  DASHBOARD_ROLES,
+  DASHBOARD_MONTH_ROLES,
   DASHBOARD_TOP_PRODUCTS,
   ERROR_CODES,
   monthSummarySchema,
@@ -71,14 +72,15 @@ const month = {
 };
 
 describe('contrato del Dashboard (plan §6)', () => {
-  it('solo el dueño ve el resumen de ventas mientras no se aclare la duda 2 (D-6)', () => {
-    expect(DASHBOARD_ROLES).toEqual(['owner']);
+  it('el resumen del mes es solo del dueño; el de hoy, de los dos roles (D-6)', () => {
+    expect(DASHBOARD_MONTH_ROLES).toEqual(['owner']);
+    expect(contracts).not.toHaveProperty('DASHBOARD_ROLES');
     expect(DASHBOARD_TOP_PRODUCTS).toBe(5);
   });
 
   it('tiene los textos de la especificación', () => {
     expect(DASHBOARD_MESSAGES).toEqual({
-      forbidden: 'No tienes permiso para ver el resumen de ventas',
+      forbiddenMonth: 'No tienes permiso para ver el resumen del mes',
       emptyToday: 'Todavía no hay ventas hoy',
       emptyMonth: 'Todavía no hay ventas este mes',
     });
@@ -91,9 +93,9 @@ describe('contrato del Dashboard (plan §6)', () => {
     expect(periodSummarySchema.safeParse(emptyToday).success).toBe(true);
   });
 
-  it('valida el 403 con el formato común de errores', () => {
+  it('valida el 403 del mes con el formato común de errores', () => {
     const forbidden = {
-      error: { code: ERROR_CODES.FORBIDDEN, message: DASHBOARD_MESSAGES.forbidden },
+      error: { code: ERROR_CODES.FORBIDDEN, message: DASHBOARD_MESSAGES.forbiddenMonth },
     };
     expect(apiErrorSchema.parse(forbidden)).toEqual(forbidden);
   });

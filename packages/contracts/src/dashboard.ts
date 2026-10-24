@@ -5,12 +5,12 @@ import { paymentMethodSchema } from './sales.ts';
 // Contrato del módulo Dashboard (plan §6). Todas las cifras las calcula la API (principio 3); la
 // interfaz las muestra con formatPrice, formatDate, formatMonth y formatDateTime.
 
-// Roles que pueden ver el resumen de ventas (RF-1, D-6): la ruta de la interfaz y la comprobación de
-// la API usan esta misma lista.
-export const DASHBOARD_ROLES = ['owner'] as const satisfies readonly Role[];
+// Roles que pueden ver el resumen del mes (RF-9, D-6); el de hoy lo ven el dueño y el cajero. La API
+// rechaza a los demás con 403 y la interfaz no les pide el mes, con esta misma lista.
+export const DASHBOARD_MONTH_ROLES = ['owner'] as const satisfies readonly Role[];
 
 export const DASHBOARD_MESSAGES = {
-  forbidden: 'No tienes permiso para ver el resumen de ventas',
+  forbiddenMonth: 'No tienes permiso para ver el resumen del mes',
   emptyToday: 'Todavía no hay ventas hoy',
   emptyMonth: 'Todavía no hay ventas este mes',
 } as const;

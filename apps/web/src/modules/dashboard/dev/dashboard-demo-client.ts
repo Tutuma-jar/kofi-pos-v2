@@ -55,7 +55,10 @@ export function createDashboardDemoClient(initial: DashboardScenarioId): Dashboa
       throw new ApiFetchError(500, { code: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE });
     }
     if (scenario === 'forbidden') {
-      throw new ApiFetchError(403, { code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbidden });
+      throw new ApiFetchError(403, {
+        code: 'FORBIDDEN',
+        message: DASHBOARD_MESSAGES.forbiddenMonth,
+      });
     }
     if (scenario === 'slow') {
       await new Promise((resolve) => setTimeout(resolve, SLOW_MILLISECONDS));
