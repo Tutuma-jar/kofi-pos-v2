@@ -49,9 +49,9 @@ for (const words of segments) {
   }
 }
 
+// El bloqueo se comunica solo con JSON y código 0: Codex ignora el código 2 (probado en su app de Windows)
+// y Claude acepta las dos formas.
 if (reasons.length) {
   const reason = `Bloqueado por el proyecto: ${[...new Set(reasons)].join(' ')}`;
   console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }));
-  console.error(reason);
-  process.exit(2);
 }
