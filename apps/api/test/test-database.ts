@@ -1,5 +1,6 @@
 import { PGlite, type Transaction } from '@electric-sql/pglite';
 import type { Database, Queryable } from '../src/shared/database/database.ts';
+import { migrate } from '../src/shared/database/migrate.ts';
 
 // Adaptador de PGlite (PostgreSQL en memoria, D-7) para las pruebas y la API de E2E.
 
@@ -25,8 +26,14 @@ export function createPgliteDatabase(pglite: PGlite): Database {
   };
 }
 
-// Base nueva en memoria para cada prueba.
+// Base nueva en memoria, sin tablas.
+export async function createEmptyTestDatabase(): Promise<Database> {
+  return createPgliteDatabase(await PGlite.create());
+}
+
+// Base nueva en memoria con las migraciones aplicadas, para cada prueba.
 export async function createTestDatabase(): Promise<Database> {
-  const pglite = await PGlite.create();
-  return createPgliteDatabase(pglite);
+  const db = await createEmptyTestDatabase();
+  await migrate(db);
+  return db;
 }
