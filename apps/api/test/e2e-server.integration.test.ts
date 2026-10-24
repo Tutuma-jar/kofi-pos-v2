@@ -40,5 +40,5 @@ describe('API real de E2E (RF-1, RF-5, RF-7, RF-13)', () => {
     } finally {
       await app.close();
     }
-  });
+  }, 15_000);
 });

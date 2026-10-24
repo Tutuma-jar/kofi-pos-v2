@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común y US1 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -83,7 +83,7 @@ Rama: `feat/001-acceso-us1`.
   Hecho cuando: las pruebas de componente cubren los dos roles, el cierre de sesión y la nueva comprobación de la sesión en `pageshow`.
 - [x] **T030 [integración] [US1]** Cambiar el cliente simulado por el real en la aplicación y ampliar `e2e-server.ts` con PGlite y las cuentas de `e2e/fixtures.ts` creadas con `accounts.service` (RF-1 a RF-8, RF-13, RF-14). Depende de: T021, T022, T023, T024, T025, T026, T027, T028, T029
   Hecho cuando: la interfaz en `vite preview` inicia y cierra sesión contra la API de E2E, y `npm test` sigue pasando.
-- [ ] **T031 [integración] [US1]** Escribir `e2e/us1-iniciar-cerrar-sesion.spec.ts` con los 8 pasos de §8.2 del plan (RF-1 a RF-8, RF-14). Depende de: T030
+- [x] **T031 [integración] [US1]** Escribir `e2e/us1-iniciar-cerrar-sesion.spec.ts` con los 8 pasos de §8.2 del plan (RF-1 a RF-8, RF-14). Depende de: T030
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: proteger las cuentas (P2)

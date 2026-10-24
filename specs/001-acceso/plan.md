@@ -416,6 +416,8 @@ Decisión delegada DD-16 (T028): `AppRoutes` monta el proveedor y las guardas co
 
 Decisión delegada DD-17 (T030): el montaje normal usa el cliente HTTP, también en desarrollo. El selector conectado al cliente simulado se activa solo en desarrollo con `?escenarios=acceso`, y cambiar de escenario vuelve a montar el proveedor para comprobar la nueva sesión. Se descarta sustituir siempre la API por el simulador al desarrollar, porque impediría probar la integración normal. Vite elimina el simulador del build de producción. La API de E2E se construye con una función importable, usa cuentas de prueba de `e2e/fixtures.ts` y cierra PGlite al cerrar Fastify.
 
+Decisión delegada DD-18 (T031): la prueba que construye la API de E2E admite 15 segundos para crear PGlite y ejecutar los hashes de las dos cuentas bajo la carga de la suite completa. Se observó un timeout con el límite predeterminado de 5 segundos. Se descarta reducir el coste de `scrypt` en las pruebas, porque deben ejercitar los parámetros reales. Este límite de una prueba local no cambia RNF-4, que se mide en el despliegue en T043.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles
