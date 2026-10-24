@@ -86,7 +86,7 @@ Rama: `feat/002-menu-us1`. La historia 1 de Acceso ya está en `develop` (#15).
 
 Rama: `feat/002-menu-us2`.
 
-- [ ] **T025 [api] [P] [US2]** Añadir a `products.service.ts` desactivar y reactivar: reactivar exige la categoría activa (`409 CATEGORY_INACTIVE` con su nombre); repetir la acción no cambia nada (plan §5.4; RF-9, RF-11). Depende de: T015
+- [x] **T025 [api] [P] [US2]** Añadir a `products.service.ts` desactivar y reactivar: reactivar exige la categoría activa (`409 CATEGORY_INACTIVE` con su nombre); repetir la acción no cambia nada (plan §5.4; RF-9, RF-11). Depende de: T015
   Hecho cuando: las pruebas de integración cubren desactivar y reactivar conservando nombre, categoría y precio, el `409` con el nombre de la categoría y la acción repetida.
 - [ ] **T026 [api] [P] [US2]** Añadir a `categories.service.ts` desactivar y reactivar: `409 CATEGORY_HAS_ACTIVE_PRODUCTS` con N («1 producto activo» en singular), `KM002` traducido al mismo `409`, reactivar sin cambiar sus productos y renombrar una categoría inactiva (plan §5.4; RF-8, RF-10, RF-11). Depende de: T014
   Hecho cuando: las pruebas de integración cubren desactivar sin productos activos y con solo inactivos, el `409` con 1 y con 3 productos, la carrera simulada con `KM002`, reactivar dejando inactivos sus productos inactivos y renombrar una inactiva.
