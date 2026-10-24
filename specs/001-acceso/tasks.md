@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común y US1 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1 y US2 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -90,24 +90,26 @@ Rama: `feat/001-acceso-us1`.
 
 Rama: `feat/001-acceso-us2`.
 
-- [ ] **T032 [api] [P] [US2]** Añadir el bloqueo al ingreso: `failed_logins`, ventana de 15 minutos, `locked_until` de 5 minutos, intentos durante el bloqueo sin contar ni alargarlo, reinicio con un ingreso correcto, transacción con `FOR UPDATE` y el mensaje `ACCOUNT_LOCKED` con «N minutos» y «1 minuto» (plan §5.1, D-5; RF-9). Depende de: T020, T021
+- [x] **T032 [api] [P] [US2]** Añadir el bloqueo al ingreso: `failed_logins`, ventana de 15 minutos, `locked_until` de 5 minutos, intentos durante el bloqueo sin contar ni alargarlo, reinicio con un ingreso correcto, transacción con `FOR UPDATE` y el mensaje `ACCOUNT_LOCKED` con «N minutos» y «1 minuto» (plan §5.1, D-5; RF-9). Depende de: T020, T021
   Hecho cuando: las pruebas de integración, con reloj falso, cubren: 5 fallos y el siguiente rechazado aunque sea correcto (`429`), el quinto fallo todavía con `INVALID_CREDENTIALS`, desbloqueo a los 5 minutos con el conteo en cero, 4 fallos + ingreso correcto + 4 fallos sin bloqueo, 4 fallos + uno a los 20 minutos sin bloqueo, intentos durante el bloqueo, usuario inexistente sin bloqueo y dos intentos simultáneos contados bien.
-- [ ] **T033 [api] [P] [US2]** Añadir el vencimiento: `resolveSession` devuelve `SESSION_EXPIRED` con el `userId` de la sesión a las 12 horas, aunque haya actividad, y la operación protegida no se ejecuta (plan §5.2; RF-10, RF-11). Depende de: T022
+- [x] **T033 [api] [P] [US2]** Añadir el vencimiento: `resolveSession` devuelve `SESSION_EXPIRED` con el `userId` de la sesión a las 12 horas, aunque haya actividad, y la operación protegida no se ejecuta (plan §5.2; RF-10, RF-11). Depende de: T022
   Hecho cuando: las pruebas, con reloj falso, comprueban la sesión válida a las 11 h 59 min, `401 SESSION_EXPIRED` a las 12 h con su mensaje y el `userId` de la cuenta, que `SESSION_MISSING` no incluye `userId` y una ruta de prueba protegida que no aplica cambios.
-- [ ] **T034 [api] [P] [US2]** Añadir la terminación: `SESSION_TERMINATED` si la cuenta se eliminó o su `session_version` cambió (plan §5.2; RF-12). Depende de: T022
+- [x] **T034 [api] [P] [US2]** Añadir la terminación: `SESSION_TERMINATED` si la cuenta se eliminó o su `session_version` cambió (plan §5.2; RF-12). Depende de: T022
   Hecho cuando: las pruebas comprueban `401 SESSION_TERMINATED` sin `userId` tras cambiar el rol, tras cambiar la contraseña y tras eliminar la cuenta, y que cambiar solo el nombre visible no termina la sesión.
-- [ ] **T035 [api] [P] [US2]** Añadir `update` y `delete` a `accounts.service.ts` y a `accounts.cli.ts` (plan §5.5; RF-12, RF-13). Depende de: T025, T034
+- [x] **T035 [api] [P] [US2]** Añadir `update` y `delete` a `accounts.service.ts` y a `accounts.cli.ts` (plan §5.5; RF-12, RF-13). Depende de: T025, T034
   Hecho cuando: las pruebas cambian el rol, la contraseña y el nombre visible, eliminan una cuenta, rechazan datos inválidos y comprueban que las sesiones de la cuenta terminan cuando corresponde.
-- [ ] **T036 [web] [P] [US2]** Mostrar en `LoginPage` y `LoginForm` el mensaje de bloqueo de la API y los avisos de vencimiento y terminación recibidos al llegar a `/ingresar` (RF-9, RF-10, RF-12). Depende de: T028
+- [x] **T036 [web] [P] [US2]** Mostrar en `LoginPage` y `LoginForm` el mensaje de bloqueo de la API y los avisos de vencimiento y terminación recibidos al llegar a `/ingresar` (RF-9, RF-10, RF-12). Depende de: T028
   Hecho cuando: las pruebas de componente, con los escenarios de bloqueo, sesión vencida y sesión terminada del cliente simulado, muestran cada mensaje tal como lo devuelve la API.
-- [ ] **T037 [web] [P] [US2]** Hacer que `SessionProvider` y `RequireSession` manejen `SESSION_EXPIRED` y `SESSION_TERMINATED`: van a `/ingresar` con el aviso de la API (plan §5.6; RF-10, RF-12). Depende de: T027
+- [x] **T037 [web] [P] [US2]** Hacer que `SessionProvider` y `RequireSession` manejen `SESSION_EXPIRED` y `SESSION_TERMINATED`: van a `/ingresar` con el aviso de la API (plan §5.6; RF-10, RF-12). Depende de: T027
   Hecho cuando: las pruebas de componente comprueban los dos avisos al abrir una ruta protegida, al recargarla (sin cuenta en memoria) y ante un `401` en una operación.
-- [ ] **T038 [web] [P] [US2]** Escribir `api/return-to.ts` y la navegación de regreso tras el vencimiento (plan §5.6; RF-11): ante `SESSION_EXPIRED` se guardan en `localStorage` el `userId` que da la API y la ruta pedida; tras ingresar, la misma cuenta vuelve a esa ruta si existe y su rol puede verla (`canView`), y si no, va a `/`. `returnTo` se borra al usarlo, al cerrar sesión y ante `SESSION_TERMINATED`, pero no ante `SESSION_MISSING`. Depende de: T028, T029, T037
+- [x] **T038 [web] [P] [US2]** Escribir `api/return-to.ts` y la navegación de regreso tras el vencimiento (plan §5.6; RF-11): ante `SESSION_EXPIRED` se guardan en `localStorage` el `userId` que da la API y la ruta pedida; tras ingresar, la misma cuenta vuelve a esa ruta si existe y su rol puede verla (`canView`), y si no, va a `/`. `returnTo` se borra al usarlo, al cerrar sesión y ante `SESSION_TERMINATED`, pero no ante `SESSION_MISSING`. Depende de: T028, T029, T037
   Hecho cuando: las pruebas cubren, con una ruta de prueba: la misma cuenta, otra cuenta, una ruta desconocida, una ruta que el rol no puede ver, el vencimiento detectado al recargar (sin cuenta en memoria), que el dato se borra tras usarlo, al cerrar sesión y ante `SESSION_TERMINATED`, y que un `SESSION_MISSING` posterior no lo borra.
-- [ ] **T039 [integración] [US2]** Añadir a `e2e-server.ts` las rutas de prueba `POST /api/__test/clock` y `POST /api/__test/accounts/:username`, que no existen en `app.ts` (RF-9, RF-10, RF-12). Depende de: T032, T033, T034, T035, T036, T037, T038
+- [x] **T039 [integración] [US2]** Añadir a `e2e-server.ts` las rutas de prueba `POST /api/__test/clock` y `POST /api/__test/accounts/:username`, que no existen en `app.ts` (RF-9, RF-10, RF-12). Depende de: T032, T033, T034, T035, T036, T037, T038
   Hecho cuando: una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y las rutas de prueba adelantan el reloj y cambian una cuenta en la API de E2E.
-- [ ] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
+- [x] **T040 [integración] [US2]** Escribir `e2e/us2-proteger-cuentas.spec.ts` con los 4 pasos de §8.2 del plan, incluida la comprobación de que la cookie del navegador vence más de 12 horas después del ingreso (D-15; RF-9 a RF-12). Depende de: T039
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2 contra la API real de E2E.
+- [x] **T045 [web] [US2]** Corregir la sincronización de la prueba del aviso recibido al ingresar (RF-10, RF-12), requerida por el verificador del PR #17. Depende de: T040
+  Hecho cuando: la prueba representa la llegada al ingreso después de que se borre la cookie, espera el aviso y el formulario utilizable sin conservar referencias a elementos retirados, todas las comprobaciones pasan y `technical-checks` aprueba el commit corregido. Se vuelve a delegar la verificación de US2.
 
 ## Fase 5 — Pulido
 

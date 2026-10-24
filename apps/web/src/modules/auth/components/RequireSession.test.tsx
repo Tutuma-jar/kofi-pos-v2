@@ -7,11 +7,12 @@ import { createAuthDemoClient } from '../dev/auth-demo-client.ts';
 import { DEMO_ERRORS, DEMO_USERS } from '../dev/fixtures.ts';
 import { SessionProvider } from './SessionProvider.tsx';
 import { RequireSession } from './RequireSession.tsx';
+import { LoginPage } from '../pages/LoginPage.tsx';
 
 function Login() {
   return (
     <>
-      <h1>Ingresar</h1>
+      <LoginPage />
       <output>{useLocation().pathname}</output>
     </>
   );
@@ -75,6 +76,7 @@ describe('guarda de sesión (RF-4, RF-8)', () => {
     await client.login({ username: 'ana', password: 'prueba de cafe' });
     mount(client);
     expect(await screen.findByText('Información del negocio')).toBeVisible();
+    client.setScenario('owner');
     vi.stubGlobal(
       'fetch',
       vi
@@ -126,4 +128,40 @@ describe('guarda de sesión (RF-4, RF-8)', () => {
     });
     expect(screen.queryByText('Información del negocio')).not.toBeInTheDocument();
   });
+  it.each(['sessionExpired', 'sessionTerminated'] as const)(
+    'al abrir o recargar sin identidad en memoria, %s lleva al ingreso con aviso (RF-10, RF-12)',
+    async (scenario) => {
+      mount(createAuthDemoClient(scenario));
+      expect(screen.queryByText('Información del negocio')).not.toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Ingresar' })).toBeVisible();
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        DEMO_ERRORS[scenario].body.error.message,
+      );
+      expect(screen.queryByText('Información del negocio')).not.toBeInTheDocument();
+    },
+  );
+  it.each(['sessionExpired', 'sessionTerminated'] as const)(
+    'un 401 de una operación con %s lleva al ingreso con aviso (RF-10, RF-12)',
+    async (scenario) => {
+      const client = createAuthDemoClient('owner');
+      await client.login({ username: 'ana', password: 'prueba de cafe' });
+      mount(client);
+      expect(await screen.findByText('Información del negocio')).toBeVisible();
+      client.setScenario('owner'); // La API borra la cookie al rechazar la sesión.
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValue(
+            new Response(JSON.stringify(DEMO_ERRORS[scenario].body), { status: 401 }),
+          ),
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Operar' }));
+      expect(await screen.findByRole('heading', { name: 'Ingresar' })).toBeVisible();
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        DEMO_ERRORS[scenario].body.error.message,
+      );
+      expect(screen.queryByText('Información del negocio')).not.toBeInTheDocument();
+    },
+  );
 });

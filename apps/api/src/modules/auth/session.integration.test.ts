@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../../app.ts';
 import { createTestDatabase } from '../../../test/test-database.ts';
-import { createFakeClock } from '../../shared/clock.ts';
+import { createFakeClock, type FakeClock } from '../../shared/clock.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { createAuthService } from './auth.service.ts';
 import { requireSession } from './auth.hook.ts';
@@ -14,6 +14,7 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
   let app: FastifyInstance;
   let db: Database;
   let auth: ReturnType<typeof createAuthService>;
+  let clock: FakeClock;
   const handler = vi.fn(async () => ({ saved: true }));
   beforeEach(async () => {
     db = await createTestDatabase();
@@ -22,7 +23,7 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
       VALUES ('ana', 'Ana Quispe', 'owner', $1)`,
       [await hashPassword('prueba de cafe')],
     );
-    const clock = createFakeClock(NOW);
+    clock = createFakeClock(NOW);
     auth = createAuthService({ db, clock });
     app = buildApp({ db, clock, logger: false });
     app.post('/api/protected', { preHandler: requireSession(auth) }, handler);
@@ -40,12 +41,77 @@ describe('sesión y guarda (RF-4, RF-5, RF-6, RF-8)', () => {
       headers: token ? { cookie: `kofi_session=${token}` } : {},
     });
 
+  it('vence exactamente a las doce horas pese a la actividad y no ejecuta cambios (RF-10, RF-11)', async () => {
+    const { token, user } = await login();
+    clock.advance((11 * 60 + 59) * 60_000);
+    expect((await session(token)).statusCode).toBe(200);
+    clock.advance(60_000);
+    const response = await session(token);
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: {
+        code: 'SESSION_EXPIRED',
+        message: 'Tu sesión venció. Vuelve a iniciar sesión',
+        userId: user.id,
+      },
+    });
+    expect(String(response.headers['set-cookie'])).toContain('Max-Age=0');
+    const operation = await app.inject({
+      method: 'POST',
+      url: '/api/protected',
+      headers: { cookie: `kofi_session=${token}` },
+    });
+    expect(operation.statusCode).toBe(401);
+    expect(operation.json().error.code).toBe('SESSION_EXPIRED');
+    expect(handler).not.toHaveBeenCalled();
+    expect((await session()).json().error).not.toHaveProperty('userId');
+  });
+
   it('devuelve solo la identidad pública de la sesión', async () => {
     const { token, user } = await login();
     const response = await session(token);
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ user });
     expect(response.headers['cache-control']).toBe('no-store');
+  });
+  it.each([
+    "UPDATE users SET role = 'cashier'",
+    "UPDATE users SET password_hash = 'hash de prueba cambiado'",
+    'DELETE FROM users',
+  ])('termina todas las sesiones tras %s y no ejecuta operaciones (RF-12)', async (sql) => {
+    const first = await login();
+    const second = await login();
+    await db.query(sql);
+    // La terminación tiene prioridad sobre el vencimiento (plan §5.2).
+    clock.advance(12 * 60 * 60_000);
+    for (const token of [first.token, second.token]) {
+      const response = await session(token);
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toEqual({
+        error: {
+          code: 'SESSION_TERMINATED',
+          message: 'Tu sesión terminó. Vuelve a iniciar sesión',
+        },
+      });
+      expect(String(response.headers['set-cookie'])).toContain('Max-Age=0');
+      expect(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/protected',
+            headers: { cookie: `kofi_session=${token}` },
+          })
+        ).statusCode,
+      ).toBe(401);
+    }
+    expect(handler).not.toHaveBeenCalled();
+  });
+  it('cambiar solo el nombre mantiene las sesiones y actualiza la identidad (RF-12)', async () => {
+    const { token } = await login();
+    await db.query("UPDATE users SET display_name = 'Ana Nueva'");
+    const response = await session(token);
+    expect(response.statusCode).toBe(200);
+    expect(response.json().user.displayName).toBe('Ana Nueva');
   });
   it.each(['missing', 'unknown', 'revoked'])('rechaza %s y borra la cookie', async (kind) => {
     let token: string | undefined;

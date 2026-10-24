@@ -6,3 +6,4 @@ export { useSession } from './components/useSession.ts';
 export { RequireSession } from './components/RequireSession.tsx';
 export { AuthenticatedLayout } from './components/AuthenticatedLayout.tsx';
 export { httpAuthClient, type AuthClient } from './api/auth-client.ts';
+export { canView } from './api/return-to.ts';
