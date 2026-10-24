@@ -98,7 +98,7 @@ Rama: `feat/001-acceso-us2`.
   Hecho cuando: las pruebas comprueban `401 SESSION_TERMINATED` sin `userId` tras cambiar el rol, tras cambiar la contraseña y tras eliminar la cuenta, y que cambiar solo el nombre visible no termina la sesión.
 - [x] **T035 [api] [P] [US2]** Añadir `update` y `delete` a `accounts.service.ts` y a `accounts.cli.ts` (plan §5.5; RF-12, RF-13). Depende de: T025, T034
   Hecho cuando: las pruebas cambian el rol, la contraseña y el nombre visible, eliminan una cuenta, rechazan datos inválidos y comprueban que las sesiones de la cuenta terminan cuando corresponde.
-- [ ] **T036 [web] [P] [US2]** Mostrar en `LoginPage` y `LoginForm` el mensaje de bloqueo de la API y los avisos de vencimiento y terminación recibidos al llegar a `/ingresar` (RF-9, RF-10, RF-12). Depende de: T028
+- [x] **T036 [web] [P] [US2]** Mostrar en `LoginPage` y `LoginForm` el mensaje de bloqueo de la API y los avisos de vencimiento y terminación recibidos al llegar a `/ingresar` (RF-9, RF-10, RF-12). Depende de: T028
   Hecho cuando: las pruebas de componente, con los escenarios de bloqueo, sesión vencida y sesión terminada del cliente simulado, muestran cada mensaje tal como lo devuelve la API.
 - [ ] **T037 [web] [P] [US2]** Hacer que `SessionProvider` y `RequireSession` manejen `SESSION_EXPIRED` y `SESSION_TERMINATED`: van a `/ingresar` con el aviso de la API (plan §5.6; RF-10, RF-12). Depende de: T027
   Hecho cuando: las pruebas de componente comprueban los dos avisos al abrir una ruta protegida, al recargarla (sin cuenta en memoria) y ante un `401` en una operación.

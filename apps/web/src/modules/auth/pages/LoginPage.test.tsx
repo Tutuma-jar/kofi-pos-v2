@@ -3,13 +3,14 @@ import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { createAuthDemoClient } from '../dev/auth-demo-client.ts';
+import { DEMO_ERRORS } from '../dev/fixtures.ts';
 import { SessionProvider } from '../components/SessionProvider.tsx';
 import { LoginPage } from './LoginPage.tsx';
 
 describe('página de ingreso (RF-1, RF-6)', () => {
-  function mount(client = createAuthDemoClient('owner')) {
+  function mount(client = createAuthDemoClient('owner'), notice?: string) {
     render(
-      <MemoryRouter initialEntries={['/ingresar']}>
+      <MemoryRouter initialEntries={[{ pathname: '/ingresar', state: { notice } }]}>
         <SessionProvider client={client}>
           <Routes>
             <Route path="/ingresar" element={<LoginPage />} />
@@ -33,5 +34,26 @@ describe('página de ingreso (RF-1, RF-6)', () => {
     await user.type(screen.getByLabelText('Contraseña'), 'prueba de cafe');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
     expect(await screen.findByRole('heading', { name: 'Pantalla inicial' })).toBeVisible();
+  });
+  it.each(['sessionExpired', 'sessionTerminated'] as const)(
+    'muestra el aviso recibido de %s tal cual (RF-10, RF-12)',
+    async (scenario) => {
+      mount(createAuthDemoClient(scenario), DEMO_ERRORS[scenario].body.error.message);
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        DEMO_ERRORS[scenario].body.error.message,
+      );
+      expect(screen.getByLabelText('Usuario')).toBeVisible();
+    },
+  );
+  it('muestra el bloqueo calculado por la API y conserva el usuario (RF-9)', async () => {
+    mount(createAuthDemoClient('accountLocked'));
+    await userEvent.type(await screen.findByLabelText('Usuario'), 'ana');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'prueba de cafe');
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      DEMO_ERRORS.accountLocked.body.error.message,
+    );
+    expect(screen.getByLabelText('Usuario')).toHaveValue('ana');
+    expect(screen.getByLabelText('Contraseña')).toHaveValue('');
   });
 });
