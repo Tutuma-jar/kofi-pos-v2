@@ -123,6 +123,8 @@ Rama: `feat/001-acceso-pulido`.
   Hecho cuando: al menos 19 de cada 20 ingresos tardan menos de 3 segundos y al menos 19 de cada 20 cierres menos de 2 segundos (límites aprobados expresamente por la persona), el ingreso cronometrado tarda menos de 15 segundos, y los resultados quedan anotados en la descripción del PR de pulido.
 - [x] **T044 [integración]** Actualizar `README.md`: estado del módulo Acceso, cómo arrancar en desarrollo (`apps/api/.env`, `npm run migrate` y las tres terminales de §3 del plan: `npm run dev -w @kofi/contracts`, `-w @kofi/api` y `-w @kofi/web`) y cómo preparar las cuentas. Depende de: T043
   Hecho cuando: siguiendo el README desde un clon nuevo se levanta la aplicación en desarrollo y se crea una cuenta.
+- [x] **T046 [integración]** Corregir el timeout de la prueba que aísla los controles de E2E de la aplicación normal (RF-4, RF-9, RF-10, RF-12), detectado en la CI del PR #18. Depende de: T044
+  Hecho cuando: la prueba conserva las dos comprobaciones de 404 con base de datos, dispone del mismo margen de 15 segundos que las otras pruebas del archivo para el arranque de PGlite y las migraciones, todas las comprobaciones pasan, la CI aprueba el commit corregido y se repite la verificación independiente.
 
 ## Cobertura de RF
 
