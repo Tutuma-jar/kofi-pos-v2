@@ -59,7 +59,7 @@ Rama: `feat/002-menu-definicion`.
 
 Rama: `feat/002-menu-us1`. La historia 1 de Acceso ya está en `develop` (#15).
 
-- [ ] **T014 [api] [P] [US1]** Escribir en `categories.service.ts` crear y renombrar una categoría: nombre normalizado, repetido según `name_key` sin contar la propia, `unique_violation` traducido al mensaje, todo en una transacción (plan §5.3; RF-3, RF-7, RF-8, RF-12). Depende de: T007
+- [x] **T014 [api] [P] [US1]** Escribir en `categories.service.ts` crear y renombrar una categoría: nombre normalizado, repetido según `name_key` sin contar la propia, `unique_violation` traducido al mensaje, todo en una transacción (plan §5.3; RF-3, RF-7, RF-8, RF-12). Depende de: T007
   Hecho cuando: las pruebas de integración crean una categoría activa, la renombran, aceptan «bebidas» → «Bebidas», rechazan un nombre repetido (también de una inactiva) con su mensaje y comprueban que un error deja la base sin cambios.
 - [ ] **T015 [api] [P] [US1]** Escribir en `products.service.ts` crear y editar un producto según §5.3 del plan: todos los campos que fallan en un solo `400`, categoría activa al crear o mover, edición en su propia categoría inactiva, nombre repetido sin contar el propio, y `unique_violation` y `KM001` traducidos (RF-4, RF-5, RF-6, RF-7, RF-8, RF-11, RF-12). Depende de: T007, T008
   Hecho cuando: las pruebas de integración cubren crear y editar; el `400` con nombre repetido, sin categoría y precio inválido a la vez; un nombre repetido en otra categoría y uno inactivo; crear en una categoría inactiva; editar el precio de un producto que está en una categoría inactiva; y la carrera simulada (categoría desactivada o nombre ocupado entre la comprobación y la escritura) con su mensaje.
