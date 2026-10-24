@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas, pendiente de análisis · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
