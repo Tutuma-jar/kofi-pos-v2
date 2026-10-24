@@ -40,11 +40,12 @@ describe('createDashboardDemoClient (plan D-8)', () => {
     localStorage.clear();
   });
 
-  it('tiene los cinco escenarios del plan', () => {
+  it('tiene los seis escenarios del plan', () => {
     expect(Object.values(DASHBOARD_SCENARIOS).map((s) => s.label)).toEqual([
       'Con ventas',
       'Sin ventas',
       'Sin conexión',
+      'Con error',
       'Sin permiso',
       'Lento',
     ]);
@@ -79,6 +80,19 @@ describe('createDashboardDemoClient (plan D-8)', () => {
 
     expect(await rejection(client.today())).toMatchObject({ status: null, code: 'NETWORK_ERROR' });
     expect(await rejection(client.month())).toMatchObject({ code: 'NETWORK_ERROR' });
+  });
+
+  it('con error falla con 500 INTERNAL_ERROR, como la API', async () => {
+    const client = createDashboardDemoClient('error');
+
+    for (const call of [client.today(), client.month()]) {
+      const error = await rejection(call);
+      expect(error.status).toBe(500);
+      expect(error.error).toEqual({
+        code: 'INTERNAL_ERROR',
+        message: 'Ocurrió un error. Inténtalo de nuevo',
+      });
+    }
   });
 
   it('sin permiso falla con 403 FORBIDDEN y el mensaje del contrato', async () => {

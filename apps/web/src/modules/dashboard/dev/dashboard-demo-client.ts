@@ -21,6 +21,8 @@ export const DASHBOARD_SCENARIOS = {
   withSales: { label: 'Con ventas' },
   empty: { label: 'Sin ventas' },
   offline: { label: 'Sin conexión' },
+  // Error inesperado de la API (RF-7).
+  error: { label: 'Con error' },
   forbidden: { label: 'Sin permiso' },
   // Como «Con ventas», pero cada respuesta tarda 1,5 s, para ver «Cargando…».
   slow: { label: 'Lento' },
@@ -34,6 +36,8 @@ export interface DashboardDemoClient extends DashboardClient {
 }
 
 const SLOW_MILLISECONDS = 1500;
+// El mensaje de 500 INTERNAL_ERROR de la API (docs/architecture.md §6.3).
+const INTERNAL_ERROR_MESSAGE = 'Ocurrió un error. Inténtalo de nuevo';
 
 export function createDashboardDemoClient(initial: DashboardScenarioId): DashboardDemoClient {
   let scenario: DashboardScenarioId = initial;
@@ -46,6 +50,9 @@ export function createDashboardDemoClient(initial: DashboardScenarioId): Dashboa
   ): Promise<T> {
     if (scenario === 'offline') {
       throw new ApiFetchError(null, { code: 'NETWORK_ERROR', message: NETWORK_ERROR_MESSAGE });
+    }
+    if (scenario === 'error') {
+      throw new ApiFetchError(500, { code: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE });
     }
     if (scenario === 'forbidden') {
       throw new ApiFetchError(403, { code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbidden });

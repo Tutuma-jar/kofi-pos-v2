@@ -5,7 +5,7 @@ import { createDashboardDemoClient } from './dashboard-demo-client.ts';
 import { ScenarioPicker } from './ScenarioPicker.tsx';
 
 describe('ScenarioPicker del dashboard', () => {
-  it('muestra los cinco escenarios y cambia el del cliente simulado', async () => {
+  it('muestra los seis escenarios y cambia el del cliente simulado', async () => {
     const client = createDashboardDemoClient('withSales');
     const onChange = vi.fn();
     render(<ScenarioPicker client={client} onChange={onChange} />);
@@ -15,6 +15,7 @@ describe('ScenarioPicker del dashboard', () => {
       'Con ventas',
       'Sin ventas',
       'Sin conexión',
+      'Con error',
       'Sin permiso',
       'Lento',
     ]);

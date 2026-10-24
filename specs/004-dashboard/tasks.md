@@ -1,6 +1,6 @@
 # Tareas — SPEC-004 Dashboard
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024) pendiente · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas, con la corrección de la verificación (T024) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -40,7 +40,7 @@ Rama: `feat/004-dashboard-definicion`.
 
 **Correcciones tras la verificación** (plan §11):
 
-- [ ] **T024 [web] [P]** Corregir RF-7: añadir al cliente simulado y a su selector el escenario «Con error», que responde `500 INTERNAL_ERROR` con «Ocurrió un error. Inténtalo de nuevo» en `today` y `month` (plan D-8; RF-7). Depende de: T007
+- [x] **T024 [web] [P]** Corregir RF-7: añadir al cliente simulado y a su selector el escenario «Con error», que responde `500 INTERNAL_ERROR` con «Ocurrió un error. Inténtalo de nuevo» en `today` y `month` (plan D-8; RF-7). Depende de: T007
   Hecho cuando: las pruebas del cliente simulado comprueban el `500` con su código y su mensaje en las dos operaciones, validado con `apiErrorSchema`, y las del selector muestran los seis escenarios.
 
 ## Fase 3 — US1: ver el resumen de hoy (P1)
