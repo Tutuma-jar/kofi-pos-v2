@@ -1,8 +1,9 @@
+import { DASHBOARD_ROLES } from '@kofi/contracts';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { AppRoutes, protectedRoutes, publicRoutes } from './routes.tsx';
-import type { AuthClient } from './modules/auth/index.ts';
+import { canView, type AuthClient } from './modules/auth/index.ts';
 import { ApiFetchError } from './shared/http/api-fetch.ts';
 
 function CurrentPath() {
@@ -87,6 +88,22 @@ describe('routes', () => {
     },
   );
 
+  // SPEC-004 Dashboard (plan §3, D-6, D-9; RF-1).
+  it('/resumen muestra el resumen de ventas con una sesión de dueño', async () => {
+    await renderAt('/resumen');
+
+    expect(await screen.findByRole('heading', { name: 'Resumen de ventas' })).toBeInTheDocument();
+    expect(screen.getByLabelText('ruta actual')).toHaveTextContent('/resumen');
+  });
+
+  it('/resumen declara los roles del contrato y solo el dueño puede verla', () => {
+    const route = protectedRoutes.find((r) => r.path === '/resumen');
+    expect(route?.roles).toBe(DASHBOARD_ROLES);
+    expect(route?.homeLink).toBe('Resumen de ventas');
+    expect(canView('owner', '/resumen', protectedRoutes)).toBe(true);
+    expect(canView('cashier', '/resumen', protectedRoutes)).toBe(false);
+  });
+
   it('las rutas protegidas declaran sus roles y el enlace de la pantalla inicial', () => {
     expect(protectedRoutes.map(({ path, roles, homeLink }) => ({ path, roles, homeLink }))).toEqual(
       [
@@ -94,6 +111,7 @@ describe('routes', () => {
         { path: '/menu/administrar', roles: ['owner'], homeLink: 'Administrar menú' },
         { path: '/menu', roles: ['owner', 'cashier'], homeLink: 'Ver menú' },
         { path: '/ventas/nueva', roles: ['owner', 'cashier'], homeLink: 'Nueva venta' },
+        { path: '/resumen', roles: ['owner'], homeLink: 'Resumen de ventas' },
       ],
     );
   });
