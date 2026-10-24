@@ -21,7 +21,7 @@ Si falta la constitución o las reglas de negocio, detente y dilo.
 1. **Número y nombre.** `NNN` es el siguiente número de tres dígitos después del mayor de `specs/` (`001` si no hay ninguno); nunca se reutiliza. `<nombre>` va en kebab-case, sin tildes ni `ñ`. Confírmalos con la persona.
 2. **Rama.** Trabaja en `feat/NNN-<nombre>-definicion`. Si la rama ya existe en GitHub, únete con `git fetch` y `git switch <rama>`; si no, créala con `git switch -c <rama>`. Si la persona decidió hacer la especificación en una sola rama, usa `feat/NNN-<nombre>`.
 3. **Contexto.** Lee la constitución y las reglas de negocio. Las reglas globales (moneda, zona horaria, un solo local) no se copian en la especificación: se enlazan.
-4. **Preguntas.** Pregunta **de una en una**, como máximo 6, sobre casos límite, errores y alcance. Espera cada respuesta antes de la siguiente.
+4. **Preguntas.** Pregunta **de una en una**, como máximo 10, sobre casos límite, errores y alcance. Espera cada respuesta antes de la siguiente.
 5. **Escribe `specs/NNN-<nombre>/spec.md`** con este formato:
    1. **Contexto y objetivo.**
    2. **Usuarios.**
