@@ -171,5 +171,11 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md), que tien
 
 - `render.yaml` (Blueprint) describe el sitio estático de la interfaz y el servicio web de la API. Los secretos (`DATABASE_URL`) se declaran sin valor y se cargan en Render.
 - Render despliega desde `main`. La API aplica las migraciones pendientes al arrancar.
+- **Despliegues de comprobación:** mientras una especificación no esté en `main`, el Blueprint puede apuntar temporalmente a su rama, con una base de Neon propia, para comprobar el despliegue. Después vuelve a `main`.
 - Los dos servicios usan el **plan gratuito**: la API se suspende tras 15 minutos sin tráfico y tarda alrededor de un minuto en reactivarse. Las especificaciones no fijan tiempos de respuesta para ese primer acceso.
 - Neon aloja PostgreSQL. Cada persona usa en desarrollo su propia base (`DATABASE_URL` en `apps/api/.env`, que no se versiona).
+
+### 6.6 Rutas de la interfaz
+
+- Las rutas se declaran en `apps/web/src/routes.tsx` con `react-router`.
+- Cada ruta protegida declara los roles que pueden verla (`roles`; por defecto, `owner` y `cashier`). La interfaz solo usa esa lista para navegar y para no mostrar lo que el rol no puede ver; los permisos reales los aplica la API en cada módulo.

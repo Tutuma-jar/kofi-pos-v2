@@ -1,6 +1,6 @@
 # Plan — SPEC-001 Acceso
 
-Estado: aprobado · Fecha: 2026-10-24 · Especificación: [`spec.md`](spec.md)
+Estado: aprobado (corregido tras el análisis de consistencia) · Fecha: 2026-10-24 · Especificación: [`spec.md`](spec.md)
 
 Es la primera especificación del proyecto: además del módulo `auth`, crea los tres paquetes del monorepo (`apps/web`, `apps/api`, `packages/contracts`), sus herramientas (tipos, lint, formato, pruebas y build) y el despliegue.
 
@@ -12,11 +12,11 @@ Se planifica con la **versión 1.0.0** de [`docs/constitution.md`](../../docs/co
 
 | Principio | ¿Se cumple? | Cómo / excepción justificada |
 | --- | --- | --- |
-| 1. Stack mínimo | Sí | TypeScript, Node 24, workspaces de npm, React con Vite, Fastify, Zod, PostgreSQL, Render y Neon. Cada dependencia nueva se justifica en §7 (D-6 a D-12). |
-| 2. Especificación antes que código | Sí | Cada parte de este plan indica sus RF (§3 a §8), y entre todas cubren RF-1 a RF-14 (tabla de cobertura, §8.4). |
+| 1. Stack mínimo | Sí | TypeScript, Node 24, workspaces de npm, React con Vite, Fastify, Zod, PostgreSQL, Render y Neon. Cada dependencia nueva se justifica en §7: las decisiones D-6 a D-10 y la tabla completa de dependencias por paquete (§7.1). |
+| 2. Especificación antes que código | Sí | Cada parte de este plan indica sus RF (§3 a §8), y entre todas cubren RF-1 a RF-14 (tabla de cobertura, §8.5). |
 | 3. Lógica separada de la interfaz | Sí | El bloqueo, el vencimiento, la validez de la sesión y los mensajes con datos calculados (minutos de bloqueo) se resuelven en la API. La interfaz solo valida que los campos no estén vacíos con el esquema del contrato (RF-3) y decide a qué pantalla navegar (RF-6, RF-11). El contrato vive en `packages/contracts/src/auth.ts`. |
-| 4. Tests primero | Sí | Cada RF tiene al menos un test automatizado (§8.4), que se escribe antes del código de su tarea. |
-| 5. Persistencia segura | Sí | Solo la capa `shared/database` de la API toca la base. El ingreso (intentos, bloqueo y sesión) y los cambios de cuenta (cuenta y sus sesiones) son transacciones. Las contraseñas se guardan con hash (RNF-1) y los tokens de sesión, como SHA-256. Ningún secreto se versiona: solo `.env.example`. Las contraseñas de prueba de E2E son datos de prueba de una base en memoria, no secretos. |
+| 4. Tests primero | Sí | Cada RF tiene al menos un test automatizado (§8.5), que se escribe antes del código de su tarea. |
+| 5. Persistencia segura | Sí | Solo la capa `shared/database` de la API toca la base. El ingreso (intentos, bloqueo y sesión) es una transacción. Cada cambio de cuenta es una sola sentencia: las sesiones no se modifican, sino que dejan de valer por el disparador de `session_version` o por `ON DELETE SET NULL` (§4, §5.2). Las contraseñas se guardan con hash (RNF-1) y los tokens de sesión, como SHA-256. Ningún secreto se versiona: solo `.env.example`. Las contraseñas de prueba de E2E son datos de prueba de una base en memoria, no secretos. |
 | 6. Idioma | Sí | Código e identificadores en inglés (`auth`, `users`, `sessions`, `owner`, `cashier`). Los mensajes al usuario están en español y los devuelve la API. Las duraciones (12 h, 5 min, 15 min) no dependen de la zona horaria. Esta especificación no muestra fechas. |
 
 Todos los principios se cumplen sin excepciones.
@@ -62,7 +62,7 @@ apps/api/
     │       └── validate.ts      valida cuerpos con los esquemas del contrato
     └── modules/auth/
         ├── index.ts             superficie pública: authPlugin, requireSession
-        ├── auth.routes.ts       POST /login, POST /logout, GET /session            RF-1–RF-12, RF-14
+        ├── auth.routes.ts       POST /login, POST /logout, GET /session            RF-1–RF-10, RF-12
         ├── auth.service.ts      ingreso, cierre y validación de sesión             RF-1, RF-2, RF-7–RF-12
         ├── auth.hook.ts         requireSession: preHandler para todos los módulos  RF-4, RF-5
         ├── users.repository.ts                                                     RF-1, RF-9, RF-13
@@ -103,6 +103,18 @@ apps/web/
 - `/api/health` responde `200` para la comprobación de salud de Render (Preparación; no traza a un RF).
 - `HomePage` vive por ahora en `auth`, porque esta especificación es la única que la define (RF-5). Cuando otro módulo la amplíe, se moverá a `shared/` en ese PR.
 - Los módulos se importan entre sí solo por su `index.ts` (D-11).
+- Cada ruta protegida de la interfaz declara los roles que pueden verla (`roles`; por defecto, los dos). En esta especificación todas las rutas admiten los dos roles (RF-11).
+
+### Scripts por paquete
+
+| Paquete | Scripts |
+| --- | --- |
+| Raíz | `typecheck`, `lint`, `format`, `format:check`, `test`, `test:e2e`, `build` (compilan antes el contrato, D-14) |
+| `@kofi/contracts` | `build` (`tsc`) y `dev` (`tsc --watch`) |
+| `@kofi/api` | `dev` (D-13), `build` (`tsc`), `start`, `migrate` y `accounts` (§5.5) |
+| `@kofi/web` | `dev`, `build` y `preview` (Vite) |
+
+En desarrollo, cada persona abre tres terminales: `npm run dev -w @kofi/contracts`, `npm run dev -w @kofi/api` y `npm run dev -w @kofi/web`.
 
 ## 4. Modelo de datos
 
@@ -195,11 +207,11 @@ resolveSession(token):
   if row is null or row.revoked_at is not null: return SESSION_MISSING          # RF-4, RF-8
   if row.user_id is null or u.session_version ≠ s.user_session_version:
       return SESSION_TERMINATED                                                  # RF-12
-  if clock.now() ≥ row.expires_at: return SESSION_EXPIRED                       # RF-10
+  if clock.now() ≥ row.expires_at: return SESSION_EXPIRED(u.id)                 # RF-10; la cuenta, para RF-11
   return toSessionUser(u)
 ```
 
-`requireSession` llama a `resolveSession`. Si falla, responde `401` con el código, borra la cookie y no ejecuta el manejador de la ruta, así que la operación no aplica ningún cambio (RF-10, RF-12).
+`requireSession` llama a `resolveSession`. Si falla, responde `401` con el código, borra la cookie y no ejecuta el manejador de la ruta, así que la operación no aplica ningún cambio (RF-10, RF-12). Solo `SESSION_EXPIRED` incluye `userId`: la cuenta de la sesión vencida, que solo recibe el navegador que tenía esa cookie. Así la interfaz sabe a qué cuenta pertenecía aunque se haya recargado (RF-11).
 
 ### 5.3 Cierre de sesión (RF-7, RF-8)
 
@@ -237,17 +249,25 @@ deleteAccount(u):        DELETE FROM users … # las sesiones quedan con user_id
 ```text
 RequireSession (en cada ruta protegida, al abrirla o recargarla, y en pageshow persistido):
   r ← authClient.getSession()
-  ok                 → mostrar la pantalla
-  SESSION_EXPIRED    → returnTo.save(lastUser.id, rutaActual); ir a /ingresar con el aviso de la API
-  SESSION_TERMINATED → ir a /ingresar con el aviso de la API
-  SESSION_MISSING    → ir a /ingresar sin aviso
+  ok                         → mostrar la pantalla
+  SESSION_EXPIRED(userId)    → returnTo.save(userId, rutaPedida); ir a /ingresar con el aviso de la API
+  SESSION_TERMINATED         → returnTo.clear(); ir a /ingresar con el aviso de la API
+  SESSION_MISSING            → ir a /ingresar sin aviso (returnTo no se toca)
 
-LoginPage al montar:  si getSession() es ok → ir a /                            # RF-6
-tras login ok:        t ← returnTo.take()                                         # lee y borra
-                      ir a t.path si t.userId = user.id y t.path es una ruta conocida; si no, a /   # RF-11
+«Cerrar sesión» (RF-7):  returnTo.clear(); logout(); ir a /ingresar
+
+LoginPage al montar:  si getSession() es ok → ir a /                                     # RF-6
+tras login ok:        t ← returnTo.take()                                                  # lee y borra
+                      si t y t.userId = user.id y canView(user.role, t.path) → ir a t.path  # RF-11
+                      si no → ir a /
+
+canView(role, path):  existe una ruta protegida para path y su lista roles incluye role  # «si su cuenta puede verla»
 ```
 
-`returnTo` se guarda en `localStorage`, que pertenece al navegador (RF-6, RF-11). Cualquier respuesta `401` de una operación también pasa por `SessionProvider`, que aplica las mismas reglas.
+- `rutaPedida` es la ruta que se abría o recargaba, o la ruta actual si el `401` llegó en una operación.
+- `userId` lo da la API en `SESSION_EXPIRED` (§5.2), así que funciona aunque la página se haya recargado o abierto en otra pestaña.
+- `SESSION_MISSING` no borra `returnTo`, porque puede llegar justo después de un `SESSION_EXPIRED` en otra petición (la cookie ya se borró). Se borra al usarlo, al cerrar sesión y ante `SESSION_TERMINATED`.
+- `returnTo` se guarda en `localStorage`, que pertenece al navegador (RF-6, RF-11). Cualquier respuesta `401` de una operación también pasa por `SessionProvider`, que aplica las mismas reglas.
 
 ## 6. Contrato de la API
 
@@ -262,7 +282,7 @@ Ubicación: **`packages/contracts/src/auth.ts`** (esquemas de Zod y tipos deriva
 | `Role` | `'owner' \| 'cashier'` | RF-5 |
 | `SessionUser` | `{ id: string (uuid), username: string, displayName: string, role: Role }` | RF-5 |
 | `accountInputSchema` | `{ username: /^[a-z0-9._-]{3,30}$/ tras trim y minúsculas, password: 8–64 y no solo espacios, displayName: 1–40 tras trim, role: Role }` | RF-13 |
-| `ApiError` | `{ error: { code: string, message: string, fields?: Record<string, string>, retryAfterMinutes?: number } }` | RF-2, RF-3, RF-9, RF-10, RF-12 |
+| `ApiError` | `{ error: { code: string, message: string, fields?: Record<string, string>, retryAfterMinutes?: number, userId?: string (uuid) } }` | RF-2, RF-3, RF-9, RF-10, RF-11, RF-12 |
 
 ### 6.2 Rutas
 
@@ -284,6 +304,9 @@ Ejemplo:
 POST /api/auth/login      { "username": "  Ana ", "password": "cafe con leche" }
 200                       { "user": { "id": "4c1f…-9a2e", "username": "ana", "displayName": "Ana Quispe", "role": "owner" } }
 429                       { "error": { "code": "ACCOUNT_LOCKED", "message": "Demasiados intentos. Vuelve a intentarlo en 4 minutos", "retryAfterMinutes": 4 } }
+
+GET /api/auth/session     (cookie de una sesión con más de 12 h)
+401                       { "error": { "code": "SESSION_EXPIRED", "message": "Tu sesión venció. Vuelve a iniciar sesión", "userId": "4c1f…-9a2e" } }
 ```
 
 **`POST /api/auth/logout`** (RF-7, RF-8)
@@ -300,7 +323,7 @@ POST /api/auth/login      { "username": "  Ana ", "password": "cafe con leche" }
 | Entrada | La cookie |
 | `200` | `sessionResponseSchema`: `{ user: SessionUser }` |
 | `401 SESSION_MISSING` | Sin cookie, token desconocido o sesión cerrada. `message: "Inicia sesión para continuar"`; la interfaz no lo muestra (RF-4, RF-8) |
-| `401 SESSION_EXPIRED` | `message: "Tu sesión venció. Vuelve a iniciar sesión"` (RF-10) |
+| `401 SESSION_EXPIRED` | `message: "Tu sesión venció. Vuelve a iniciar sesión"` y `userId` de la cuenta de la sesión vencida (RF-10, RF-11) |
 | `401 SESSION_TERMINATED` | `message: "Tu sesión terminó. Vuelve a iniciar sesión"` (RF-12) |
 
 Las rutas protegidas de los módulos siguientes usan `requireSession` y responden los mismos tres `401`.
@@ -325,9 +348,35 @@ Las rutas protegidas de los módulos siguientes usan `requireSession` y responde
 | D-9 | **`react-router`** (modo biblioteca) | Rutas pública y protegida, redirecciones con estado (avisos de RF-10 y RF-12) y la ruta de regreso (RF-11) | Un enrutador propio con `history`: hay que reimplementar casos que la biblioteca ya resuelve | RF-4, RF-6, RF-11 |
 | D-10 | **Herramientas de calidad:** Vitest (pruebas unitarias, de integración y de componentes, con `jsdom`, `@testing-library/react` y `@testing-library/user-event`); Playwright con Chromium para E2E; ESLint con `typescript-eslint` y `eslint-plugin-react-hooks`; Prettier | Vitest usa la misma configuración que Vite y entiende TypeScript directamente. Playwright permite simular la falta de conexión (RF-14) y reutilizar una sesión entre pestañas (RF-8). La regla nativa `no-restricted-imports` de ESLint cubre «ninguna aplicación importa de otra» sin otro plugin | Jest: necesita transformar TypeScript y ESM. Cypress: más pesado y no maneja varias pestañas. `eslint-plugin-import`: una dependencia más para lo que la regla nativa ya hace | Todos |
 | D-11 | **Cada módulo expone un `index.ts`** como superficie pública, y los demás módulos importan solo de ahí | Hace verificable la regla de arquitectura «un módulo no importa los archivos internos de otro», con `no-restricted-imports` | Sin superficie pública: la regla depende de la revisión manual | RF-4, RF-5 |
-| D-12 | **Despliegue con `render.yaml`** (Blueprint): sitio estático `kofi-web` (publica `apps/web/dist`, reescribe `/api/*` a la API y `/*` a `/index.html`) y servicio web `kofi-api` (aplica las migraciones al arrancar, comprobación de salud en `/api/health`). `DATABASE_URL` se declara sin valor (`sync: false`) y se carga en Render. Neon aloja la base de producción | La configuración queda versionada sin secretos. El build instala también las dependencias de desarrollo (`npm ci --include=dev`), porque TypeScript lo es | Configurar Render a mano: no queda registro ni se puede revisar en un PR | RNF-4 |
+| D-12 | **Despliegue con `render.yaml`** (Blueprint): sitio estático `kofi-web` (publica `apps/web/dist`, reescribe `/api/*` a la API y `/*` a `/index.html`) y servicio web `kofi-api` (aplica las migraciones al arrancar, comprobación de salud en `/api/health`). `DATABASE_URL` se declara sin valor (`sync: false`) y se carga en Render. Neon aloja la base de producción. **Comprobaciones antes de `main`:** mientras Acceso no esté en `main`, el Blueprint apunta a la rama que se comprueba (la de definición en la Preparación y la de pulido al final), con su propia base de Neon. Cuando Acceso llega a `main`, se cambia a `main` y se usa la base de producción | La configuración queda versionada sin secretos. El build instala también las dependencias de desarrollo (`npm ci --include=dev`), porque TypeScript lo es | Configurar Render a mano: no queda registro ni se puede revisar en un PR | RNF-4 |
 | D-13 | **API ejecutada con TypeScript nativo de Node 24** en desarrollo (`node --watch --env-file-if-exists=.env src/server.ts`, con `erasableSyntaxOnly`) y compilada con `tsc` para producción | Sin dependencias para ejecutar TypeScript. `erasableSyntaxOnly` hace que `tsc` rechace lo que Node no puede quitar (por ejemplo, `enum`) | `tsx`: otra dependencia para algo que Node 24 ya hace | — (Preparación) |
 | D-14 | **`packages/contracts` se compila antes** que las aplicaciones: los scripts `typecheck`, `test` y `build` de la raíz lo compilan primero, y `npm run dev -w @kofi/contracts` lo recompila en desarrollo | Es lo que fija `docs/architecture.md` §4.4 | Que cada aplicación importe el código fuente del contrato: cada una tendría que configurar su propia forma de resolverlo | — (Base común) |
+
+### 7.1 Dependencias por paquete
+
+Todas se instalan en su última versión estable al crear el paquete, y la versión queda fijada en `package-lock.json`. Las que fija la constitución (principio 1) no necesitan otra justificación.
+
+| Paquete | Dependencia | Tipo | Justificación |
+| --- | --- | --- | --- |
+| Raíz | `typescript` | desarrollo | Principio 1 |
+| Raíz | `prettier` | desarrollo | D-10 |
+| Raíz | `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-react-hooks`, `globals` | desarrollo | D-10. `@eslint/js` aporta las reglas recomendadas de ESLint y `globals`, las variables globales del navegador y de Node |
+| Raíz | `vitest` | desarrollo | D-10 |
+| Raíz | `@playwright/test` | desarrollo | D-10 |
+| `@kofi/contracts` | `zod` | producción | Principio 1 |
+| `@kofi/api` | `fastify` | producción | Principio 1 |
+| `@kofi/api` | `@fastify/cookie` | producción | D-8 |
+| `@kofi/api` | `pg` | producción | D-6 |
+| `@kofi/api` | `@types/pg`, `@types/node` | desarrollo | Tipos de TypeScript de `pg` y de Node, que no los incluyen |
+| `@kofi/api` | `@electric-sql/pglite` | desarrollo | D-7 |
+| `@kofi/web` | `react`, `react-dom` | producción | Principio 1 |
+| `@kofi/web` | `react-router` | producción | D-9 |
+| `@kofi/web` | `vite` | desarrollo | Principio 1 |
+| `@kofi/web` | `@vitejs/plugin-react` | desarrollo | Plugin oficial de Vite para React: compila JSX y recarga los componentes sin perder el estado. Sin él, Vite no entiende React |
+| `@kofi/web` | `@types/react`, `@types/react-dom` | desarrollo | Tipos de TypeScript de React, que no los incluye |
+| `@kofi/web` | `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | desarrollo | D-10. `@testing-library/jest-dom` agrega aserciones legibles sobre el DOM («está visible», «tiene el valor») |
+
+Agregar cualquier otra dependencia exige actualizar este plan o el de la especificación que la necesite.
 
 **Plan gratuito de Render.** El servicio `kofi-api` usa el plan gratuito, por decisión de la persona. En ese plan, un servicio web «se suspende tras 15 minutos sin tráfico» y reactivarlo «tarda alrededor de un minuto» ([render.com/docs/free](https://render.com/docs/free)). Por eso `spec.md` excluye de RNF-4 y del criterio de 15 segundos el primer ingreso después de un período sin uso (ver sus «Aclaraciones»). Mientras el servicio se reactiva, la interfaz muestra el formulario como enviado y espera la respuesta; no lo trata como falta de conexión (RF-14).
 
@@ -364,15 +413,26 @@ La API de E2E (`e2e-server.ts`) usa PGlite en memoria, crea las cuentas de `e2e/
 3. Adelantar el reloj 12 horas y recargar → `/ingresar` con «Tu sesión venció…»; al volver a ingresar con la misma cuenta, se regresa a `/` (RF-10, RF-11).
 4. Cambiar el rol de la cuenta con la sesión abierta y recargar → «Tu sesión terminó…» (RF-12).
 
-En esta especificación la única pantalla interna es la inicial, así que la E2E de RF-11 solo comprueba que se vuelve a `/`. Que se regrese a otra ruta se prueba en `RequireSession.test.tsx` y `return-to.test.ts` con una ruta de prueba, y se reforzará en la E2E de Menú cuando existan otras pantallas.
+En esta especificación la única pantalla interna es la inicial, así que la E2E de RF-11 solo comprueba que se vuelve a `/`. Que se regrese a otra ruta se prueba en `RequireSession.test.tsx` y `return-to.test.ts` con una ruta de prueba, incluido el caso en que el vencimiento se detecta al recargar (sin cuenta en memoria). Se reforzará en la E2E de Menú cuando existan otras pantallas.
 
-### 8.3 Datos y tiempo
+### 8.3 Requisitos no funcionales
+
+| RNF | Cómo se comprueba |
+| --- | --- |
+| RNF-1 | Integración: el hash no contiene la contraseña y la contraseña no aparece en los registros de la API. CLI: la contraseña no se recibe como argumento |
+| RNF-2 | Integración: con un usuario inexistente y con uno existente, `verifyPassword` se ejecuta exactamente una vez (espía sobre `passwords.service`), y la respuesta es idéntica. Se comprueba la llamada, no el tiempo, para que la prueba no dependa de la velocidad de la máquina |
+| RNF-3 | Las pruebas de componentes y E2E comparan los textos en español tal como los define la especificación |
+| RNF-4 | Medición manual en el despliegue (Pulido): 20 ingresos y 20 cierres de sesión desde un navegador, después de un primer ingreso que reactiva el servicio. Al menos 19 de cada 20 deben tardar menos de 2 segundos (tiempo de la petición en las herramientas del navegador). El resultado se anota en el PR de pulido |
+| RNF-5 | Componentes: el formulario se completa y se envía solo con el teclado |
+| Criterio de 15 s | Medición manual en el despliegue (Pulido), junto con RNF-4: una persona ingresa desde la pantalla de ingreso, con el servicio ya reactivado, en menos de 15 segundos |
+
+### 8.4 Datos y tiempo
 
 - Las pruebas de la API inyectan un `Clock` falso para el bloqueo (5 y 15 minutos) y el vencimiento (12 horas), sin esperas reales.
 - Cada prueba de integración crea su propia base PGlite con las migraciones aplicadas.
 - Las cuentas y contraseñas de prueba están en `e2e/fixtures.ts` y en los fixtures de las pruebas. Solo valen para bases en memoria.
 
-### 8.4 Cobertura por RF
+### 8.5 Cobertura por RF
 
 | RF | Integración de la API | Componentes de la interfaz | E2E |
 | --- | --- | --- | --- |
@@ -386,7 +446,7 @@ En esta especificación la única pantalla interna es la inicial, así que la E2
 | RF-8 | token revocado → `SESSION_MISSING`; otras sesiones siguen | `SessionProvider` ante `401` | US1-6 |
 | RF-9 | 5 fallos en 15 min, ventana deslizante, intentos durante el bloqueo, reinicio, inexistentes, «1 minuto» | `LoginForm` muestra el mensaje de la API | US2-1, US2-2 |
 | RF-10 | 12 h → `SESSION_EXPIRED`; la operación no se aplica | `RequireSession`: aviso | US2-3 |
-| RF-11 | — (solo interfaz) | `return-to` y `RequireSession`: misma cuenta, otra cuenta, ruta desconocida | US2-3 |
+| RF-11 | `SESSION_EXPIRED` incluye `userId`; `SESSION_MISSING` y `SESSION_TERMINATED` no | `return-to` y `RequireSession`: misma cuenta, otra cuenta, ruta desconocida, ruta que el rol no puede ver, vencimiento detectado al recargar, borrado al cerrar sesión y ante `SESSION_TERMINATED` | US2-3 |
 | RF-12 | rol, contraseña o cuenta eliminada → `SESSION_TERMINATED` | `RequireSession`: aviso | US2-4 |
 | RF-13 | `accounts.service` y CLI: datos inválidos, usuario repetido sin distinguir mayúsculas | — | — |
 | RF-14 | — (no llega a la API) | `LoginForm` ante `NETWORK_ERROR` | US1-8 |
@@ -402,3 +462,25 @@ Afectan a todo el proyecto. La persona las aprobó y se aplican en este mismo PR
 5. **Datos (D-6, D-7):** `pg` con SQL y migraciones numeradas en `apps/api/src/shared/database/migrations/`, PGlite en las pruebas y `shared/clock.ts` como única fuente de la hora en la API.
 6. **Herramientas (D-10, D-13, D-14):** Vitest, Playwright en `e2e/` en la raíz, ESLint y Prettier; TypeScript nativo de Node en el desarrollo de la API; compilación previa del contrato.
 7. **Superficie pública de los módulos (D-11):** `index.ts` en cada módulo de las dos aplicaciones.
+
+**Añadidas tras el análisis de consistencia**, también aprobadas y aplicadas en este PR:
+
+8. **Despliegues de comprobación (D-12):** mientras una especificación no esté en `main`, el Blueprint de Render puede apuntar temporalmente a su rama, con una base de Neon propia, para comprobar el despliegue. Después vuelve a `main`.
+9. **Roles por ruta (§3):** cada ruta protegida de la interfaz declara los roles que pueden verla (`roles`, los dos por defecto). Lo usan la navegación de regreso (RF-11) y los módulos que restrinjan pantallas por rol.
+
+## 10. Cambios tras el análisis de consistencia
+
+Correcciones del 2026-10-24 a los hallazgos del análisis que corresponden al plan:
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 (bloqueante) | `SESSION_EXPIRED` incluye el `userId` de la sesión vencida, así que la interfaz guarda la pantalla de regreso aunque se haya recargado. `returnTo` se borra al cerrar sesión y ante `SESSION_TERMINATED` | §5.2, §5.6, §6.1, §6.2, §8.2, §8.5 |
+| 2 | La pantalla de regreso se usa si existe y el rol de la cuenta puede verla (`canView`), como dice RF-11 | §3, §5.6 |
+| 4 | Tabla completa de dependencias por paquete, con `@vitejs/plugin-react` y los paquetes de tipos | §2, §7.1 |
+| 5 | El control del principio 5 describe cómo terminan las sesiones al cambiar una cuenta | §2 |
+| 6 | RF-14 deja de asignarse a `auth.routes.ts` | §3 |
+| 7 | Scripts de cada paquete, incluido `dev` de `@kofi/contracts` | §3 |
+| 8 | Despliegue de comprobación desde la rama antes de `main` | §7 (D-12), §9 |
+| 10 | Cómo se comprueba cada RNF y el criterio de 15 segundos | §8.3 |
+
+Los hallazgos 3 (la E2E de HU-2 solo comprueba `/`, reconocido en §8.2), 9 (rama de las tareas de Preparación y Base común) y 11 (marca `[P]` en Base común) no son del plan: 9 y 11 se corrigen en `tasks.md` con `/desglosar`.
