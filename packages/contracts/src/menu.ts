@@ -47,8 +47,8 @@ function menuNameSchema(maxLength: number, emptyMessage: string, maxMessage: str
     .pipe(
       z
         .string()
-        .min(1, emptyMessage)
-        .max(maxLength, maxMessage)
+        .min(1, { error: emptyMessage, abort: true })
+        .max(maxLength, { error: maxMessage, abort: true })
         .regex(NAME_PATTERN, NAME_CHARACTERS_MESSAGE),
     );
 }
@@ -120,5 +120,56 @@ const CATEGORY_MISSING_MESSAGE = 'Elige una categoría';
 
 export const categoryIdSchema = z
   .string({ error: CATEGORY_MISSING_MESSAGE })
-  .min(1, CATEGORY_MISSING_MESSAGE)
+  .min(1, { error: CATEGORY_MISSING_MESSAGE, abort: true })
   .refine((value) => z.uuid().safeParse(value).success, 'Elige una categoría activa');
+
+// Entradas de las rutas (plan §6.2). La interfaz envía lo escrito tal cual; la API valida.
+export const categoryInputSchema = z.object({ name: categoryNameSchema });
+export type CategoryInput = z.input<typeof categoryInputSchema>;
+
+export const productInputSchema = z
+  .object({ name: productNameSchema, categoryId: categoryIdSchema, price: priceSchema })
+  .transform(({ name, categoryId, price }) => ({ name, categoryId, priceCents: price }));
+export type ProductInput = z.input<typeof productInputSchema>;
+
+// Entidades y respuestas (plan §6.1, §6.2).
+const priceCentsSchema = z.int().min(1).max(PRICE_MAX_CENTS);
+
+export const categorySchema = z.object({ id: z.uuid(), name: z.string(), active: z.boolean() });
+export type Category = z.infer<typeof categorySchema>;
+
+export const adminProductSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  categoryId: z.uuid(),
+  priceCents: priceCentsSchema,
+  active: z.boolean(),
+});
+export type AdminProduct = z.infer<typeof adminProductSchema>;
+
+export const menuProductSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  priceCents: priceCentsSchema,
+});
+export type MenuProduct = z.infer<typeof menuProductSchema>;
+
+export const categoryResponseSchema = z.object({ category: categorySchema });
+export type CategoryResponse = z.infer<typeof categoryResponseSchema>;
+
+export const productResponseSchema = z.object({ product: adminProductSchema });
+export type ProductResponse = z.infer<typeof productResponseSchema>;
+
+// GET /api/menu/admin (RF-2): todas las categorías y productos, ordenados por la API.
+export const adminMenuResponseSchema = z.object({
+  categories: z.array(categorySchema.extend({ products: z.array(adminProductSchema) })),
+});
+export type AdminMenuResponse = z.infer<typeof adminMenuResponseSchema>;
+
+// GET /api/menu (RF-14, RF-15): solo el menú vigente.
+export const currentMenuResponseSchema = z.object({
+  categories: z.array(
+    z.object({ id: z.uuid(), name: z.string(), products: z.array(menuProductSchema) }),
+  ),
+});
+export type CurrentMenuResponse = z.infer<typeof currentMenuResponseSchema>;
