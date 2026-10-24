@@ -534,3 +534,5 @@ El hallazgo 2 (ninguna tarea crea el script `migrate`) es de `tasks.md`; el plan
 ### Decisiones delegadas de US2
 
 Decisión delegada DD-19 (T032): el ingreso devuelve internamente el rechazo desde la transacción y lo lanza después del commit. Así los fallos y el bloqueo persisten de forma atómica bajo el bloqueo de fila. Se descarta lanzar el error dentro de la transacción porque desharía el intento fallido. El reloj se lee después de adquirir la fila para decidir con la hora de cada intento serializado. No cambia el contrato.
+
+Decisión delegada DD-20 (T034): limitar Vitest a cuatro procesos simultáneos. La suite completa produjo un timeout de preparación de PGlite (10 segundos) al ejecutar las bases y hashes de todos los archivos a la vez. Se descarta aumentar los tiempos límite o reducir el coste de scrypt: limitar la carga conserva las comprobaciones y los parámetros reales y funciona en Windows y CI. No cambia el comportamiento del producto.

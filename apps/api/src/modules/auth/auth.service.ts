@@ -34,8 +34,11 @@ export function createAuthService({ db, clock }: AuthDeps) {
     },
     async resolveSession(token?: string): Promise<SessionUser> {
       const session = token ? await findSessionByToken(db, token) : null;
-      if (!session || session.revokedAt || !session.user) {
+      if (!session || session.revokedAt) {
         throw new AppError(401, 'SESSION_MISSING', 'Inicia sesión para continuar');
+      }
+      if (!session.user || session.userSessionVersion !== session.user.sessionVersion) {
+        throw new AppError(401, 'SESSION_TERMINATED', 'Tu sesión terminó. Vuelve a iniciar sesión');
       }
       if (clock.now() >= session.expiresAt) {
         throw new AppError(401, 'SESSION_EXPIRED', 'Tu sesión venció. Vuelve a iniciar sesión', {
