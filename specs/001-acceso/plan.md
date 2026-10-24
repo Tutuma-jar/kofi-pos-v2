@@ -530,3 +530,8 @@ Los hallazgos 3 (la E2E de HU-2 solo comprueba `/`, reconocido en §8.2), 9 (ram
 | 1 (bloqueante) | La cookie tiene un `Max-Age` de 12 h + 7 días y el vencimiento lo decide la API, así que pasadas las 12 horas el navegador todavía envía la cookie y la API responde `SESSION_EXPIRED` | §6.2, §7 (D-15), §8.2, §8.5 |
 
 El hallazgo 2 (ninguna tarea crea el script `migrate`) es de `tasks.md`; el plan ya lo define en §3. El hallazgo 3 sigue reconocido en §8.2. La regla de D-15 se registró en `docs/architecture.md` §6.2, con la aprobación de la persona.
+
+### Decisiones delegadas de US2
+
+Decisión delegada DD-19 (T032): el ingreso devuelve internamente el rechazo desde la transacción y lo lanza después del commit. Así los fallos y el bloqueo persisten de forma atómica bajo el bloqueo de fila. Se descarta lanzar el error dentro de la transacción porque desharía el intento fallido. El reloj se lee después de adquirir la fila para decidir con la hora de cada intento serializado. No cambia el contrato.
+

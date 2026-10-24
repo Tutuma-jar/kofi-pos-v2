@@ -5,7 +5,13 @@ import type { Database } from '../../shared/database/database.ts';
 import { AppError } from '../../shared/http/errors.ts';
 import { hashPassword, verifyPassword } from './passwords.service.ts';
 import { createSession, findSessionByToken, revokeSession } from './sessions.repository.ts';
-import { findUserByUsername, type UserRecord } from './users.repository.ts';
+import {
+  clearLoginFailures,
+  findUserByUsername,
+  recordLoginFailure,
+  setAccountLock,
+  type UserRecord,
+} from './users.repository.ts';
 
 export interface AuthDeps {
   db: Database;
@@ -34,15 +40,30 @@ export function createAuthService({ db, clock }: AuthDeps) {
       return toSessionUser(session.user);
     },
     async login(input: LoginRequest, previousToken?: string) {
-      return db.transaction(async (tx) => {
+      const result = await db.transaction(async (tx) => {
         const user = await findUserByUsername(tx, input.username.trim().toLowerCase(), {
           forUpdate: true,
         });
+        const now = clock.now();
+        if (user?.lockedUntil && user.lockedUntil > now) {
+          const minutes = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 60_000);
+          return new AppError(
+            429,
+            'ACCOUNT_LOCKED',
+            `Demasiados intentos. Vuelve a intentarlo en ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`,
+            { retryAfterMinutes: minutes },
+          );
+        }
         const valid = await verifyPassword(input.password, user?.passwordHash ?? (await dummyHash));
         if (!user || !valid) {
-          throw new AppError(401, 'INVALID_CREDENTIALS', 'Usuario o contraseña incorrectos');
+          if (user && (await recordLoginFailure(tx, user.id, now)) >= 5) {
+            await setAccountLock(tx, user.id, new Date(now.getTime() + 5 * 60_000));
+            await clearLoginFailures(tx, user.id);
+          }
+          return new AppError(401, 'INVALID_CREDENTIALS', 'Usuario o contraseña incorrectos');
         }
-        const now = clock.now();
+        await clearLoginFailures(tx, user.id);
+        await setAccountLock(tx, user.id, null);
         if (previousToken) await revokeSession(tx, previousToken, now);
         const token = randomBytes(32).toString('base64url');
         await createSession(tx, {
@@ -54,6 +75,9 @@ export function createAuthService({ db, clock }: AuthDeps) {
         });
         return { token, user: toSessionUser(user) };
       });
+      // El rechazo se lanza después del commit: los fallos y el bloqueo deben persistir.
+      if (result instanceof AppError) throw result;
+      return result;
     },
   };
 }

@@ -70,3 +70,31 @@ export async function listUsers(db: Queryable): Promise<UserRecord[]> {
   const result = await db.query<UserRow>(`SELECT ${USER_COLUMNS} FROM users u ORDER BY u.username`);
   return result.rows.map(toUserRecord);
 }
+
+export async function clearLoginFailures(db: Queryable, userId: string): Promise<void> {
+  await db.query('DELETE FROM failed_logins WHERE user_id = $1', [userId]);
+}
+
+export async function setAccountLock(
+  db: Queryable,
+  userId: string,
+  until: Date | null,
+): Promise<void> {
+  await db.query('UPDATE users SET locked_until = $2 WHERE id = $1', [userId, until]);
+}
+
+export async function recordLoginFailure(
+  db: Queryable,
+  userId: string,
+  now: Date,
+): Promise<number> {
+  await db.query('INSERT INTO failed_logins (user_id, attempted_at) VALUES ($1, $2)', [
+    userId,
+    now,
+  ]);
+  const result = await db.query<{ count: number }>(
+    'SELECT count(*)::int AS count FROM failed_logins WHERE user_id = $1 AND attempted_at > $2',
+    [userId, new Date(now.getTime() - 15 * 60_000)],
+  );
+  return result.rows[0]!.count;
+}
