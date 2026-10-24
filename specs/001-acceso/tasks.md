@@ -1,6 +1,6 @@
 # Tareas — SPEC-001 Acceso
 
-Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1 y US2 implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (tercer análisis sin bloqueantes); Preparación, Base común, US1, US2 y Pulido implementados · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -121,7 +121,7 @@ Rama: `feat/001-acceso-pulido`.
   Hecho cuando: la cookie `kofi_session` llega con sus atributos a través del dominio del sitio estático, se inicia y se cierra sesión con una cuenta creada con la CLI y `/api/health` responde `200`.
 - [x] **T043 [integración]** Medir en el despliegue de T042 el RNF-4 y el criterio de 15 segundos, como indica el plan (§8.3): script local con Playwright y contraseña introducida una vez sin eco, un ciclo de calentamiento excluido, 20 ingresos y 20 cierres automáticos hasta el resultado visible y la petición terminada, y un ingreso manual cronometrado desde el formulario visible. Guardar solo tiempos/resultados, sin identidad, cuerpos ni credenciales (RNF-1, RNF-4). Método automatizado aprobado por la persona. Depende de: T042
   Hecho cuando: al menos 19 de cada 20 ingresos tardan menos de 3 segundos y al menos 19 de cada 20 cierres menos de 2 segundos (límites aprobados expresamente por la persona), el ingreso cronometrado tarda menos de 15 segundos, y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T044 [integración]** Actualizar `README.md`: estado del módulo Acceso, cómo arrancar en desarrollo (`apps/api/.env`, `npm run migrate` y las tres terminales de §3 del plan: `npm run dev -w @kofi/contracts`, `-w @kofi/api` y `-w @kofi/web`) y cómo preparar las cuentas. Depende de: T043
+- [x] **T044 [integración]** Actualizar `README.md`: estado del módulo Acceso, cómo arrancar en desarrollo (`apps/api/.env`, `npm run migrate` y las tres terminales de §3 del plan: `npm run dev -w @kofi/contracts`, `-w @kofi/api` y `-w @kofi/web`) y cómo preparar las cuentas. Depende de: T043
   Hecho cuando: siguiendo el README desde un clon nuevo se levanta la aplicación en desarrollo y se crea una cuenta.
 
 ## Cobertura de RF
