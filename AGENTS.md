@@ -83,6 +83,14 @@ Refs: SPEC-NNN (T<nnn>)
 
 Sin pedir confirmación: ejecuta las comprobaciones de «Comandos» que existan, haz el commit, publica la rama (`git push -u origin <rama>`), abre o actualiza el PR en borrador y su descripción, e informa el resultado.
 
+### 6. Al terminar la fase de una rama
+
+Cuando todas las casillas de la fase de tu rama (definición, historia o pulido) estén marcadas:
+
+1. Delega en el subagente `verificador` con este mensaje exacto, sin añadir nada: `Verifica SPEC-NNN (PR #M).`
+2. Cuando termine, comprueba que `git status --porcelain` no muestra cambios nuevos; si los hay, descártalos sin commitearlos e infórmalo.
+3. Informa su veredicto. Si aprobó, el PR ya está listo para que una persona lo revise.
+
 ### Documentación
 
 | Archivo | Contenido |
@@ -94,7 +102,7 @@ Sin pedir confirmación: ejecuta las comprobaciones de «Comandos» que existan,
 
 Consulta solo lo pertinente a la tarea.
 
-### 6. Compatibilidad
+### 7. Compatibilidad
 
 El equipo trabaja en Windows: una persona con la app de Claude y otra con la app de Codex. Todo lo que se añada al flujo (hooks, scripts, configuración) debe funcionar en ambas apps tras clonar y ejecutar `npm install`, estar escrito en Node sin depender de Bash ni de PowerShell, usar saltos de línea LF, no usar enlaces simbólicos y configurarse para las dos herramientas en el mismo cambio.
 
@@ -104,6 +112,6 @@ Requisitos: Node 24 y npm 11.
 
 | Acción | Comando |
 | --- | --- |
-| Instalar dependencias (activa los hooks de Git y las skills) | `npm install` |
+| Instalar dependencias (activa los hooks de Git, las skills y el subagente) | `npm install` |
 | Pruebas de las reglas de Git | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |

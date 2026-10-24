@@ -49,7 +49,7 @@ Una vez por computadora (Windows):
 ```bash
 git clone https://github.com/Tutuma-jar/kofi-pos-v2.git
 cd kofi-pos-v2
-npm install   # dependencias, hooks de Git y skills del proyecto
+npm install   # dependencias, hooks de Git, skills y subagente del proyecto
 ```
 
 ## Flujo de trabajo
@@ -66,7 +66,7 @@ Cada funcionalidad sigue el ciclo de desarrollo guiado por especificaciones, con
 | 4. Desglosar | `/desglosar` → `tasks.md`, en fases por historia |
 | 5. Analizar | `/analizar` → consistencia entre documentos, antes de programar |
 | 6. Implementar | `/implementar T<nnn>` → una tarea, tests primero |
-| 7. Verificar | Revisión independiente, RF por RF |
+| 7. Verificar | Automático: el subagente `verificador` recorre los RF |
 | 8. Integrar | Una persona revisa y fusiona con squash merge |
 
 Cada especificación se entrega **por historias priorizadas**: un PR de definición (con el contrato), un PR por historia (`feat/NNN-<nombre>-usN`) y un PR de pulido. Dentro de cada historia, la interfaz (contra un cliente simulado del contrato) y la API avanzan en paralelo, y la historia cierra integrada y probada de punta a punta.

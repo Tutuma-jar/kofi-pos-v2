@@ -39,7 +39,8 @@ Si falta alguno de esos archivos, detente y dilo.
     - **Verificación:** los comandos ejecutados en esta tarea y su resultado, con extractos reales de los errores.
     - **Relacionado:** `specs/NNN-<nombre>/` y las especificaciones de las que depende.
     - **Observaciones:** problemas conocidos, desvíos respecto a `plan.md` y pasos pendientes.
-11. **Informe.** Indica qué RF cubre la tarea, el resultado de las comprobaciones, el enlace al PR y si era la última casilla de la fase de la rama. Después **detente**.
+11. **Verificación.** Si era la última casilla de la fase de la rama, aplica la regla 6 de `AGENTS.md`: delega en el subagente `verificador` con el mensaje exacto `Verifica SPEC-NNN (PR #M).`
+12. **Informe.** Indica qué RF cubre la tarea, el resultado de las comprobaciones, el enlace al PR y, si hubo verificación, su veredicto. Después **detente**.
 
 ## Salida
 
