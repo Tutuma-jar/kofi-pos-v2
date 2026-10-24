@@ -152,6 +152,7 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md), que tien
 ### 6.2 Sesión
 
 - La sesión es una cookie `kofi_session` (`HttpOnly`, `SameSite=Strict`, `Secure` en producción) con un token aleatorio. En la base solo se guarda su SHA-256.
+- La cookie dura más que la sesión: `Max-Age` de 12 horas más 7 días de margen. El vencimiento lo decide solo la API, con `sessions.expires_at`, para poder distinguir una sesión vencida de una inexistente.
 - Toda ruta protegida de cualquier módulo usa `requireSession`, que exporta el módulo `auth` de la API. Ante una sesión inválida responde `401` con `SESSION_MISSING`, `SESSION_EXPIRED` o `SESSION_TERMINATED`.
 - Las respuestas de la API llevan `Cache-Control: no-store`.
 

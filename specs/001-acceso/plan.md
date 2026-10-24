@@ -1,6 +1,6 @@
 # Plan — SPEC-001 Acceso
 
-Estado: aprobado (corregido tras el análisis de consistencia) · Fecha: 2026-10-24 · Especificación: [`spec.md`](spec.md)
+Estado: aprobado (corregido tras el segundo análisis de consistencia) · Fecha: 2026-10-24 · Especificación: [`spec.md`](spec.md)
 
 Es la primera especificación del proyecto: además del módulo `auth`, crea los tres paquetes del monorepo (`apps/web`, `apps/api`, `packages/contracts`), sus herramientas (tipos, lint, formato, pruebas y build) y el despliegue.
 
@@ -286,7 +286,7 @@ Ubicación: **`packages/contracts/src/auth.ts`** (esquemas de Zod y tipos deriva
 
 ### 6.2 Rutas
 
-La cookie de sesión es `kofi_session`: `HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age` igual al tiempo que le queda a la sesión. Todas las respuestas llevan `Cache-Control: no-store`.
+La cookie de sesión es `kofi_session`: `HttpOnly`, `SameSite=Strict`, `Path=/`, `Secure` en producción y `Max-Age=648000` (12 horas de sesión más 7 días de margen, D-15). El vencimiento lo decide solo la API con `sessions.expires_at`; el margen permite que, pasadas las 12 horas, el navegador siga enviando la cookie y la API pueda responder `SESSION_EXPIRED` con el `userId` (RF-10, RF-11). Todas las respuestas llevan `Cache-Control: no-store`.
 
 **`POST /api/auth/login`** (RF-1, RF-2, RF-3, RF-6, RF-9)
 
@@ -351,6 +351,7 @@ Las rutas protegidas de los módulos siguientes usan `requireSession` y responde
 | D-12 | **Despliegue con `render.yaml`** (Blueprint): sitio estático `kofi-web` (publica `apps/web/dist`, reescribe `/api/*` a la API y `/*` a `/index.html`) y servicio web `kofi-api` (aplica las migraciones al arrancar, comprobación de salud en `/api/health`). `DATABASE_URL` se declara sin valor (`sync: false`) y se carga en Render. Neon aloja la base de producción. **Comprobaciones antes de `main`:** mientras Acceso no esté en `main`, el Blueprint apunta a la rama que se comprueba (la de definición en la Preparación y la de pulido al final), con su propia base de Neon. Cuando Acceso llega a `main`, se cambia a `main` y se usa la base de producción | La configuración queda versionada sin secretos. El build instala también las dependencias de desarrollo (`npm ci --include=dev`), porque TypeScript lo es | Configurar Render a mano: no queda registro ni se puede revisar en un PR | RNF-4 |
 | D-13 | **API ejecutada con TypeScript nativo de Node 24** en desarrollo (`node --watch --env-file-if-exists=.env src/server.ts`, con `erasableSyntaxOnly`) y compilada con `tsc` para producción | Sin dependencias para ejecutar TypeScript. `erasableSyntaxOnly` hace que `tsc` rechace lo que Node no puede quitar (por ejemplo, `enum`) | `tsx`: otra dependencia para algo que Node 24 ya hace | — (Preparación) |
 | D-14 | **`packages/contracts` se compila antes** que las aplicaciones: los scripts `typecheck`, `test` y `build` de la raíz lo compilan primero, y `npm run dev -w @kofi/contracts` lo recompila en desarrollo | Es lo que fija `docs/architecture.md` §4.4 | Que cada aplicación importe el código fuente del contrato: cada una tendría que configurar su propia forma de resolverlo | — (Base común) |
+| D-15 | **La cookie dura más que la sesión:** `Max-Age` de 12 h + 7 días, y el vencimiento se decide en la API | Si la cookie venciera junto con la sesión, el navegador la borraría a las 12 horas y la API solo vería «sin cookie» (`SESSION_MISSING`): no podría avisar del vencimiento (RF-10) ni dar la cuenta para el regreso (RF-11). Una cookie vencida en la API no da acceso, porque `resolveSession` comprueba `expires_at` en cada petición. Pasados los 7 días, el navegador la borra y se trata como cualquier ingreso sin sesión | `Max-Age` igual al tiempo que le queda a la sesión: rompe RF-10 y RF-11 (hallazgo del segundo análisis). Cookie de sesión del navegador, sin `Max-Age`: se pierde al cerrar el navegador, algo que la especificación no pide | RF-10, RF-11 |
 
 ### 7.1 Dependencias por paquete
 
@@ -410,7 +411,7 @@ La API de E2E (`e2e-server.ts`) usa PGlite en memoria, crea las cuentas de `e2e/
 
 1. 5 fallos sobre «luis» y luego la contraseña correcta → «Demasiados intentos. Vuelve a intentarlo en 5 minutos» (RF-9).
 2. Adelantar el reloj 5 minutos → el ingreso funciona (RF-9).
-3. Adelantar el reloj 12 horas y recargar → `/ingresar` con «Tu sesión venció…»; al volver a ingresar con la misma cuenta, se regresa a `/` (RF-10, RF-11).
+3. Al ingresar, la cookie `kofi_session` del navegador (`context.cookies()`) vence más de 12 horas después del ingreso (D-15). Adelantar el reloj de la API 12 horas y recargar → `/ingresar` con «Tu sesión venció…»; al volver a ingresar con la misma cuenta, se regresa a `/` (RF-10, RF-11). Playwright no puede adelantar el reloj de cookies del navegador, por eso la primera comprobación asegura que la cookie seguiría ahí pasadas las 12 horas.
 4. Cambiar el rol de la cuenta con la sesión abierta y recargar → «Tu sesión terminó…» (RF-12).
 
 En esta especificación la única pantalla interna es la inicial, así que la E2E de RF-11 solo comprueba que se vuelve a `/`. Que se regrese a otra ruta se prueba en `RequireSession.test.tsx` y `return-to.test.ts` con una ruta de prueba, incluido el caso en que el vencimiento se detecta al recargar (sin cuenta en memoria). Se reforzará en la E2E de Menú cuando existan otras pantallas.
@@ -445,7 +446,7 @@ En esta especificación la única pantalla interna es la inicial, así que la E2
 | RF-7 | `logout` revoca y borra la cookie; `204` sin sesión | `AuthenticatedLayout`: «Cerrar sesión» | US1-6 |
 | RF-8 | token revocado → `SESSION_MISSING`; otras sesiones siguen | `SessionProvider` ante `401` | US1-6 |
 | RF-9 | 5 fallos en 15 min, ventana deslizante, intentos durante el bloqueo, reinicio, inexistentes, «1 minuto» | `LoginForm` muestra el mensaje de la API | US2-1, US2-2 |
-| RF-10 | 12 h → `SESSION_EXPIRED`; la operación no se aplica | `RequireSession`: aviso | US2-3 |
+| RF-10 | `Set-Cookie` con `Max-Age=648000` (D-15); 12 h → `SESSION_EXPIRED`; la operación no se aplica | `RequireSession`: aviso | US2-3 |
 | RF-11 | `SESSION_EXPIRED` incluye `userId`; `SESSION_MISSING` y `SESSION_TERMINATED` no | `return-to` y `RequireSession`: misma cuenta, otra cuenta, ruta desconocida, ruta que el rol no puede ver, vencimiento detectado al recargar, borrado al cerrar sesión y ante `SESSION_TERMINATED` | US2-3 |
 | RF-12 | rol, contraseña o cuenta eliminada → `SESSION_TERMINATED` | `RequireSession`: aviso | US2-4 |
 | RF-13 | `accounts.service` y CLI: datos inválidos, usuario repetido sin distinguir mayúsculas | — | — |
@@ -484,3 +485,11 @@ Correcciones del 2026-10-24 a los hallazgos del análisis que corresponden al pl
 | 10 | Cómo se comprueba cada RNF y el criterio de 15 segundos | §8.3 |
 
 Los hallazgos 3 (la E2E de HU-2 solo comprueba `/`, reconocido en §8.2), 9 (rama de las tareas de Preparación y Base común) y 11 (marca `[P]` en Base común) no son del plan: 9 y 11 se corrigen en `tasks.md` con `/desglosar`.
+
+### Segundo análisis de consistencia
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 (bloqueante) | La cookie tiene un `Max-Age` de 12 h + 7 días y el vencimiento lo decide la API, así que pasadas las 12 horas el navegador todavía envía la cookie y la API responde `SESSION_EXPIRED` | §6.2, §7 (D-15), §8.2, §8.5 |
+
+El hallazgo 2 (ninguna tarea crea el script `migrate`) es de `tasks.md`; el plan ya lo define en §3. El hallazgo 3 sigue reconocido en §8.2. La regla de D-15 se registró en `docs/architecture.md` §6.2, con la aprobación de la persona.
