@@ -37,7 +37,7 @@ Rama: `feat/002-menu-definicion`.
   Hecho cuando: las pruebas de integración cubren cada función; el precio se lee como el entero guardado; la lista de vigentes excluye los productos inactivos y los de categorías inactivas.
 - [x] **T009 [web] [P]** Hacer que `shared/http/api-fetch.ts` admita `PUT` (plan D-7). Depende de: T001
   Hecho cuando: una prueba comprueba una petición `PUT` con cuerpo JSON, y las pruebas existentes siguen pasando.
-- [ ] **T010 [web] [P]** Escribir `modules/menu/api/menu-client.ts`: interfaz `MenuClient` con las 10 operaciones del contrato y su cliente HTTP real sobre `api-fetch` (plan §6.2; RF-1 a RF-6, RF-9, RF-10, RF-14). Depende de: T005, T009
+- [x] **T010 [web] [P]** Escribir `modules/menu/api/menu-client.ts`: interfaz `MenuClient` con las 10 operaciones del contrato y su cliente HTTP real sobre `api-fetch` (plan §6.2; RF-1 a RF-6, RF-9, RF-10, RF-14). Depende de: T005, T009
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada operación, que las respuestas se validan con los esquemas del contrato y que un `ApiError` se propaga.
 - [ ] **T011 [web] [P]** Escribir `modules/menu/api/MenuClientProvider.tsx` y `useMenuClient`: el cliente en uso por contexto, que el proveedor siempre recibe (plan D-10). `main.tsx` provee el cliente real fuera de desarrollo. Depende de: T010
   Hecho cuando: una prueba de componente comprueba que `useMenuClient` devuelve el cliente del proveedor y falla con un error claro fuera de él, y el build de producción usa el cliente real.
