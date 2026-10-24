@@ -38,6 +38,29 @@ describe('routes', () => {
   });
 
   it('/ es protegida y declara los dos roles', () => {
-    expect(protectedRoutes.map((r) => [r.path, r.roles])).toEqual([['/', ['owner', 'cashier']]]);
+    expect(protectedRoutes.find((r) => r.path === '/')?.roles).toEqual(['owner', 'cashier']);
+  });
+
+  // SPEC-002 Menú (plan §3, D-8; RF-1, RF-13).
+  it('/menu/administrar muestra la administración del menú', () => {
+    renderAt('/menu/administrar');
+
+    expect(screen.getByRole('heading', { name: 'Administrar menú' })).toBeInTheDocument();
+  });
+
+  it('/menu muestra la consulta del menú', () => {
+    renderAt('/menu');
+
+    expect(screen.getByRole('heading', { name: 'Menú' })).toBeInTheDocument();
+  });
+
+  it('las rutas protegidas declaran sus roles y el enlace de la pantalla inicial', () => {
+    expect(protectedRoutes.map(({ path, roles, homeLink }) => ({ path, roles, homeLink }))).toEqual(
+      [
+        { path: '/', roles: ['owner', 'cashier'], homeLink: undefined },
+        { path: '/menu/administrar', roles: ['owner'], homeLink: 'Administrar menú' },
+        { path: '/menu', roles: ['owner', 'cashier'], homeLink: 'Ver menú' },
+      ],
+    );
   });
 });

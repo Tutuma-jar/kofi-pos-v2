@@ -43,7 +43,7 @@ Rama: `feat/002-menu-definicion`.
   Hecho cuando: una prueba de componente comprueba que `useMenuClient` devuelve el cliente del proveedor y falla con un error claro fuera de él, y el build de producción usa el cliente real.
 - [x] **T012 [web] [P]** Escribir `modules/menu/dev/`: `fixtures.ts`, `menu-demo-client.ts` (implementa `MenuClient` con el menú en memoria) y `ScenarioPicker.tsx` con los escenarios menú vacío, menú cargado, nombre repetido, categoría con productos activos, sin permiso y sin conexión. En desarrollo, `main.tsx` provee el cliente simulado a la aplicación y monta el selector (plan D-10, D-11; RF-1 a RF-10, RF-14). Depende de: T011
   Hecho cuando: las pruebas validan con los esquemas del contrato todos los datos y errores del cliente simulado, comprueban que crear y editar cambian el menú en memoria y que cambiar de escenario cambia sus respuestas, y el build de producción no contiene el selector ni el cliente simulado del menú.
-- [ ] **T013 [web] [P]** Añadir a `routes.tsx` el campo `homeLink` y las rutas `/menu` («Ver menú», los dos roles) y `/menu/administrar` («Administrar menú», `roles: ['owner']`), con páginas provisionales exportadas desde `modules/menu/index.ts` (plan §3, D-8; RF-1, RF-13). Depende de: T001
+- [x] **T013 [web] [P]** Añadir a `routes.tsx` el campo `homeLink` y las rutas `/menu` («Ver menú», los dos roles) y `/menu/administrar` («Administrar menú», `roles: ['owner']`), con páginas provisionales exportadas desde `modules/menu/index.ts` (plan §3, D-8; RF-1, RF-13). Depende de: T001
   Hecho cuando: una prueba de componente navega a las dos rutas y comprueba sus `roles` y su `homeLink`.
 
 ## Fase 3 — US1: armar el menú (P1)
