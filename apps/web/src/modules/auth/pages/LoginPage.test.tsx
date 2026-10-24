@@ -42,7 +42,7 @@ describe('página de ingreso (RF-1, RF-6)', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent(
         DEMO_ERRORS[scenario].body.error.message,
       );
-      expect(screen.getByLabelText('Usuario')).toBeVisible();
+      expect(await screen.findByLabelText('Usuario')).toBeVisible();
     },
   );
   it('muestra el bloqueo calculado por la API y conserva el usuario (RF-9)', async () => {

@@ -17,12 +17,26 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
   const generation = useRef(0);
   const [state, setState] = useState<State>({ user: null, checkedKey: null, error: null });
 
-  const sessionMissing = useCallback(
+  const rejectSession = useCallback(
     (error: unknown) => {
-      if (!(error instanceof ApiFetchError) || error.code !== 'SESSION_MISSING') return false;
+      if (
+        !(error instanceof ApiFetchError) ||
+        error.status !== 401 ||
+        !['SESSION_MISSING', 'SESSION_EXPIRED', 'SESSION_TERMINATED'].includes(error.code)
+      )
+        return false;
       generation.current++;
-      setState({ user: null, checkedKey: location.key, error: null });
-      if (location.pathname !== '/ingresar') navigate('/ingresar', { replace: true });
+      setState({
+        user: null,
+        checkedKey: location.pathname === '/ingresar' ? location.key : null,
+        error: null,
+      });
+      if (location.pathname !== '/ingresar' || error.code !== 'SESSION_MISSING') {
+        navigate('/ingresar', {
+          replace: true,
+          state: { notice: error.code === 'SESSION_MISSING' ? undefined : error.message },
+        });
+      }
       return true;
     },
     [location.key, location.pathname, navigate],
@@ -38,7 +52,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
       })
       .catch((error: unknown) => {
         if (current !== generation.current) return;
-        if (!sessionMissing(error))
+        if (!rejectSession(error))
           setState({
             user: null,
             checkedKey: location.key,
@@ -48,7 +62,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
                 : 'Ocurrió un error. Inténtalo de nuevo',
           });
       });
-  }, [client, location.key, sessionMissing]);
+  }, [client, location.key, rejectSession]);
 
   useEffect(() => {
     const sequence = generation;
@@ -57,7 +71,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
       sequence.current++;
     };
   }, [checkSession]);
-  useEffect(() => subscribeUnauthorized(sessionMissing), [sessionMissing]);
+  useEffect(() => subscribeUnauthorized(rejectSession), [rejectSession]);
 
   const refresh = useCallback(() => {
     setState({ user: null, checkedKey: null, error: null });
