@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router';
 import { ApiFetchError, subscribeUnauthorized } from '../../../shared/http/api-fetch.ts';
 import type { AuthClient } from '../api/auth-client.ts';
+import { returnTo } from '../api/return-to.ts';
 import { SessionContext } from './useSession.ts';
 
 interface State {
@@ -25,6 +26,9 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
         !['SESSION_MISSING', 'SESSION_EXPIRED', 'SESSION_TERMINATED'].includes(error.code)
       )
         return false;
+      if (error.code === 'SESSION_EXPIRED' && error.error.userId) {
+        returnTo.save(error.error.userId, location.pathname + location.search + location.hash);
+      } else if (error.code === 'SESSION_TERMINATED') returnTo.clear();
       generation.current++;
       setState({
         user: null,
@@ -39,7 +43,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
       }
       return true;
     },
-    [location.key, location.pathname, navigate],
+    [location.key, location.pathname, location.search, location.hash, navigate],
   );
 
   const checkSession = useCallback(() => {
@@ -78,14 +82,13 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
     return checkSession();
   }, [checkSession]);
 
-  const acceptSession = useCallback(
-    (user: SessionUser) => {
-      generation.current++;
-      setState({ user, checkedKey: location.key, error: null });
-    },
-    [location.key],
-  );
+  const acceptSession = useCallback((user: SessionUser) => {
+    generation.current++;
+    // La página de ingreso navega al destino antes de exponer la nueva identidad.
+    setState({ user, checkedKey: null, error: null });
+  }, []);
   const logout = useCallback(async () => {
+    returnTo.clear();
     await client.logout();
     generation.current++;
     setState({ user: null, checkedKey: location.key, error: null });

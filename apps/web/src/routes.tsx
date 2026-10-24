@@ -9,6 +9,7 @@ import {
   AuthenticatedLayout,
   httpAuthClient,
   type AuthClient,
+  canView,
 } from './modules/auth/index.ts';
 
 // Rutas de la interfaz (docs/architecture.md §6.6). Cada ruta protegida declara los roles que pueden
@@ -26,7 +27,12 @@ interface ProtectedRouteDefinition extends RouteDefinition {
   roles?: readonly Role[];
 }
 
-export const publicRoutes: RouteDefinition[] = [{ path: '/ingresar', element: <LoginPage /> }];
+export const publicRoutes: RouteDefinition[] = [
+  {
+    path: '/ingresar',
+    element: <LoginPage canView={(role, path) => canView(role, path, protectedRoutes)} />,
+  },
+];
 
 const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
   { path: '/', element: <HomePage /> },
