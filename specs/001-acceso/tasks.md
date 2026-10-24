@@ -17,7 +17,7 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: `npm run format:check` pasa en todo el repositorio.
 - [x] **T002 [contrato]** Crear el paquete `@kofi/contracts` vacío: `package.json` con `zod`, `tsconfig`, scripts `build` (`tsc` a `dist/`) y `dev` (`tsc --watch`), `exports` hacia `dist/` y una prueba de humo (D-14, plan §3 «Scripts por paquete»). Depende de: T001
   Hecho cuando: `npm run build -w @kofi/contracts` genera `dist/`, `npm run dev -w @kofi/contracts` recompila al guardar y Vitest ejecuta la prueba de humo.
-- [ ] **T003 [api] [P]** Crear el paquete `@kofi/api` con las dependencias de §7.1 del plan (`fastify`, `@types/node`): `app.ts` con `buildApp(deps)`, `server.ts`, `GET /api/health` y los scripts `dev` con TypeScript nativo de Node (D-13), `build` con `tsc` y `start`. Depende de: T001
+- [x] **T003 [api] [P]** Crear el paquete `@kofi/api` con las dependencias de §7.1 del plan (`fastify`, `@types/node`): `app.ts` con `buildApp(deps)`, `server.ts`, `GET /api/health` y los scripts `dev` con TypeScript nativo de Node (D-13), `build` con `tsc` y `start`. Depende de: T001
   Hecho cuando: una prueba con `app.inject` recibe `200` en `/api/health` y `npm run build -w @kofi/api` termina sin errores.
 - [ ] **T004 [web] [P]** Crear el paquete `@kofi/web` con las dependencias de §7.1 del plan (`react`, `react-dom`, `vite`, `@vitejs/plugin-react`, tipos de React, `jsdom` y Testing Library con `jest-dom`): `index.html`, `main.tsx`, scripts `dev`, `build` y `preview`, y proxy de `/api` a la API en `vite.config.ts` (D-2). Depende de: T001
   Hecho cuando: una prueba de componente de humo pasa y `npm run build -w @kofi/web` genera `apps/web/dist/`.
