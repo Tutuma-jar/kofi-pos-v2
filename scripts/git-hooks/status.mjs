@@ -19,4 +19,6 @@ for (const [name, what] of HOOKS) {
   const ok = existsSync(join('.githooks', name));
   console.log(`  ${ok ? ' ' : '✖'} ${name.padEnd(19)} ${what}${ok ? '' : ' (falta el archivo)'}`);
 }
-console.log('\nHooks de agente: Claude → /hooks · Codex → Settings → Hooks');
+console.log('\nHooks de agente:');
+console.log('  Claude  aceptar la confianza de la carpeta; verlos con /hooks en la terminal (claude)');
+console.log('  Codex   Settings → Hooks; volver a confiar cada vez que cambia .codex/hooks.json');
