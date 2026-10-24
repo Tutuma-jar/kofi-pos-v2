@@ -13,7 +13,7 @@ Estado: aprobadas, pendiente de análisis · Fecha: 2026-10-24 · [`spec.md`](sp
 
 Rama: `feat/001-acceso-definicion`.
 
-- [ ] **T001 [integración]** Configurar TypeScript y Prettier en la raíz: `tsconfig.base.json` (estricto, ESM, `erasableSyntaxOnly`), `.prettierrc.json` y los scripts `format` y `format:check`
+- [x] **T001 [integración]** Configurar TypeScript y Prettier en la raíz: `tsconfig.base.json` (estricto, ESM, `erasableSyntaxOnly`), `.prettierrc.json` y los scripts `format` y `format:check`
   Hecho cuando: `npm run format:check` pasa en todo el repositorio.
 - [ ] **T002 [contrato]** Crear el paquete `@kofi/contracts` vacío: `package.json` con `zod`, `tsconfig`, scripts `build` (`tsc` a `dist/`) y `dev` (`tsc --watch`), `exports` hacia `dist/` y una prueba de humo (D-14, plan §3 «Scripts por paquete»). Depende de: T001
   Hecho cuando: `npm run build -w @kofi/contracts` genera `dist/`, `npm run dev -w @kofi/contracts` recompila al guardar y Vitest ejecuta la prueba de humo.

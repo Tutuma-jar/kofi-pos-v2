@@ -381,6 +381,14 @@ Agregar cualquier otra dependencia exige actualizar este plan o el de la especif
 
 **Plan gratuito de Render.** El servicio `kofi-api` usa el plan gratuito, por decisión de la persona. En ese plan, un servicio web «se suspende tras 15 minutos sin tráfico» y reactivarlo «tarda alrededor de un minuto» ([render.com/docs/free](https://render.com/docs/free)). Por eso `spec.md` excluye de RNF-4 y del criterio de 15 segundos el primer ingreso después de un período sin uso (ver sus «Aclaraciones»). Mientras el servicio se reactiva, la interfaz muestra el formulario como enviado y espera la respuesta; no lo trata como falta de conexión (RF-14).
 
+### 7.2 Decisiones delegadas de la implementación
+
+Decisiones técnicas tomadas por el agente al implementar Preparación y Base común, con la persona en modo delegado (`AGENTS.md`). Quedan aprobadas al fusionar el PR de definición.
+
+| # | Tarea | Decisión delegada | Motivo | Alternativa descartada |
+| --- | --- | --- | --- | --- |
+| DD-1 | T001 | Prettier formatea el código y la configuración del monorepo, con `singleQuote` y `printWidth: 100`. `.prettierignore` excluye el Markdown y los archivos del flujo de trabajo (`scripts/`, `.githooks/`, `.github/`, `.agents/`, `.claude/`, `.codex/`) | Reformatear el Markdown cambiaría `docs/constitution.md`, que solo se modifica en su propio PR, y todas las tablas de la documentación. Reformatear `.codex/hooks.json` obligaría a volver a confiar en los hooks de Codex, y `scripts/` tiene su propio estilo compacto, cubierto por `npm run test:git` | Formatear todo el repositorio: modifica la constitución fuera de su PR y mezcla en esta tarea cambios ajenos al código |
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles
