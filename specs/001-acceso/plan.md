@@ -410,6 +410,8 @@ Decisiones técnicas tomadas por el agente al implementar Preparación y Base co
 
 Decisión delegada DD-14 (T025): la CLI admite solo el comando (`create` o `list` en US1) y pide los datos de creación interactivamente. La contraseña usa el modo sin eco de Node, exige una terminal interactiva y restaura su modo al terminar o cancelar. Se descarta admitir contraseñas como argumentos o por entrada redirigida porque podrían quedar en el historial o en archivos. `runAccounts` recibe la entrada/salida para probar el flujo con datos simulados sin cuentas reales ni dependencias nuevas.
 
+Decisión delegada DD-15 (T027): `apiFetch` publica los errores 401 a suscriptores y `SessionProvider` atiende los códigos de sesión (el ingreso incorrecto sigue siendo un error del formulario). La comprobación usa un contador para ignorar respuestas antiguas y oculta la identidad mientras cambia de ruta. Un fallo de red en la comprobación permite reintentar sin mostrar contenido protegido. Se descarta que cada módulo redirija por separado: dejaría operaciones sin protección visual y duplicaría las reglas de navegación. No cambia el contrato.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles
