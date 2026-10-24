@@ -1,0 +1,17 @@
+# Generados
+package-lock.json
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Documentación: su formato se mantiene a mano (y docs/constitution.md solo cambia en su propio PR).
+*.md
+
+# Flujo de trabajo del repositorio (hooks, reglas de Git, skills y configuración de las apps de agentes).
+.agents/
+.claude/
+.codex/
+.github/
+.githooks/
+scripts/

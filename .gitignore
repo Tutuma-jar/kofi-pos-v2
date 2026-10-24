@@ -18,3 +18,10 @@ build/
 .agents/skills/emil-design-eng/
 .claude/settings.local.json
 .impeccable/config.local.json
+
+# Resultados de Playwright
+test-results/
+playwright-report/
+
+# Enlace local del CLI de Neon (organización, proyecto y rama de cada persona)
+.neon
