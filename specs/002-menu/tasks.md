@@ -114,7 +114,7 @@ Rama: `feat/002-menu-us3`.
 
 Rama: `feat/002-menu-pulido`.
 
-- [ ] **T034 [integración]** Escribir `apps/api/test/seed-menu.ts` y su script `npm run seed:menu -w @kofi/api`, que carga 200 productos de prueba con los servicios del módulo en la base de `DATABASE_URL` y se niega a hacerlo si la base ya tiene productos (plan D-12; RNF-3). Depende de: T033
+- [x] **T034 [integración]** Escribir `apps/api/test/seed-menu.ts` y su script `npm run seed:menu -w @kofi/api`, que carga 200 productos de prueba con los servicios del módulo en la base de `DATABASE_URL` y se niega a hacerlo si la base ya tiene productos (plan D-12; RNF-3). Depende de: T033
   Hecho cuando: una prueba lo ejecuta sobre PGlite y comprueba 200 productos en el menú vigente, y que con productos previos no carga nada.
 - [ ] **T035 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T034
   Hecho cuando: al menos 19 de cada 20 aperturas de la administración, de la consulta y de guardados tardan menos de 2 segundos, una persona crea un producto en menos de 30 segundos y los resultados quedan anotados en la descripción del PR de pulido.
