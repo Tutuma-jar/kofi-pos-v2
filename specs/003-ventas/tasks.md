@@ -1,13 +1,13 @@
 # Tareas — SPEC-003 Ventas
 
-Estado: aprobadas (modo delegado), pendientes de análisis · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes) · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
 - **Frentes:** `[contrato]`, `[api]`, `[web]` e `[integración]`. Las tareas que tocan la raíz del monorepo, la E2E o el despliegue usan `[integración]`.
 - **`[P]`:** se puede hacer en paralelo con las tareas del otro frente de su fase. En Base común, las tareas `[api]` y `[web]` avanzan en paralelo una vez escrito el contrato. En las fases de historia, ninguna tarea `[web]` depende de una `[api]` ni al revés: las dos dependen solo de Preparación y Base común. Dentro de un mismo frente, las tareas se hacen en orden de ID y declaran sus dependencias.
 - **Ramas** (`AGENTS.md`): Preparación y Base común en `feat/003-ventas-definicion`, como en SPEC-001 y SPEC-002; cada historia en `feat/003-ventas-usN`; Pulido en `feat/003-ventas-pulido`.
-- **Dependencia de SPEC-002** (plan, encabezado y D-1): Preparación y Base común no usan nada de las historias de Menú. La historia 1 de Ventas necesita tres piezas de la historia 1 de Menú, que **todavía no está en `develop`**: `getCurrentMenu` (SPEC-002 T016), los enlaces de la pantalla inicial (SPEC-002 T018) y la ruta de pruebas `POST /api/__test/menu` (SPEC-002 T023). Por eso **las historias de Ventas empiezan cuando se fusionen el PR de definición de 003 y `feat/002-menu-us1`**. Dentro de US1, solo la tarea de integración (T020) usa esas piezas; las demás trabajan con un menú vigente falso o con el cliente simulado. Ventas no usa `GET /api/menu` (SPEC-002 T031).
+- **Dependencia de SPEC-002** (plan, encabezado y D-1): Preparación y Base común no usan nada de las historias de Menú. La historia 1 de Ventas necesita tres piezas de la historia 1 de Menú, que **todavía no está en `develop`**: `getCurrentMenu` (SPEC-002 T016), los enlaces de la pantalla inicial (SPEC-002 T018) y la ruta de pruebas `POST /api/__test/menu` (SPEC-002 T023); la prueba de punta a punta usa además la edición del menú (SPEC-002 T017). Por eso **las historias de Ventas empiezan cuando se fusionen el PR de definición de 003 y `feat/002-menu-us1`**. Dentro de US1, solo la tarea de integración (T020) usa esas piezas; las demás trabajan con un menú vigente falso o con el cliente simulado. Ventas no usa `GET /api/menu` (SPEC-002 T031).
 - **Dependencia de SPEC-001:** `requireSession`, `createAuthService` y la sesión de la interfaz ya están en `develop` (#15 y #17).
 - **Tests primero:** en cada tarea se escriben primero sus tests y después el código (principio 4).
 
@@ -65,7 +65,7 @@ Rama: `feat/003-ventas-us1`. Empieza cuando se fusionen el PR de definición de 
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren el registro con su confirmación (que desaparece al agregar otro producto), el doble clic con un solo registro, el escenario de precio cambiado al registrar y el de respuesta perdida con el reintento que muestra la misma venta.
 - [ ] **T020 [integración] [US1]** Registrar `salesPlugin` en `app.ts` con `getCurrentMenu` de `modules/menu/index.ts` y la sesión de SPEC-001, comprobar que la aplicación usa el cliente real de ventas sin `?escenarios=ventas`, y añadir a `e2e-server.ts` la ruta `GET /api/__test/sales` con `listRegisteredSales` (plan D-1, §8.2; RF-1, RF-2, RF-11). Depende de: T015, T019, SPEC-002 T016, SPEC-002 T018, SPEC-002 T023
   Hecho cuando: la interfaz en `vite preview` registra una venta contra la API de E2E con un menú cargado por `POST /api/__test/menu`, la pantalla inicial muestra «Nueva venta» a los dos roles, una prueba comprueba que `buildApp` no registra rutas `/api/__test`, y `npm test` sigue pasando.
-- [ ] **T021 [integración] [US1]** Escribir `e2e/sales-us1-registrar-venta.spec.ts` con los 5 pasos de §8.2 del plan (RF-1 a RF-11). Depende de: T020
+- [ ] **T021 [integración] [US1]** Escribir `e2e/sales-us1-registrar-venta.spec.ts` con los 5 pasos de §8.2 del plan; el paso 4 cambia el precio con la ruta de edición del menú y una sesión de dueño (RF-1 a RF-11). Depende de: T020, SPEC-002 T017
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: no perder la venta en preparación (P2)
@@ -108,6 +108,7 @@ Rama: `feat/003-ventas-pulido`.
 | RF-12 | T022, T025 |
 | RF-13 | T022, T023, T025 |
 | RF-14 | T024, T025 |
+| RNF-1 | T017, T018, T019, T021, T024, T025 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T006, T012 |
 | RNF-3 | T026 |
 | RNF-4 | T017, T018, T024 |

@@ -207,11 +207,11 @@ POST /api/sales { draftId, lines }:                          # cada línea con u
   if previa:                                                 # RF-8: reintento o doble clic, sin mirar el menú
     if previa.registeredBy.userId ≠ user.id: fail 400 VALIDATION_ERROR { fields.draftId }
     return 200 { sale: previa }
+  menu   ← currentMenu(db)
+  priced ← priceDraft(lines, menu)
+  if priced.menuChanged: fail 409 MENU_CHANGED «El menú cambió. Revisa la venta antes de registrarla»
   try:
     sale ← db.transaction(tx →
-      menu   ← currentMenu(tx)
-      priced ← priceDraft(lines, menu)
-      if priced.menuChanged: fail 409 MENU_CHANGED «El menú cambió. Revisa la venta antes de registrarla»
       number ← UPDATE sale_counter SET last_number = last_number + 1 RETURNING last_number   # bloquea la fila
       insertSale(tx, { number, draftId, registeredAt: clock.now(), user, priced })           # venta y líneas
     )
@@ -221,7 +221,7 @@ POST /api/sales { draftId, lines }:                          # cada línea con u
 ```
 
 - **Número sin saltos (RF-10).** El `UPDATE` de `sale_counter` bloquea su única fila hasta el fin de la transacción: dos registros a la vez se ordenan, y si uno falla, su `ROLLBACK` deshace también el número. Para un local con una o dos personas, registrar de a una venta no demora a nadie.
-- **Precio vigente (RF-7).** Se lee dentro de la transacción y se compara con lo que se mostraba. Si el dueño guarda un precio nuevo en ese mismo instante, la venta queda con el precio que estaba vigente al leerlo, que es el que se cobró.
+- **Precio vigente (RF-7).** Se lee justo antes de la transacción y se compara con lo que se mostraba. Si el dueño guarda un precio nuevo en ese mismo instante, la venta queda con el precio que estaba vigente al leerlo, que es el que se cobró; leerlo dentro de la transacción no cambiaría nada, porque Ventas no bloquea el menú (en `READ COMMITTED`, cada lectura ve lo ya confirmado).
 - **Ante `409 MENU_CHANGED`**, la interfaz vuelve a pedir el cálculo (§5.2) con las mismas líneas, muestra el mensaje y los avisos de cada línea, y deja que la persona registre de nuevo (RF-7).
 - **Quién (RF-11).** Se guardan `user.id`, `user.displayName` y `user.role` de la sesión; si después la cuenta se elimina, `registered_by_user_id` pasa a `NULL` y el nombre y el rol quedan.
 
@@ -363,7 +363,7 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 | # | Decisión | Por qué | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
-| D-1 | **El menú vigente llega a Ventas como una función inyectada:** `salesPlugin` y el servicio reciben `currentMenu: (db: Queryable) => Promise<CurrentMenu>`, y `app.ts` les pasa `getCurrentMenu` de `modules/menu/index.ts` (SPEC-002 RF-15, T016). Las pruebas pasan una función falsa con un menú fijo | `getCurrentMenu` es de la historia 1 de Menú y aún no está en `develop`; así la Base común y la API de las historias se prueban sin ella, y `sales` no conoce cómo guarda el menú sus datos (`docs/architecture.md` §4.2) | Leer `products` y `categories` desde `sales`: duplicaría la regla del menú vigente y rompería la frontera entre módulos. Esperar a 002 US1 para empezar la Base común: frena 003 sin motivo | RF-2, RF-5, RF-7 |
+| D-1 | **El menú vigente llega a Ventas como una función inyectada:** `salesPlugin` y el servicio reciben `currentMenu: (db: Database) => Promise<CurrentMenu>`, donde `CurrentMenu` es `CurrentMenuResponse['categories']` del contrato, y `app.ts` les pasa `getCurrentMenu` de `modules/menu/index.ts` (SPEC-002 RF-15, T016), que SPEC-002 fija como `getCurrentMenu(db)`. Si su tipo de retorno difiere, T020 lo adapta en `app.ts`. Las pruebas pasan una función falsa con un menú fijo | `getCurrentMenu` es de la historia 1 de Menú y aún no está en `develop`; así la Base común y la API de las historias se prueban sin ella, y `sales` no conoce cómo guarda el menú sus datos (`docs/architecture.md` §4.2) | Leer `products` y `categories` desde `sales`: duplicaría la regla del menú vigente y rompería la frontera entre módulos. Esperar a 002 US1 para empezar la Base común: frena 003 sin motivo | RF-2, RF-5, RF-7 |
 | D-2 | **`POST /api/sales/quote` devuelve también los productos para vender** (`menu`), con el mismo menú con el que calculó las líneas | Un solo pedido por cambio da a la vez el total y la lista actualizada (RF-5 pide actualizarla), siempre coherentes entre sí; y la interfaz de Ventas no depende de `GET /api/menu`, que es de la historia 3 de Menú | Usar `GET /api/menu` (SPEC-002 T031) además del cálculo: dos pedidos por cambio, que pueden ver menús distintos, y una dependencia de la última historia de 002 | RF-2, RF-4, RF-5 |
 | D-3 | **La interfaz envía la lista deseada y la API la calcula entera** cada vez (`quote`), sin guardar nada en la base hasta registrar | Cumple el principio 3 sin estado en el servidor: la API valida límites, calcula subtotales y total y detecta cambios de precio comparando con `unitPriceCents` mostrado. Con hasta 30 líneas y 200 productos, calcular todo es inmediato (RNF-3) | Guardar la venta en preparación en la base y cambiarla línea a línea: tablas y rutas de más, y habría que borrarla al cerrar sesión desde el módulo `auth` | RF-3–RF-5, RF-7 |
 | D-4 | **Integridad en la base:** `CHECK` de subtotal, disparador diferido que compara el total con la suma de las líneas, disparadores que impiden modificar o borrar ventas y líneas, y contador de una fila para el número | El principio 5 pide atomicidad y RF-11 que una venta registrada no cambie; la base lo garantiza aunque un error de programación lo intente. El contador bloqueado da números sin saltos (RF-10), que una secuencia de PostgreSQL no garantiza | Una `SEQUENCE`: deja huecos cuando una transacción falla. `max(number) + 1`: dos transacciones a la vez leen el mismo máximo | RF-6, RF-9–RF-11, RNF-2 |
@@ -405,7 +405,7 @@ Los de SPEC-001 y SPEC-002:
 
 **US2 — No perder la venta en preparación** (`e2e/sales-us2-conservar-venta.spec.ts`)
 
-1. Armar una venta de dos productos, recargar, ir a «Ver menú» y volver → las mismas líneas; una segunda pestaña muestra la misma venta (RF-12).
+1. Armar una venta de dos productos, recargar, ir a la pantalla inicial y volver → las mismas líneas; una segunda pestaña muestra la misma venta (RF-12).
 2. Adelantar el reloj de la API 12 horas, agregar un producto → ingreso con el aviso de SPEC-001; volver a entrar con la misma cuenta → «Nueva venta» con la venta conservada (RF-13).
 3. Cerrar sesión y volver a entrar → «Nueva venta» vacía (RF-13).
 4. Armar una venta, adelantar el reloj 12 horas para que venza la sesión y entrar con otra cuenta → «Nueva venta» vacía; volver a entrar con la primera cuenta → también vacía, porque se descartó (RF-13).
@@ -454,3 +454,15 @@ Afectan a todo el proyecto. En modo delegado se aplican en este mismo PR y se in
 1. **Fechas y horas (§6.8, nuevo; D-7):** la API toma la hora de `clock.ts` y la guarda como `timestamptz`; en el contrato viaja como texto ISO 8601 en UTC, y se muestra con `formatDateTime` de `packages/contracts`, en hora de Bolivia («24/10/2026 14:05»).
 2. **Trabajo sin guardar al terminar la sesión (§6.2; D-9):** `SessionProvider` recibe `onSessionEnd` desde `routes.tsx` y lo llama al cerrar sesión y cuando la sesión termina por un cambio de la cuenta, no al vencer; cada módulo decide ahí qué descarta.
 3. **Datos de otro módulo en la API (§4.2; D-1):** un módulo puede recibir como función, desde `app.ts`, lo que exporta el `index.ts` de otro, para probarse sin él y no depender de cuándo se implementa.
+
+## 10. Cambios tras el análisis de consistencia
+
+Correcciones del 2026-10-24 a los hallazgos menores del análisis (ninguno bloqueante):
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 | La venta en preparación de otra cuenta se descarta al abrir «Nueva venta» | `spec.md` RF-13 (el plan ya lo hacía así, §5.5) |
+| 2 | `currentMenu` recibe la `Database` y se lee antes de la transacción del registro, como fija SPEC-002 (`getCurrentMenu(db)`) | §5.3, D-1 |
+| 3 | T021 depende también de la edición del menú (SPEC-002 T017) | `tasks.md` |
+| 4 | La prueba de HU-2 sale a la pantalla inicial, no a «Ver menú» (SPEC-002 US3) | `spec.md` HU-2, §8.2 |
+| 5 | RNF-1 en la cobertura de `tasks.md` | `tasks.md` |

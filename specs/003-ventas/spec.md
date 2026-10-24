@@ -54,7 +54,7 @@ Como **persona que atiende el mostrador (cajero o dueño)**, quiero **armar la v
 
 Como **persona que atiende el mostrador**, quiero que **la venta que estoy armando no se pierda si recargo la pantalla, voy a otra pantalla o vence mi sesión**, y que **nadie más la vea** si cierro sesión o entra otra persona, para **no tener que volver a pedirle el pedido a la clientela y no mezclar mi venta con la de otra persona**.
 
-**Prueba independiente:** con una venta en preparación de dos productos, recargar la pantalla, ir a «Ver menú» y volver, o cerrar el navegador y volver a abrir el sistema conservan sus líneas; una segunda pestaña del mismo navegador muestra la misma venta. Si vence la sesión en «Nueva venta» y la misma cuenta vuelve a entrar en ese navegador, regresa a «Nueva venta» con la misma venta en preparación. Si en cambio entra otra cuenta, o la misma cuenta cierra sesión y vuelve a entrar, «Nueva venta» empieza vacía.
+**Prueba independiente:** con una venta en preparación de dos productos, recargar la pantalla, ir a la pantalla inicial y volver, o cerrar el navegador y volver a abrir el sistema conservan sus líneas; una segunda pestaña del mismo navegador muestra la misma venta. Si vence la sesión en «Nueva venta» y la misma cuenta vuelve a entrar en ese navegador, regresa a «Nueva venta» con la misma venta en preparación. Si en cambio entra otra cuenta, o la misma cuenta cierra sesión y vuelve a entrar, «Nueva venta» empieza vacía.
 
 ## 4. Requisitos funcionales
 
@@ -143,7 +143,7 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 
 - Cuando vence la sesión (SPEC-001, RF-10) y la misma cuenta vuelve a entrar en ese navegador, el sistema deberá conservarle la venta en preparación que tenía: la ve al volver a «Nueva venta», ya sea porque SPEC-001 (RF-11) la regresa a esa pantalla o porque la abre después.
 - Cuando la persona elige «Cerrar sesión» (SPEC-001, RF-7), el sistema deberá descartar la venta en preparación de esa cuenta en ese navegador.
-- Cuando entra en un navegador una cuenta distinta de la que tenía allí una venta en preparación, el sistema deberá no mostrársela y descartarla.
+- Cuando una cuenta distinta de la que tenía una venta en preparación en un navegador abre «Nueva venta» en él, el sistema deberá no mostrársela y descartarla.
 - Si la sesión termina porque la cuenta cambió o se eliminó (SPEC-001, RF-12), entonces el sistema deberá descartar la venta en preparación.
 
 **RF-14. Descartar la venta en preparación** (HU-2)
@@ -187,7 +187,7 @@ En los avisos de este requisito y de RF-7, [producto] es el nombre del producto 
 | La misma cuenta tiene «Nueva venta» abierta en dos pestañas del mismo navegador | Las dos muestran la misma venta en preparación; registrarla en una la deja vacía en las dos (RF-12). |
 | Tras vencer la sesión, la misma cuenta vuelve a entrar en ese navegador días después | Recupera la venta en preparación, recalculada con el menú vigente y con los avisos de los cambios (RF-12, RF-13). |
 | La persona cierra sesión con una venta en preparación | Se descarta sin aviso (RF-13). |
-| Entra otra cuenta en el navegador donde quedó una venta en preparación | No la ve; la venta se descarta (RF-13). |
+| Entra otra cuenta en el navegador donde quedó una venta en preparación | No la ve: al abrir «Nueva venta», la venta se descarta (RF-13). |
 | Una venta de 30 productos con 99 unidades cada uno a Bs 1000,00 | Se registra con el total exacto «Bs 2970000,00» (RNF-2). |
 
 ## 7. Fuera de alcance
@@ -260,3 +260,8 @@ La persona delegó la definición completa de 003-ventas («Delego la definició
 - **Decisión delegada:** (Hallazgo 12) No se decía qué pasa con una venta en preparación conservada durante días. → Se conserva hasta registrarla o descartarla y se recalcula con avisos al volver a mostrarla. (Motivo: RF-5 y RF-7 ya impiden registrarla con precios viejos, y descartarla por tiempo podría perder un pedido. Alternativa descartada: descartarla a las 12 horas.) (Aplicado en RF-12 y «Casos límite».)
 - **Decisión delegada:** (Hallazgo 13) No se cubría el vencimiento de la sesión durante un cambio de la venta en preparación. → El cambio no se aplica y la venta queda como estaba. (Motivo: es la regla de SPEC-001 (RF-10) aplicada a Ventas. Alternativa descartada: ninguna.) (Aplicado en «Casos límite».)
 - **Decisión delegada:** (Hallazgo 14) La definición de [producto] estaba al final de RF-5, fuera de la notación EARS. → Pasa a una introducción del requisito, que también define «Bs X». (Motivo: deja los criterios en EARS y la definición antes de usarla. Alternativa descartada: ninguna.) (Aplicado en RF-5.)
+
+**Análisis de consistencia.** En modo delegado; ningún hallazgo era bloqueante.
+
+- **Decisión delegada:** (Hallazgo 1) RF-13 descartaba la venta en preparación «cuando entra» otra cuenta, pero el plan la descarta cuando esa cuenta abre «Nueva venta». → Se descarta al abrir «Nueva venta» con otra cuenta. (Motivo: lo que importa es que otra cuenta nunca la vea, y es en esa pantalla donde se vería; el ingreso es de SPEC-001. Alternativa descartada: descartarla en el ingreso, que obligaría a `auth` a conocer las ventas.) (Aplicado en RF-13 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 4) La prueba independiente de HU-2 iba a «Ver menú», que es de la historia 3 de SPEC-002, no de la historia 1 de la que dependen las de Ventas. → Se va a la pantalla inicial y se vuelve. (Motivo: comprueba lo mismo, salir de «Nueva venta» y volver, sin otra dependencia. Alternativa descartada: depender también de SPEC-002 US3.) (Aplicado en HU-2.)
