@@ -48,7 +48,7 @@ Rama: `feat/001-acceso-definicion`.
   Hecho cuando: las pruebas comprueban que el hash no contiene la contraseña, que dos hash de la misma contraseña son distintos, que se verifica la correcta, se rechaza otra (incluida una diferencia de mayúsculas) y se verifica con los parámetros guardados.
 - [x] **T015 [api] [P]** Escribir `users.repository.ts` y `sessions.repository.ts`: buscar cuenta por usuario (con `FOR UPDATE`), crear sesión con `sha256(token)`, buscar sesión por token con su cuenta y revocar (RF-1, RF-6, RF-7). Depende de: T011
   Hecho cuando: las pruebas de integración crean y encuentran una sesión por su token, comprueban que el token no se guarda en claro y que una sesión revocada se lee con `revoked_at`.
-- [ ] **T016 [web] [P]** Escribir `shared/http/api-fetch.ts`: peticiones al mismo origen con cookies, lectura de `ApiError` con el esquema del contrato y error de red convertido en `NETWORK_ERROR` (RF-14). Depende de: T004, T008
+- [x] **T016 [web] [P]** Escribir `shared/http/api-fetch.ts`: peticiones al mismo origen con cookies, lectura de `ApiError` con el esquema del contrato y error de red convertido en `NETWORK_ERROR` (RF-14). Depende de: T004, T008
   Hecho cuando: las pruebas cubren una respuesta `200`, un `ApiError` y un fallo de red simulado.
 - [ ] **T017 [web] [P]** Escribir `modules/auth/api/auth-client.ts`: interfaz `AuthClient` (`login`, `logout`, `getSession`) y su cliente HTTP real sobre `api-fetch`. Depende de: T009, T016
   Hecho cuando: las pruebas comprueban la ruta, el método y el cuerpo de cada llamada, y que las respuestas se validan con los esquemas del contrato.
