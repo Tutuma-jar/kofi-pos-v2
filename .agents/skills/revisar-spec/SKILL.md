@@ -1,7 +1,6 @@
 ---
 name: revisar-spec
-description: Paso 2 del ciclo SDD de Kofi POS. Usar solo cuando la persona lo invoca con /revisar-spec o $revisar-spec.
-disable-model-invocation: true
+description: Paso 2 del ciclo SDD de Kofi POS. Revisa una spec.md como QA y lista sus hallazgos. Usar cuando una spec.md está escrita y aún no revisada, o cuando la persona pida revisarla.
 ---
 
 # Revisar la especificación
@@ -28,9 +27,9 @@ Si falta alguno de esos archivos, detente y dilo.
    - Más de 3 `[NECESITA ACLARACIÓN]` abiertos.
 
    Cada hallazgo indica dónde está (sección, historia o RF) y por qué es un problema, sin decir cómo resolverlo. Si una categoría no tiene hallazgos, escribe «Ninguno».
-3. **Decisiones de la persona.** La persona decide qué hacer con cada hallazgo. Registra cada pregunta y su respuesta en «Aclaraciones», bajo la fecha de hoy en hora de Bolivia (`node -e "console.log(new Intl.DateTimeFormat('en-CA',{timeZone:'America/La_Paz'}).format(new Date()))"`), y aplica cada respuesta en las secciones que correspondan, indicando dónde.
-4. **Aprobación.** Muestra los cambios en `spec.md` y pide su aprobación.
-5. **Commit y PR.** Con la aprobación, haz el commit `docs(<scope>): revisar especificación de <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Especificación revisada».
+3. **Decisiones de la persona.** La persona decide qué hacer con cada hallazgo. En modo delegado (`AGENTS.md`), decídelo tú con tu recomendación y regístralo como decisión delegada (decisión, motivo y alternativa descartada); un dato que solo conocen las personas se marca `[NECESITA ACLARACIÓN]`. Registra cada pregunta y su respuesta en «Aclaraciones», bajo la fecha de hoy en hora de Bolivia (`node -e "console.log(new Intl.DateTimeFormat('en-CA',{timeZone:'America/La_Paz'}).format(new Date()))"`), y aplica cada respuesta en las secciones que correspondan, indicando dónde.
+4. **Aprobación.** Muestra los cambios en `spec.md` y pide su aprobación. En modo delegado no la pidas: se aprueba al fusionar el PR de definición.
+5. **Commit y PR.** Con la aprobación (o, en modo delegado, al terminar), haz el commit `docs(<scope>): revisar especificación de <nombre>`, publica la rama y actualiza la descripción del PR con el estado «Especificación revisada».
 
 ## Salida
 
@@ -38,6 +37,6 @@ La lista numerada de hallazgos y, tras las decisiones de la persona, `spec.md` a
 
 ## Límites
 
-- No propone soluciones ni redacta requisitos por su cuenta: solo detecta y aplica lo que la persona decide.
+- La lista de hallazgos solo detecta: no incluye soluciones. Después aplica lo que decide la persona o, en modo delegado, lo que decide el agente con su recomendación.
 - No inventa requisitos ni datos técnicos: los pregunta o los obtiene del repositorio.
-- Termina pidiendo la aprobación de la persona, sin pasar al paso siguiente (`/planificar`).
+- Termina pidiendo la aprobación de la persona. Con su aprobación, o en modo delegado, sigue con la skill `planificar`.
