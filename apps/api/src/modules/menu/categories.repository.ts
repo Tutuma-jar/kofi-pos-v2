@@ -11,6 +11,10 @@ export interface CategoryNames {
 
 const CATEGORY_COLUMNS = 'id, name, active';
 
+export async function listCategories(db: Queryable): Promise<Category[]> {
+  return (await db.query<Category>(`SELECT ${CATEGORY_COLUMNS} FROM categories`)).rows;
+}
+
 export async function insertCategory(db: Queryable, { name, nameKey }: CategoryNames) {
   const result = await db.query<Category>(
     `INSERT INTO categories (name, name_key) VALUES ($1, $2) RETURNING ${CATEGORY_COLUMNS}`,

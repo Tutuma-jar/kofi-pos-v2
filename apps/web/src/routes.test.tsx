@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { AppRoutes, protectedRoutes, publicRoutes } from './routes.tsx';
 import { canView, type AuthClient } from './modules/auth/index.ts';
 import { ApiFetchError } from './shared/http/api-fetch.ts';
+import { MenuClientProvider, httpMenuClient } from './modules/menu/index.ts';
 
 function CurrentPath() {
   return <output aria-label="ruta actual">{useLocation().pathname}</output>;
@@ -32,7 +33,11 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
   };
   render(
     <MemoryRouter initialEntries={[path]}>
-      <AppRoutes client={client} />
+      <MenuClientProvider
+        client={{ ...httpMenuClient, getAdminMenu: async () => [], getCurrentMenu: async () => [] }}
+      >
+        <AppRoutes client={client} />
+      </MenuClientProvider>
       <CurrentPath />
     </MemoryRouter>,
   );
