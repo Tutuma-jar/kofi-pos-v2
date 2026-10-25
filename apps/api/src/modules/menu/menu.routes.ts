@@ -12,7 +12,7 @@ import type { Clock } from '../../shared/clock.ts';
 import { AppError } from '../../shared/http/errors.ts';
 import { saveCategory, deactivateCategory, reactivateCategory } from './categories.service.ts';
 import { saveProduct, deactivateProduct, reactivateProduct } from './products.service.ts';
-import { getAdminMenu } from './menu.views.ts';
+import { getAdminMenu, getCurrentMenu } from './menu.views.ts';
 
 async function requireOwner(request: FastifyRequest) {
   if (request.sessionUser?.role !== 'owner')

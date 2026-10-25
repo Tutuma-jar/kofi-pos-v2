@@ -123,6 +123,9 @@ Rama: `feat/002-menu-us3`.
 - [x] **T043 [integración] [US3]** Adelantar a US3 la configuración de Vitest de la API ya adoptada en Pulido: 15 segundos por test para las integraciones con PGlite y criptografía real, sin cambiar casos ni aserciones (plan D-15). Depende de: T033, T042
   Hecho cuando: se conservan los tests y el código de aplicación; las comprobaciones y la CI pasan. El run `40168447613` falló únicamente por timeout de 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 766 casos correctos. La integración en Pulido se hace después mediante merge.
 
+- [x] **T045 [integración] [US3]** Restaurar la importación de `getCurrentMenu` y la decisión D-15 perdidas al integrar `develop` en US3 (RF-13 a RF-15; plan §5.5 y §6.2). Depende de: T033, T043
+  Hecho cuando: desaparece TS2304, la consulta vigente responde con ambas sesiones y se conserva la trazabilidad de T043; las comprobaciones y la CI pasan. El run `40171291962` falló en tipos por la importación ausente. Después se integra la corrección en Pulido mediante merge.
+
 ## Fase 6 — Pulido
 
 Rama: `feat/002-menu-pulido`.
