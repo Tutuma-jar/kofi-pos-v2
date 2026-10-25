@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 import cookie from '@fastify/cookie';
 import { registerErrorHandler } from './shared/http/errors.ts';
 import { authPlugin } from './modules/auth/index.ts';
+import { menuPlugin } from './modules/menu/index.ts';
 import { systemClock, type Clock } from './shared/clock.ts';
 import type { Database } from './shared/database/database.ts';
 
@@ -27,6 +28,11 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
   app.get('/api/health', async () => ({ status: 'ok' }));
   if (deps.db) {
     app.register(authPlugin, {
+      db: deps.db,
+      clock: deps.clock ?? systemClock,
+      production: deps.production ?? false,
+    });
+    app.register(menuPlugin, {
       db: deps.db,
       clock: deps.clock ?? systemClock,
       production: deps.production ?? false,
