@@ -2,6 +2,7 @@
 import { buildApp } from '../src/app.ts';
 import { createAccountsService } from '../src/modules/auth/index.ts';
 import { saveCategory, saveProduct } from '../src/modules/menu/index.ts';
+import { listRegisteredSales } from '../src/modules/sales/index.ts';
 import { createFakeClock } from '../src/shared/clock.ts';
 import { createTestDatabase } from './test-database.ts';
 import { TEST_ACCOUNTS } from '../../../e2e/fixtures.ts';
@@ -36,7 +37,12 @@ export async function buildE2eApp() {
     // Restablecer solo datos efímeros de E2E; cada alta recorre los servicios del módulo.
     app.post('/api/__test/menu', async (request) => {
       const fixture = validate(menuFixtureSchema, request.body);
-      await db.transaction((tx) => tx.exec('DELETE FROM products; DELETE FROM categories;'));
+      // El fixture reinicia también las ventas de E2E para respetar sus FK al sustituir el menú.
+      await db.transaction((tx) =>
+        tx.exec(
+          'TRUNCATE sale_lines, sales; UPDATE sale_counter SET last_number = 0; DELETE FROM products; DELETE FROM categories;',
+        ),
+      );
       for (const input of fixture.categories) {
         const category = await saveCategory(db, { name: input.name });
         for (const product of input.products)
@@ -44,6 +50,7 @@ export async function buildE2eApp() {
       }
       return { ok: true };
     });
+    app.get('/api/__test/sales', async () => ({ sales: await listRegisteredSales(db) }));
     // Controles exclusivos del servidor de pruebas; buildApp nunca los registra.
     app.post('/api/__test/clock', async (request) => {
       const { advanceMilliseconds } = validate(clockSchema, request.body);

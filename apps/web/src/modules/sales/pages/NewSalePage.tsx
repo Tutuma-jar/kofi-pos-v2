@@ -1,8 +1,43 @@
-// Provisional: la venta en preparación y su registro llegan en US1 (T016 a T019).
+import { Link } from 'react-router';
+import { ProductPicker } from '../components/ProductPicker.tsx';
+import { SaleDraftLines } from '../components/SaleDraftLines.tsx';
+import { PaymentMethodPicker } from '../components/PaymentMethodPicker.tsx';
+import { SaleConfirmation } from '../components/SaleConfirmation.tsx';
+import { useSaleDraft } from '../state/useSaleDraft.ts';
+
 export function NewSalePage() {
+  const draft = useSaleDraft();
   return (
     <main>
       <h1>Nueva venta</h1>
+      <Link to="/">Volver al inicio</Link>
+      {draft.error && <p role="alert">{draft.error}</p>}
+      {draft.confirmation && <SaleConfirmation sale={draft.confirmation} />}
+      {!draft.quote && draft.busy && <p role="status">Cargando productos…</p>}
+      {draft.quote && (
+        <>
+          <ProductPicker menu={draft.quote.menu} busy={draft.busy} onSelect={draft.addProduct} />
+          <SaleDraftLines
+            quote={draft.quote}
+            busy={draft.busy}
+            onIncrement={draft.increment}
+            onDecrement={draft.decrement}
+            onRemove={draft.remove}
+          />
+          <PaymentMethodPicker
+            value={draft.paymentMethod}
+            busy={draft.busy}
+            onChange={draft.choosePayment}
+          />
+          <button
+            type="button"
+            disabled={draft.busy || !draft.quote.lines.length || !draft.paymentMethod}
+            onClick={() => void draft.registerSale()}
+          >
+            Registrar venta
+          </button>
+        </>
+      )}
     </main>
   );
 }
