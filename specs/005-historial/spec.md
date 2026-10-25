@@ -1,6 +1,6 @@
 # SPEC-005 — Historial y reportes
 
-Estado: escrita · Fecha: 2026-10-25
+Estado: revisada · Fecha: 2026-10-25
 
 Reglas globales (moneda, zona horaria, un solo local): ver [`docs/business-rules.md`](../../docs/business-rules.md#reglas-globales).
 
@@ -70,13 +70,13 @@ Como **dueño**, quiero **elegir un día y ver todas sus ventas, una por una, co
 
 Como **dueño**, quiero **abrir una venta y ver todo lo que tuvo: sus productos, cantidades y precios, su total, cómo se pagó, quién la registró y cuándo**, ya sea **desde la lista de un día o escribiendo su número**, para **aclarar una duda sobre una venta concreta**.
 
-**Prueba independiente:** con la venta N.º 3 del ejemplo de HU-1, registrada cuando «Café americano» costaba Bs 12,50, y con ese precio cambiado después a Bs 13,00, una sesión de dueño abre «Historial de ventas», escribe «3» en «Buscar venta por número» y elige «Buscar»: ve «Venta N.º 3», «24/10/2026 10:30», «Registrada por Luis Mamani · Dueño», «Medio de pago: QR», las líneas «Empanada · Salados · Bs 8,00 × 1 · Bs 8,00» y «Café americano · Bebidas calientes · Bs 12,50 × 1 · Bs 12,50», en ese orden, y el total «Bs 20,50». Al buscar «99» ve «No existe la venta N.º 99». Con HU-1, elegir la venta en la lista de un día abre ese mismo detalle, y «Volver» regresa a la lista de su día.
+**Prueba independiente:** con la venta N.º 3 del ejemplo de HU-1, registrada cuando «Café americano» costaba Bs 12,50, y con ese precio cambiado después a Bs 13,00, una sesión de dueño abre «Historial de ventas», escribe «3» en «Buscar venta por número» y elige «Buscar»: ve «Venta N.º 3», «24/10/2026 10:30», «Registrada por Luis Mamani · Dueño», «Medio de pago: QR», las líneas «Empanada · Salados · Bs 8,00 × 1 · Bs 8,00» y «Café americano · Bebidas calientes · Bs 12,50 × 1 · Bs 12,50», en ese orden, y el total «Bs 20,50». Al buscar «99» ve «No existe la venta N.º 99». La prueba no usa la lista de ventas de un día: la búsqueda está en la pantalla que abre «Historial de ventas» (RF-1, RF-9). Con HU-1, elegir la venta en la lista de un día abre ese mismo detalle, y «Volver» regresa a la lista de su día.
 
 ### HU-3 — Consultar las cifras de un mes (P3)
 
 Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efectivo y cuánto con QR, y cuánto se vendió cada día** para **comparar la marcha del negocio entre meses y encontrar los días con más o menos ventas**.
 
-**Prueba independiente:** con ventas registradas el 30/09/2026 a las 23:59 por Bs 12,50 en efectivo, el 01/10/2026 a las 08:00 por Bs 8,00 en efectivo, el 15/10/2026 a las 16:20 por Bs 25,00 con QR y el 01/11/2026 a las 00:00 por Bs 10,00 con QR, el 05/11/2026 una sesión de dueño abre «Historial de ventas», elige «Ver por mes» y ve «Noviembre de 2026» con «Bs 10,00 · 1 venta» y una fila por día del 01/11/2026 al 05/11/2026. Elige «Mes anterior» y ve «Octubre de 2026»: total vendido «Bs 33,00», «2 ventas», «Efectivo: Bs 8,00 · 1 venta», «QR: Bs 25,00 · 1 venta» y una fila por cada día del 01/10/2026 al 31/10/2026, con «01/10/2026 · Bs 8,00 · 1 venta», «15/10/2026 · Bs 25,00 · 1 venta» y los demás días con «Bs 0,00 · 0 ventas». La venta del 30/09 no cuenta en octubre. «Mes siguiente» no se puede elegir estando en noviembre de 2026.
+**Prueba independiente:** con ventas registradas el 30/09/2026 a las 23:59 por Bs 12,50 en efectivo, el 01/10/2026 a las 08:00 por Bs 8,00 en efectivo, el 15/10/2026 a las 16:20 por Bs 25,00 con QR y el 01/11/2026 a las 00:00 por Bs 10,00 con QR, el 05/11/2026 una sesión de dueño abre «Historial de ventas», elige «Ver por mes» y ve «Noviembre de 2026» con «Bs 10,00 · 1 venta» y una fila por día del 01/11/2026 al 05/11/2026. Elige «Mes anterior» y ve «Octubre de 2026»: total vendido «Bs 33,00», «2 ventas», «Efectivo: Bs 8,00 · 1 venta», «QR: Bs 25,00 · 1 venta» y una fila por cada día del 01/10/2026 al 31/10/2026, con «01/10/2026 · Bs 8,00 · 1 venta», «15/10/2026 · Bs 25,00 · 1 venta» y los demás días con «Bs 0,00 · 0 ventas». La venta del 30/09 no cuenta en octubre. «Mes siguiente» no se puede elegir estando en noviembre de 2026. La prueba no usa la lista de ventas de un día: «Ver por mes» está en la pantalla que abre «Historial de ventas» (RF-1, RF-11).
 
 ## 4. Requisitos funcionales
 
@@ -91,16 +91,16 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 
 **RF-2. Elegir el día** (HU-1)
 
-- El sistema deberá mostrar las ventas de un día con el título «Ventas del [fecha]» y ofrecer las opciones «Día anterior», «Día siguiente» y un campo para elegir una fecha cualquiera.
+- El sistema deberá mostrar las ventas de un día con el título «Ventas del [fecha]» y ofrecer las opciones «Día anterior», «Día siguiente» y un campo para elegir una fecha cualquiera, que no ofrece días posteriores a hoy.
 - Cuando la persona elige «Día anterior», «Día siguiente» u otra fecha, el sistema deberá mostrar las ventas y las cifras de ese día.
-- Mientras se muestre el día de hoy, el sistema deberá no permitir elegir «Día siguiente».
-- Si se pide un día futuro, entonces el sistema deberá rechazarlo con el mensaje «No se pueden consultar fechas futuras» y no mostrar ninguna venta de ese día.
+- Mientras se muestre el día que era hoy cuando el sistema obtuvo los datos, el sistema deberá no permitir elegir «Día siguiente»; tras la medianoche, lo permite después de «Actualizar» (RF-5).
+- Si se pide un día futuro por otra vía (por ejemplo, escribiéndolo en la dirección), entonces el sistema deberá rechazarlo con el mensaje «No se pueden consultar fechas futuras» y no mostrar ninguna venta de ese día.
 - Si se pide una fecha que no existe en el calendario o no se puede leer como fecha, entonces el sistema deberá rechazarla con el mensaje «La fecha no es válida».
 - El sistema deberá decidir qué día es hoy con su propia fecha y hora en hora de Bolivia, no con la de la computadora desde la que se consulta.
 
 **RF-3. Ventas de un día** (HU-1)
 
-- El sistema deberá mostrar todas las ventas registradas del día elegido (ver «Conceptos»), y ninguna otra, de la más reciente a la más antigua, cada una con su número, su hora, quién la registró, su medio de pago y su total: «N.º 3 · 10:30 · Luis Mamani · Dueño · QR · Bs 20,50».
+- El sistema deberá mostrar todas las ventas registradas del día elegido (ver «Conceptos»), y ninguna otra, de la más reciente a la más antigua (de mayor a menor número, que es el orden en que se registraron), cada una con su número, su hora, quién la registró, su medio de pago y su total: «N.º 3 · 10:30 · Luis Mamani · Dueño · QR · Bs 20,50».
 - Mientras el día elegido no tenga ventas, el sistema deberá mostrar «No hay ventas registradas este día» en lugar de la lista.
 
 **RF-4. Cifras de un día** (HU-1)
@@ -111,15 +111,15 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 
 **RF-5. Momento de los datos y actualización** (HU-1)
 
-- El sistema deberá obtener lo que muestra el Historial al abrir o recargar la pantalla, al elegir otro día, otro mes u otra venta, y cuando la persona elige «Actualizar»; no se actualiza solo.
-- El sistema deberá mostrar, junto a las cifras de un día o de un mes, el momento de sus datos: «Datos al 25/10/2026 11:00».
+- El sistema deberá obtener cada consulta del Historial (las ventas de un día y, con las demás historias, el detalle de una venta o las cifras de un mes) al abrirla o recargar la pantalla y cuando la persona elige «Actualizar»; no se actualiza sola.
+- El sistema deberá mostrar, junto a las cifras de un día, el momento de sus datos: «Datos al 25/10/2026 11:00».
 - Mientras obtiene lo que va a mostrar, el sistema deberá mostrar «Cargando…» y no permitir elegir «Actualizar» de nuevo; si ya se mostraba una consulta anterior, deberá seguir mostrándola mientras tanto.
 - Cuando la persona recarga la pantalla o vuelve atrás con el navegador, el sistema deberá mostrar el mismo día, mes o venta que se estaba consultando.
 
 **RF-6. Sin conexión o con error** (HU-1)
 
-- Si lo que se pide no se puede obtener por falta de conexión, entonces el sistema deberá mostrar «No hay conexión. Inténtalo de nuevo» junto a la opción «Actualizar».
-- Si lo que se pide no se puede obtener por un error inesperado del sistema, entonces el sistema deberá mostrar «Ocurrió un error. Inténtalo de nuevo» junto a la opción «Actualizar».
+- Si una consulta no se puede obtener por falta de conexión, entonces el sistema deberá mostrar «No hay conexión. Inténtalo de nuevo» junto a la opción «Actualizar».
+- Si una consulta no se puede obtener por un error inesperado del sistema, entonces el sistema deberá mostrar «Ocurrió un error. Inténtalo de nuevo» junto a la opción «Actualizar».
 - Si ya se mostraba una consulta anterior, entonces el sistema deberá seguir mostrándola junto al aviso, con su propio título y el momento de sus datos, para que no se confunda con la que se pidió.
 
 **RF-7. Las ventas se muestran tal como se registraron** (HU-1)
@@ -133,12 +133,13 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 
 - Cuando la persona elige una venta, el sistema deberá mostrar su detalle con el título «Venta N.º [número]»: su fecha y hora, «Registrada por [nombre] · [rol]», «Medio de pago: [medio]», todas sus líneas en el orden en que se registraron y su total, según «Datos de una venta en el Historial».
 - Mientras se muestre el detalle de una venta, el sistema deberá ofrecer la opción «Volver», que lleva a la lista de ventas del día de esa venta.
+- El sistema deberá obtener el detalle, actualizarlo y avisar sin conexión o con error como indican RF-5 y RF-6.
 
 **RF-9. Buscar una venta por su número** (HU-2)
 
-- El sistema deberá ofrecer en el Historial el campo «Buscar venta por número» con la opción «Buscar».
-- Cuando la persona busca el número de una venta registrada, el sistema deberá mostrar su detalle (RF-8).
-- Si no existe ninguna venta registrada con ese número, entonces el sistema deberá mostrar «No existe la venta N.º [número]».
+- El sistema deberá ofrecer en todas las pantallas del Historial (las ventas de un día, el detalle de una venta y las cifras de un mes) el campo «Buscar venta por número» con la opción «Buscar».
+- Cuando la persona busca el número de una venta registrada, el sistema deberá mostrar su detalle (RF-8), sin tener en cuenta los espacios alrededor ni los ceros a la izquierda («007» es la venta N.º 7).
+- Si no existe ninguna venta registrada con ese número, por grande que sea, entonces el sistema deberá mostrar «No existe la venta N.º [número]».
 - Si lo escrito no es un número entero mayor que cero, entonces el sistema deberá mostrar «Escribe un número de venta válido» y no buscar.
 
 **RF-10. Abrir el detalle desde la lista de un día** (HU-2)
@@ -149,16 +150,17 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 
 **RF-11. Elegir el mes** (HU-3)
 
-- El sistema deberá ofrecer en el Historial la opción «Ver por mes», que muestra las cifras del mes en curso, con el título «[Mes] de [año]», por ejemplo «Octubre de 2026», y las opciones «Mes anterior», «Mes siguiente» y un campo para elegir un mes cualquiera.
+- El sistema deberá ofrecer en el Historial la opción «Ver por mes», que muestra las cifras del mes en curso, con el título «[Mes] de [año]», por ejemplo «Octubre de 2026», y las opciones «Mes anterior», «Mes siguiente» y un campo para elegir un mes cualquiera, que no ofrece meses posteriores al mes en curso.
 - Cuando la persona elige «Mes anterior», «Mes siguiente» u otro mes, el sistema deberá mostrar las cifras de ese mes.
-- Mientras se muestre el mes en curso, el sistema deberá no permitir elegir «Mes siguiente».
-- Si se pide un mes futuro, entonces el sistema deberá rechazarlo con el mensaje «No se pueden consultar meses futuros» y no mostrar ninguna cifra de ese mes.
+- Si se pide un mes futuro por otra vía, entonces el sistema deberá rechazarlo con el mensaje «No se pueden consultar meses futuros» y no mostrar ninguna cifra de ese mes.
 - Si se pide un mes que no existe o no se puede leer como mes, entonces el sistema deberá rechazarlo con el mensaje «El mes no es válido».
+- Mientras se muestre el mes que era el mes en curso cuando el sistema obtuvo los datos, el sistema deberá no permitir elegir «Mes siguiente» (como «Día siguiente» en RF-2).
+- Donde estén las ventas de un día (HU-1), el sistema deberá ofrecer en las cifras de un mes la opción «Ver por día», que muestra las ventas de hoy.
 - El sistema deberá decidir cuál es el mes en curso con su propia fecha y hora en hora de Bolivia (como en RF-2).
 
 **RF-12. Cifras de un mes** (HU-3)
 
-- El sistema deberá mostrar del mes elegido su total vendido, su número de ventas y sus importes por medio de pago, contando todas las ventas registradas del mes (ver «Conceptos») y ninguna otra, con las mismas reglas que RF-4, y obtenerlas, actualizarlas y mostrar el momento de sus datos como indican RF-5 a RF-7.
+- El sistema deberá mostrar del mes elegido su total vendido, su número de ventas y sus importes por medio de pago, contando todas las ventas registradas del mes (ver «Conceptos») y ninguna otra, con las mismas reglas que RF-4, y obtenerlas, actualizarlas, mostrar el momento de sus datos («Datos al …») y avisar sin conexión o con error como indican RF-5 a RF-7.
 - Mientras el mes no tenga ventas, el sistema deberá mostrar «No hay ventas registradas este mes» junto a sus cifras en cero.
 
 **RF-13. Ventas por día de un mes** (HU-3)
@@ -196,6 +198,9 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 | Se busca la venta «0», «-3», «2,5» o «abc» | «Escribe un número de venta válido» (RF-9). |
 | Se busca un número mayor que el de la última venta | «No existe la venta N.º [número]» (RF-9). |
 | Se busca con el campo vacío | «Escribe un número de venta válido» (RF-9). |
+| Se busca « 007 » | Se abre la venta N.º 7 (RF-9). |
+| Se busca un número de 20 cifras | «No existe la venta N.º [número]» (RF-9). |
+| Se está en «Ver por mes» y se quiere volver a las ventas de un día | «Ver por día» muestra las de hoy; elegir una fila muestra las de ese día (RF-11, RF-13). |
 | Una venta con 30 líneas | El detalle muestra las 30, en el orden en que se registraron (RF-8). |
 | Un día con 400 ventas | Se muestran todas en menos de 2 segundos (RF-3, RNF-3). |
 | Un mes con 6000 ventas | Sus cifras se muestran en menos de 2 segundos (RF-12, RNF-3). |
@@ -205,6 +210,7 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 | Un cajero escribe la dirección del Historial | Recibe «No tienes permiso para ver el historial de ventas», sin datos de ventas (RF-1). |
 | La sesión vence con el Historial abierto y se elige «Actualizar» | Se aplica SPEC-001, RF-10 (RF-1). |
 | Dos ventas de la misma hora y minuto | Se distinguen por su número; la de número mayor va primero (RF-3). |
+| La pantalla de un mes queda abierta y empieza un mes nuevo | Lo que se muestra no cambia; «Mes siguiente» se puede elegir después de «Actualizar» (RF-11). |
 
 ## 7. Fuera de alcance
 
@@ -257,3 +263,15 @@ La persona delegó la definición completa de 005-historial («Delego la definic
 - **Decisión delegada:** Mientras no se aclare la duda 2, se puede consultar cualquier fecha hasta hoy, sin límite hacia atrás. (Motivo: las ventas registradas no se borran ni se modifican (SPEC-003), y un límite escondería datos que existen; poner un límite después solo restringe la consulta. Alternativa descartada: un límite inventado, como 12 meses.) (Aplicado en «Fecha consultable» y «Dudas abiertas».)
 - **Decisión delegada:** Rapidez de menos de 2 segundos con hasta 400 ventas en un día y 6000 en un mes. (Motivo: 2 segundos es el umbral de SPEC-001 a SPEC-004 para abrir una pantalla; 6000 ventas al mes es el volumen de SPEC-004, y 400 en un día es el doble de su promedio diario, para cubrir los días de más movimiento. Alternativa descartada: no fijar un volumen, que deja el requisito sin medida.) (Aplicado en RNF-3.)
 - **Decisión delegada:** Quedan fuera los productos más vendidos y los reportes por producto, categoría, persona u hora de períodos anteriores, los filtros, los rangos libres, las comparaciones, la exportación, el arqueo y los gráficos. (Motivo: ninguno es necesario para consultar las ventas y las cifras de caja de un día o un mes, y cada uno trae reglas propias que pueden llegar en una especificación nueva. Alternativa descartada: incluir los productos más vendidos de cualquier mes, que repite el cálculo del Dashboard.) (Aplicado en «Fuera de alcance».)
+
+**Revisión de QA.** En modo delegado, cada hallazgo se decidió con la recomendación indicada.
+
+- **Decisión delegada:** (Hallazgo 1) RF-9 no decía en qué pantallas está la búsqueda por número. → En todas las del Historial: día, detalle y mes. (Motivo: la persona busca una venta desde donde esté, sin volver a una pantalla concreta. Alternativa descartada: solo en la lista del día.) (Aplicado en RF-9.)
+- **Decisión delegada:** (Hallazgo 2) RF-2 no decía si el campo de fecha ofrece días futuros. → El campo no los ofrece, y el rechazo con su mensaje se aplica si se piden por otra vía (por ejemplo, la dirección); lo mismo para los meses. (Motivo: no ofrecer lo que no se puede consultar, y no mostrar datos si se pide igual. Alternativa descartada: dejarlos elegir y rechazarlos después.) (Aplicado en RF-2 y RF-11.)
+- **Decisión delegada:** (Hallazgo 3) RF-3 no fijaba el orden de dos ventas del mismo minuto. → De mayor a menor número, que es el orden en que se registraron (SPEC-003). (Motivo: el número es único y sigue el orden de registro, así que el orden es estable. Alternativa descartada: por hora, que empata en el mismo minuto.) (Aplicado en RF-3.)
+- **Decisión delegada:** (Hallazgo 4) RF-9 no decía qué pasa con espacios y ceros a la izquierda. → Se ignoran: « 007 » es la venta N.º 7. (Motivo: es el mismo número y no hay motivo para rechazarlo. Alternativa descartada: rechazarlo como número no válido.) (Aplicado en RF-9 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 5) RF-5, de HU-1, hablaba del mes y del detalle, de HU-2 y HU-3. → RF-5 habla de «cada consulta del Historial» y del día; RF-8 y RF-12 remiten a RF-5 y RF-6 para el detalle y el mes. (Motivo: HU-1 debe poder probarse sin las demás. Alternativa descartada: repetir las reglas de carga y conexión en cada historia.) (Aplicado en RF-5, RF-6, RF-8 y RF-12.)
+- **Decisión delegada:** (Hallazgo 6) RF-2 decía «mientras se muestre el día de hoy», lo que contradecía el caso de la medianoche. → «Día siguiente» y «Mes siguiente» se bloquean según el día y el mes que eran los actuales cuando el sistema obtuvo los datos; tras la medianoche o el cambio de mes, se habilitan después de «Actualizar». (Motivo: la pantalla no cambia sola (RF-5), y así se comporta igual que las cifras. Alternativa descartada: habilitarlos solos a la medianoche, que sería una actualización automática.) (Aplicado en RF-2, RF-11 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 7) Las pruebas de HU-2 y HU-3 parecían depender de HU-1. → Usan solo el acceso de RF-1 y la búsqueda o «Ver por mes», que están en la pantalla que abre el Historial, no la lista de un día; lo que depende de HU-1 (RF-10, «Ver por día», elegir una fila del mes) está marcado con «Donde». (Motivo: cada historia se prueba sola; el acceso es común. Alternativa descartada: una pantalla propia de búsqueda.) (Aplicado en HU-2, HU-3 y RF-11.)
+- **Decisión delegada:** (Hallazgo 8) Desde «Ver por mes» no se podía volver a la vista por día salvo eligiendo una fila. → Las cifras de un mes ofrecen «Ver por día», que muestra las ventas de hoy. (Motivo: es el camino de vuelta simétrico de «Ver por mes». Alternativa descartada: depender del botón atrás del navegador.) (Aplicado en RF-11 y «Casos límite».)
+- **Decisión delegada:** (Hallazgo 9) No se cubría un número de venta enorme. → Cualquier entero mayor que cero sin venta muestra «No existe la venta N.º [número]», por grande que sea. (Motivo: es un número válido que no corresponde a ninguna venta; un límite de cifras sería inventado. Alternativa descartada: «Escribe un número de venta válido».) (Aplicado en RF-9 y «Casos límite».)
