@@ -94,7 +94,7 @@ Rama: `feat/003-ventas-us2`. Esta historia no tiene tareas `[api]`: lo que pide 
   Hecho cuando: las pruebas de componente comprueban que `onSessionEnd` se llama al cerrar sesión y ante `SESSION_TERMINATED`, que no se llama ante `SESSION_EXPIRED` ni `SESSION_MISSING`, y que tras cerrar sesión no queda venta guardada; y las pruebas existentes de `auth` siguen pasando.
 - [x] **T024 [web] [P] [US2]** Escribir `DiscardSaleDialog.tsx` y la opción «Descartar venta», visible solo con líneas, con «¿Descartar esta venta? Se quitarán todos sus productos», «Descartar» y «Volver» (RF-14). Depende de: T018
   Hecho cuando: las pruebas de componente cubren que la opción no aparece con la venta vacía, que «Volver» conserva la venta, que «Descartar» la vacía sin registrar nada y que el diálogo se usa con teclado.
-- [ ] **T025 [integración] [US2]** Escribir `e2e/sales-us2-conservar-venta.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-12, RF-13, RF-14). Depende de: T021, T022, T023, T024
+- [x] **T025 [integración] [US2]** Escribir `e2e/sales-us2-conservar-venta.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-12, RF-13, RF-14). Depende de: T021, T022, T023, T024
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
 ## Fase 5 — Pulido
