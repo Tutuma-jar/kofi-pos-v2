@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.build.json && node -e \"require('node:fs').cpSync('src/shared/database/migrations', 'dist/shared/database/migrations', { recursive: true })\"",
     "start": "node dist/shared/database/migrate.js && node dist/server.js",
     "migrate": "node --env-file-if-exists=.env src/shared/database/migrate.ts",
-    "accounts": "node --env-file-if-exists=.env src/modules/auth/accounts.cli.ts"
+    "accounts": "node --env-file-if-exists=.env src/modules/auth/accounts.cli.ts",
+    "seed:menu": "node --env-file-if-exists=.env test/seed-menu.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

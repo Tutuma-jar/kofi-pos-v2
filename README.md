@@ -12,7 +12,7 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | Módulo | Especificación | Estado |
 | --- | --- | --- |
 | Acceso | `specs/001-acceso/` | Implementado; pulido en revisión |
-| Menú | `specs/002-menu/` | Pendiente |
+| Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
 | Ventas | `specs/003-ventas/` | Pendiente |
 | Dashboard | `specs/004-dashboard/` | Pendiente |
 | Historial y reportes | `specs/005-historial/` | Pendiente |
@@ -135,6 +135,44 @@ npm run test:e2e
 Las pruebas usan cuentas ficticias y una base en memoria. Los comandos compilan antes el contrato; E2E también compila la web y levanta sus propios servidores. Las demás comprobaciones están en [AGENTS.md](AGENTS.md#comandos).
 
 Para medir el despliegue de comprobación con una persona, usa `npm run measure:access`: pide una contraseña oculta en la terminal, automatiza veinte ingresos y cierres después del calentamiento y luego cronometra un ingreso manual. RNF-4 exige al menos 19 de 20 ingresos en menos de 3 segundos y 19 de 20 cierres en menos de 2 segundos; el ingreso manual debe tardar menos de 15 segundos. El primer acceso tras la suspensión del servicio queda excluido. La evidencia de Pulido y su reevaluación aprobada están en [el informe de tiempos](specs/001-acceso/evidence/access-performance.json) y en [el plan](specs/001-acceso/plan.md#pulido--medición-asistida-t043).
+
+## Menú
+
+El dueño abre **Administrar menú** desde la pantalla inicial (`/menu/administrar`). Para cargar lo que vende Kofi:
+
+1. Elige **Crear categoría**, escribe su nombre y guarda con Intro o **Guardar categoría**.
+2. Elige **Crear producto**, escribe su nombre, elige una categoría activa y escribe el precio en bolivianos (por ejemplo, `12,50`). Guarda con Intro o **Guardar producto**.
+3. Comprueba **Cambios guardados** y el producto en la lista, con su precio como «Bs 12,50». **Renombrar** y **Editar** permiten corregir los datos. Los mensajes de validación aparecen junto a cada campo y conservan lo escrito.
+
+El dueño puede **Desactivar** y **Reactivar** productos y categorías desde su fila, sin borrarlos. Una categoría con productos activos no se puede desactivar; antes hay que desactivarlos o moverlos. Reactivar una categoría conserva el estado de sus productos. Para reactivar un producto, su categoría debe estar activa.
+
+Dueño y cajero abren **Ver menú** desde inicio (`/menu`): ven solo los productos activos de categorías activas y sus precios, sin opciones de edición. Los cambios posteriores aparecen al volver a abrir o recargar la consulta. El cajero no puede administrar ni modificar el menú.
+
+### Cargar los 200 productos de prueba de T035
+
+Prepara una base propia de comprobación en Neon, sin productos, y configura su `DATABASE_URL` en `apps/api/.env`, como en «Preparar la base y el contrato». Usa esa misma base en el despliegue de comprobación de Render. Desde la raíz:
+
+```sh
+npm run build:contracts
+npm run seed:menu -w @kofi/api
+```
+
+El script aplica las migraciones pendientes y carga 200 productos ficticios mediante los servicios de Menú, en una transacción. Se niega a cargar si ya hay productos, incluidos los inactivos; no elimina datos. Un error revierte toda la carga. Estos datos son solo para comprobación, no el menú real del local. Prepara las cuentas con `npm run accounts -w @kofi/api -- create`, introduciendo la contraseña oculta en la terminal.
+
+**T035 medida el 2026-10-25:** las tres series cumplieron 20/20 operaciones menores de 2 segundos y la creación humana tardó 11,946 segundos. La [evidencia del despliegue](specs/002-menu/evidence/deployment.md) y las [60 muestras originales](specs/002-menu/evidence/menu-performance.json) registran los resultados. Para repetirla, el Blueprint y ambos servicios deben apuntar a `feat/002-menu-pulido`, usar la base de comprobación y tener el proxy de `/api` funcionando. `render.yaml` apunta a esa rama para los dos servicios; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir.
+
+Para automatizar las series y el cronómetro desde la computadora usada para comprobar el sistema:
+
+```sh
+npx playwright install chromium
+npm run measure:menu
+```
+
+Chromium se abre en la web de comprobación. Ingresa tú con una cuenta de dueño, escribiendo la contraseña solo en ese navegador. El medidor exige exactamente 200 productos, todos vigentes; excluye un calentamiento por operación y mide las tres series de veinte operaciones reales hasta ver su resultado en la interfaz. Los guardados conservan los datos precargados del producto. No uses esa ventana mientras se ejecutan los ciclos. Después, la terminal te pedirá pulsar Intro: se abrirá la administración y deberás crear tú un producto nuevo, con nombre único, categoría existente y precio. El cronómetro termina al verlo guardado en la lista. Esa creación deja un producto adicional; no se elimina automáticamente. Una repetición exige volver a disponer de 200 productos.
+
+El JSON sin credenciales se guarda en la ruta que muestra `git rev-parse --git-path menu-performance.json`. Incluye todas las duraciones, los límites, la hora de Bolivia y el commit local para contrastarlo con los desplegados en Render. La creación automatizada de un producto no sustituye la prueba humana. `npm run test:measure` verifica los medidores con datos ficticios y `npm run test:measure:menu` comprueba solo el de Menú.
+
+Con los servicios ya reactivados y los 200 productos cargados, mide desde la computadora del local 20 aperturas de la administración, 20 de la consulta y 20 guardados de productos existentes. Cronometra desde la acción hasta ver la lista o la confirmación actualizada: al menos 19 de cada serie deben tardar menos de 2 segundos. Excluye la primera operación tras la suspensión del servicio. Después, cronometra crear un producto en una categoría existente desde que se abre la administración: debe tardar menos de 30 segundos. Anota las duraciones, la fecha en hora de Bolivia, las URLs y el commit desplegado en el PR de pulido. La ejecución de las pruebas locales no sustituye esta medición; consulta [el plan de Menú, §8.3](specs/002-menu/plan.md#83-requisitos-no-funcionales).
 
 ## Flujo de trabajo
 
