@@ -86,18 +86,26 @@ Rama: `feat/002-menu-us1`. La historia 1 de Acceso ya está en `develop` (#15).
 
 Rama: `feat/002-menu-us2`.
 
-- [ ] **T025 [api] [P] [US2]** Añadir a `products.service.ts` desactivar y reactivar: reactivar exige la categoría activa (`409 CATEGORY_INACTIVE` con su nombre); repetir la acción no cambia nada (plan §5.4; RF-9, RF-11). Depende de: T015
+- [x] **T025 [api] [P] [US2]** Añadir a `products.service.ts` desactivar y reactivar: reactivar exige la categoría activa (`409 CATEGORY_INACTIVE` con su nombre); repetir la acción no cambia nada (plan §5.4; RF-9, RF-11). Depende de: T015
   Hecho cuando: las pruebas de integración cubren desactivar y reactivar conservando nombre, categoría y precio, el `409` con el nombre de la categoría y la acción repetida.
-- [ ] **T026 [api] [P] [US2]** Añadir a `categories.service.ts` desactivar y reactivar: `409 CATEGORY_HAS_ACTIVE_PRODUCTS` con N («1 producto activo» en singular), `KM002` traducido al mismo `409`, reactivar sin cambiar sus productos y renombrar una categoría inactiva (plan §5.4; RF-8, RF-10, RF-11). Depende de: T014
+- [x] **T026 [api] [P] [US2]** Añadir a `categories.service.ts` desactivar y reactivar: `409 CATEGORY_HAS_ACTIVE_PRODUCTS` con N («1 producto activo» en singular), `KM002` traducido al mismo `409`, reactivar sin cambiar sus productos y renombrar una categoría inactiva (plan §5.4; RF-8, RF-10, RF-11). Depende de: T014
   Hecho cuando: las pruebas de integración cubren desactivar sin productos activos y con solo inactivos, el `409` con 1 y con 3 productos, la carrera simulada con `KM002`, reactivar dejando inactivos sus productos inactivos y renombrar una inactiva.
-- [ ] **T027 [api] [P] [US2]** Añadir a `menu.routes.ts` las rutas de acción `…/deactivate` y `…/reactivate` de categorías y productos (plan §6.2; RF-1, RF-9, RF-10). Depende de: T017, T025, T026
+- [x] **T027 [api] [P] [US2]** Añadir a `menu.routes.ts` las rutas de acción `…/deactivate` y `…/reactivate` de categorías y productos (plan §6.2; RF-1, RF-9, RF-10). Depende de: T017, T025, T026
   Hecho cuando: las pruebas con `app.inject` cubren las cuatro rutas, sus `409` y `404`, y el `403` para el cajero.
-- [ ] **T028 [web] [P] [US2]** Añadir a `MenuAdminList` las acciones desactivar y reactivar de cada categoría y producto, sin confirmación y sin opción de eliminar, con el mensaje de la API junto a la fila, y el flujo de guardado de `SaveStatus` («Cambios guardados» o falta de conexión) (RF-7, RF-9, RF-10, RF-12). Depende de: T019, T022
+- [x] **T028 [web] [P] [US2]** Añadir a `MenuAdminList` las acciones desactivar y reactivar de cada categoría y producto, sin confirmación y sin opción de eliminar, con el mensaje de la API junto a la fila, y el flujo de guardado de `SaveStatus` («Cambios guardados» o falta de conexión) (RF-7, RF-9, RF-10, RF-12). Depende de: T019, T022
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada acción con «Cambios guardados», el escenario de categoría con productos activos, el escenario sin conexión y que no hay ninguna opción de eliminar.
-- [ ] **T029 [web] [P] [US2]** Hacer que `ProductForm` no ofrezca categorías inactivas al crear ni al mover, y que al editar un producto de una categoría inactiva ofrezca la suya marcada «Inactiva» (plan §5.7; RF-5, RF-11). Depende de: T021
+- [x] **T029 [web] [P] [US2]** Hacer que `ProductForm` no ofrezca categorías inactivas al crear ni al mover, y que al editar un producto de una categoría inactiva ofrezca la suya marcada «Inactiva» (plan §5.7; RF-5, RF-11). Depende de: T021
   Hecho cuando: las pruebas de componente cubren los dos casos con un menú simulado que tiene una categoría inactiva.
-- [ ] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
+- [x] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
+
+**Corrección tras integrar `develop` (2026-10-25):**
+
+- [x] **T042 [integración] [US2]** Restaurar la implementación y las pruebas de US2 perdidas al resolver el merge de `develop` en `feat/002-menu-us2` (RF-1, RF-5, RF-7, RF-9 a RF-12; plan §5.4 y §5.7). Depende de: T030
+  Hecho cuando: vuelven las funciones y rutas de activación, las acciones de la interfaz y la edición en la categoría inactiva propia; los tipos, las pruebas y las comprobaciones pasan. La corrección se integra con merge en US3 y Pulido.
+
+- [x] **T044 [integración] [US2]** Adelantar a US2 el margen de 15 segundos por test de API ya adoptado en US3 y Pulido, tras el timeout de Acceso al integrar `develop` (plan D-16). Depende de: T042
+  Hecho cuando: las pruebas, sus aserciones y el aislamiento se conservan, las comprobaciones pasan y la CI aplica el nuevo límite. El run `40169699691` agotó los 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 760 casos correctos. Después se integra en las ramas siguientes con merge.
 
 ## Fase 5 — US3: consultar el menú vigente (P3)
 
