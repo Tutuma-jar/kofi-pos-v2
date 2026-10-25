@@ -2,6 +2,7 @@ import {
   adminMenuResponseSchema,
   categoryResponseSchema,
   productResponseSchema,
+  currentMenuResponseSchema,
 } from '@kofi/contracts';
 import type { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { z } from 'zod';
@@ -11,7 +12,7 @@ import type { Clock } from '../../shared/clock.ts';
 import { AppError } from '../../shared/http/errors.ts';
 import { saveCategory, deactivateCategory, reactivateCategory } from './categories.service.ts';
 import { saveProduct, deactivateProduct, reactivateProduct } from './products.service.ts';
-import { getAdminMenu } from './menu.views.ts';
+import { getAdminMenu, getCurrentMenu } from './menu.views.ts';
 
 async function requireOwner(request: FastifyRequest) {
   if (request.sessionUser?.role !== 'owner')
@@ -41,6 +42,9 @@ export const menuPlugin: FastifyPluginAsync<{
   production?: boolean;
 }> = async (app, deps) => {
   app.addHook('preHandler', requireSession(createAuthService(deps), deps.production));
+  app.get('/api/menu', async () =>
+    currentMenuResponseSchema.parse({ categories: await getCurrentMenu(deps.db) }),
+  );
   const owner = { preHandler: requireOwner };
   for (const [action, change] of [
     ['deactivate', deactivateCategory],

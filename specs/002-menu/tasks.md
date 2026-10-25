@@ -111,12 +111,20 @@ Rama: `feat/002-menu-us2`.
 
 Rama: `feat/002-menu-us3`.
 
-- [ ] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
+- [x] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
   Hecho cuando: las pruebas con `app.inject` comprueban el menú vigente ordenado con las dos sesiones, sin categorías sin productos activos, y `401` sin sesión.
-- [ ] **T032 [web] [P] [US3]** Escribir `MenuPage.tsx` y `CurrentMenuList.tsx`: solo lectura, precio con `formatPrice`, aviso «El menú todavía no tiene productos disponibles», y el enlace «Ver menú» en la pantalla inicial para los dos roles (plan §5.7; RF-13, RF-14). Depende de: T011, T012, T018
+- [x] **T032 [web] [P] [US3]** Escribir `MenuPage.tsx` y `CurrentMenuList.tsx`: solo lectura, precio con `formatPrice`, aviso «El menú todavía no tiene productos disponibles», y el enlace «Ver menú» en la pantalla inicial para los dos roles (plan §5.7; RF-13, RF-14). Depende de: T011, T012, T018
   Hecho cuando: las pruebas de componente cubren el menú cargado sin ninguna acción de edición, el menú vacío y el enlace para el cajero y para el dueño.
-- [ ] **T033 [integración] [US3]** Escribir `e2e/menu-us3-consultar.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-13, RF-14). Depende de: T031, T032
+- [x] **T033 [integración] [US3]** Escribir `e2e/menu-us3-consultar.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-13, RF-14). Depende de: T031, T032
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1, US2 y US3.
+
+**Corrección de CI al integrar US2 (2026-10-25):**
+
+- [x] **T043 [integración] [US3]** Adelantar a US3 la configuración de Vitest de la API ya adoptada en Pulido: 15 segundos por test para las integraciones con PGlite y criptografía real, sin cambiar casos ni aserciones (plan D-15). Depende de: T033, T042
+  Hecho cuando: se conservan los tests y el código de aplicación; las comprobaciones y la CI pasan. El run `40168447613` falló únicamente por timeout de 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 766 casos correctos. La integración en Pulido se hace después mediante merge.
+
+- [x] **T045 [integración] [US3]** Restaurar la importación de `getCurrentMenu` y la decisión D-15 perdidas al integrar `develop` en US3 (RF-13 a RF-15; plan §5.5 y §6.2). Depende de: T033, T043
+  Hecho cuando: desaparece TS2304, la consulta vigente responde con ambas sesiones y se conserva la trazabilidad de T043; las comprobaciones y la CI pasan. El run `40171291962` falló en tipos por la importación ausente. Después se integra la corrección en Pulido mediante merge.
 
 ## Fase 6 — Pulido
 

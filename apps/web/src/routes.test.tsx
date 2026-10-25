@@ -44,6 +44,10 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
 }
 
 describe('routes', () => {
+  it.each(['owner', 'cashier'] as const)('ofrece Ver menú en inicio a %s (RF-13)', async (role) => {
+    await renderAt('/', role);
+    expect(await screen.findByRole('link', { name: 'Ver menú' })).toHaveAttribute('href', '/menu');
+  });
   it('/ingresar es pública y muestra la página de ingreso', async () => {
     await renderAt('/ingresar');
 
