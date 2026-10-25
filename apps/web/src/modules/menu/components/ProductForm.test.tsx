@@ -72,41 +72,4 @@ describe('formulario de producto (RF-4 a RF-6, RNF-4)', () => {
     ).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Guardar producto' })).not.toBeInTheDocument();
   });
-  it('no ofrece categorías inactivas al crear ni al mover desde otra categoría (RF-11)', () => {
-    const view = render(
-      <ProductForm categories={DEMO_CATEGORIES} onSave={async () => {}} onCancel={() => {}} />,
-    );
-    expect(screen.queryByRole('option', { name: /Temporada/ })).not.toBeInTheDocument();
-    view.rerender(
-      <ProductForm
-        product={DEMO_PRODUCTS[0]}
-        categories={DEMO_CATEGORIES}
-        onSave={async () => {}}
-        onCancel={() => {}}
-      />,
-    );
-    expect(screen.queryByRole('option', { name: /Temporada/ })).not.toBeInTheDocument();
-  });
-  it('ofrece la propia categoría inactiva marcada y permite guardar sin mover (RF-5)', async () => {
-    const product = DEMO_PRODUCTS[3]!;
-    const client = createMenuDemoClient('loaded');
-    const onSave = vi.fn((input) => client.updateProduct(product.id, input));
-    render(
-      <ProductForm
-        product={product}
-        categories={DEMO_CATEGORIES}
-        onSave={onSave}
-        onCancel={() => {}}
-      />,
-    );
-    expect(screen.getByRole('option', { name: 'Temporada · Inactiva' })).toBeVisible();
-    expect(screen.getByLabelText('Categoría')).toHaveValue(product.categoryId);
-    await userEvent.clear(screen.getByLabelText('Precio (Bs)'));
-    await userEvent.type(screen.getByLabelText('Precio (Bs)'), '19{Enter}');
-    expect(onSave).toHaveBeenCalledWith({
-      name: product.name,
-      categoryId: product.categoryId,
-      price: '19',
-    });
-  });
 });

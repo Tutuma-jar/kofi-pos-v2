@@ -9,8 +9,8 @@ import { createAuthService, requireSession } from '../auth/index.ts';
 import type { Database } from '../../shared/database/database.ts';
 import type { Clock } from '../../shared/clock.ts';
 import { AppError } from '../../shared/http/errors.ts';
-import { saveCategory, deactivateCategory, reactivateCategory } from './categories.service.ts';
-import { saveProduct, deactivateProduct, reactivateProduct } from './products.service.ts';
+import { saveCategory } from './categories.service.ts';
+import { saveProduct } from './products.service.ts';
 import { getAdminMenu } from './menu.views.ts';
 
 async function requireOwner(request: FastifyRequest) {
@@ -42,24 +42,6 @@ export const menuPlugin: FastifyPluginAsync<{
 }> = async (app, deps) => {
   app.addHook('preHandler', requireSession(createAuthService(deps), deps.production));
   const owner = { preHandler: requireOwner };
-  for (const [action, change] of [
-    ['deactivate', deactivateCategory],
-    ['reactivate', reactivateCategory],
-  ] as const) {
-    app.post(`/api/menu/categories/:id/${action}`, owner, async (request) =>
-      categoryResponseSchema.parse({
-        category: await change(deps.db, entityId(request, 'category')),
-      }),
-    );
-  }
-  for (const [action, change] of [
-    ['deactivate', deactivateProduct],
-    ['reactivate', reactivateProduct],
-  ] as const) {
-    app.post(`/api/menu/products/:id/${action}`, owner, async (request) =>
-      productResponseSchema.parse({ product: await change(deps.db, entityId(request, 'product')) }),
-    );
-  }
   app.get('/api/menu/admin', owner, async () =>
     adminMenuResponseSchema.parse({ categories: await getAdminMenu(deps.db) }),
   );

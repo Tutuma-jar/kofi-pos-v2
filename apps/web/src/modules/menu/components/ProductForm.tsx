@@ -24,9 +24,7 @@ export function ProductForm({ product, categories, onSave, onCancel, onFailure }
   const [fields, setFields] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
-  const options = categories.filter(
-    (category) => category.active || category.id === product?.categoryId,
-  );
+  const options = categories.filter((category) => category.active);
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
@@ -78,7 +76,6 @@ export function ProductForm({ product, categories, onSave, onCancel, onFailure }
         {options.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
-            {!category.active && ' · Inactiva'}
           </option>
         ))}
       </select>

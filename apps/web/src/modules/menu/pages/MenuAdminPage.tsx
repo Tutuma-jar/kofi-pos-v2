@@ -19,19 +19,6 @@ export function MenuAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [saveState, setSaveState] = useState<SaveState>(null);
-  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
-  async function act(id: string, operation: () => Promise<unknown>) {
-    if (saveState === 'saving') return;
-    setRowErrors({});
-    try {
-      await save(operation);
-    } catch (error) {
-      if (error instanceof ApiFetchError && error.status === 409) {
-        setSaveState(null);
-        setRowErrors({ [id]: error.message });
-      } else handleFailure(error);
-    }
-  }
   function handleFailure(error: unknown) {
     setSaveState(null);
     if (error instanceof ApiFetchError) {
@@ -119,16 +106,12 @@ export function MenuAdminPage() {
             />
           ) : (
             <>
-              <button
-                type="button"
-                disabled={saveState === 'saving'}
-                onClick={() => setEditor({ kind: 'category' })}
-              >
+              <button type="button" onClick={() => setEditor({ kind: 'category' })}>
                 Crear categoría
               </button>
               <button
                 type="button"
-                disabled={saveState === 'saving' || !categories.some((category) => category.active)}
+                disabled={!categories.some((category) => category.active)}
                 onClick={() => setEditor({ kind: 'product' })}
               >
                 Crear producto
@@ -140,30 +123,6 @@ export function MenuAdminPage() {
           )}
           <MenuAdminList
             categories={categories}
-            busy={saveState === 'saving'}
-            errors={rowErrors}
-            onCategoryActive={
-              editor
-                ? undefined
-                : (category) => {
-                    void act(category.id, () =>
-                      category.active
-                        ? client.deactivateCategory(category.id)
-                        : client.reactivateCategory(category.id),
-                    );
-                  }
-            }
-            onProductActive={
-              editor
-                ? undefined
-                : (product) => {
-                    void act(product.id, () =>
-                      product.active
-                        ? client.deactivateProduct(product.id)
-                        : client.reactivateProduct(product.id),
-                    );
-                  }
-            }
             onRenameCategory={
               editor ? undefined : (category) => setEditor({ kind: 'category', category })
             }

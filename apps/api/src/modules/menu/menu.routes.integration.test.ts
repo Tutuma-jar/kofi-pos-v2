@@ -14,10 +14,6 @@ import { createAccountsService } from '../auth/index.ts';
 const missingId = '11111111-1111-4111-8111-111111111111';
 const adminRoutes = [
   { method: 'GET', url: '/api/menu/admin' },
-  { method: 'POST', url: `/api/menu/categories/${missingId}/deactivate` },
-  { method: 'POST', url: `/api/menu/categories/${missingId}/reactivate` },
-  { method: 'POST', url: `/api/menu/products/${missingId}/deactivate` },
-  { method: 'POST', url: `/api/menu/products/${missingId}/reactivate` },
   { method: 'POST', url: '/api/menu/categories', payload: { name: 'Bebidas' } },
   { method: 'PUT', url: `/api/menu/categories/${missingId}`, payload: { name: 'Bebidas' } },
   {
@@ -145,45 +141,4 @@ describe('rutas del menú (RF-1 a RF-7)', () => {
       expect(response.json().error.fields.name).toBeTruthy();
     }
   });
-  it('expone las cuatro acciones y sus conflictos con respuestas del contrato (RF-9, RF-10)', async () => {
-    const post = (url: string, payload?: object) =>
-      app.inject({ method: 'POST', url, payload, headers: { cookie: ownerCookie } });
-    const category = (await post('/api/menu/categories', { name: 'Bebidas' })).json().category;
-    const product = (
-      await post('/api/menu/products', { name: 'Café', categoryId: category.id, price: '12,5' })
-    ).json().product;
-    expect((await post(`/api/menu/categories/${category.id}/deactivate`)).json().error.code).toBe(
-      'CATEGORY_HAS_ACTIVE_PRODUCTS',
-    );
-    let response = await post(`/api/menu/products/${product.id}/deactivate`);
-    expect(response.statusCode).toBe(200);
-    expect(productResponseSchema.parse(response.json()).product.active).toBe(false);
-    response = await post(`/api/menu/categories/${category.id}/deactivate`);
-    expect(response.statusCode).toBe(200);
-    expect(categoryResponseSchema.parse(response.json()).category.active).toBe(false);
-    response = await post(`/api/menu/products/${product.id}/reactivate`);
-    expect(response.statusCode).toBe(409);
-    expect(response.json().error.code).toBe('CATEGORY_INACTIVE');
-    response = await post(`/api/menu/categories/${category.id}/reactivate`);
-    expect(response.statusCode).toBe(200);
-    expect(categoryResponseSchema.parse(response.json()).category.active).toBe(true);
-    response = await post(`/api/menu/products/${product.id}/reactivate`);
-    expect(response.statusCode).toBe(200);
-    expect(productResponseSchema.parse(response.json()).product.active).toBe(true);
-  });
-  it.each(['categories', 'products'])(
-    'responde 404 para los ids desconocidos en acciones de %s',
-    async (entity) => {
-      for (const id of [missingId, 'no-es-uuid'])
-        for (const action of ['deactivate', 'reactivate']) {
-          const response = await app.inject({
-            method: 'POST',
-            url: `/api/menu/${entity}/${id}/${action}`,
-            headers: { cookie: ownerCookie },
-          });
-          expect(response.statusCode).toBe(404);
-          expect(response.json().error.code).toBe('NOT_FOUND');
-        }
-    },
-  );
 });
