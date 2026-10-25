@@ -9,6 +9,7 @@ import type {
 } from '@kofi/contracts';
 import { ApiFetchError } from '../../../shared/http/api-fetch.ts';
 import { useSalesClient } from '../api/SalesClientProvider.tsx';
+import { draftStore, type StoredSaleDraft } from './draft-store.ts';
 
 function draftLines(lines: SaleLine[]) {
   return lines.map(({ productId, productName, quantity, unitPriceCents }) => ({
@@ -18,59 +19,88 @@ function draftLines(lines: SaleLine[]) {
     unitPriceCents,
   }));
 }
-
+function emptyDraft(userId: string): StoredSaleDraft {
+  return { userId, draftId: crypto.randomUUID(), paymentMethod: null, lines: [] };
+}
+function persistQuote(draft: StoredSaleDraft, quote: SaleQuote): StoredSaleDraft {
+  const next = { ...draft, lines: draftLines(quote.lines) };
+  draftStore.save(next);
+  return next;
+}
 function errorMessage(error: unknown): string {
   if (error instanceof ApiFetchError) return error.error.fields?.lines ?? error.message;
   return error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo';
 }
 
-// Solo conserva la elección de productos. Todos los importes y avisos llegan de la API (RF-4).
-export function useSaleDraft() {
+// Los importes llegan de la API. La generación invalida respuestas anteriores a un cambio de
+// otra pestaña o a salir de la pantalla, para no reponer un borrador descartado (RF-12, RF-13).
+export function useSaleDraft(userId: string) {
   const client = useSalesClient();
+  const draft = useRef<StoredSaleDraft>(emptyDraft(userId));
   const [quote, setQuote] = useState<SaleQuote | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string>();
-  const [draftId, setDraftId] = useState(() => crypto.randomUUID());
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [confirmation, setConfirmation] = useState<Sale | null>(null);
   const pending = useRef(true);
+  const sequence = useRef(0);
   useEffect(() => {
     let active = true;
-    pending.current = true;
-    void client
-      .quote({ lines: [] })
-      .then((result) => {
-        if (active) setQuote(result);
-      })
-      .catch((failure: unknown) => {
-        if (active) setError(errorMessage(failure));
-      })
-      .finally(() => {
-        if (active) {
+    async function restore() {
+      const current = ++sequence.current;
+      const saved = draftStore.load(userId) ?? emptyDraft(userId);
+      draft.current = saved;
+      pending.current = true;
+      setBusy(true);
+      setError(undefined);
+      setPaymentMethod(saved.paymentMethod);
+      try {
+        const calculated = await client.quote({ lines: saved.lines });
+        if (!active || current !== sequence.current) return;
+        draft.current = persistQuote(saved, calculated);
+        setQuote(calculated);
+        if (calculated.lines.length) setConfirmation(null);
+      } catch (failure) {
+        if (active && current === sequence.current) setError(errorMessage(failure));
+      } finally {
+        if (active && current === sequence.current) {
           pending.current = false;
           setBusy(false);
         }
-      });
+      }
+    }
+    const unsubscribe = draftStore.subscribe(() => {
+      void restore();
+    });
+    void restore();
     return () => {
       active = false;
+      sequence.current++;
+      unsubscribe();
     };
-  }, [client]);
+  }, [client, userId]);
 
   async function calculate(lines: SaleDraftLine[], addedProductId?: string) {
     if (pending.current) return;
+    const current = ++sequence.current;
+    const saved = draft.current;
     pending.current = true;
     setBusy(true);
     setError(undefined);
     try {
       const calculated = await client.quote({ lines });
+      if (current !== sequence.current) return;
+      draft.current = persistQuote(saved, calculated);
       setQuote(calculated);
       if (addedProductId && calculated.lines.some((line) => line.productId === addedProductId))
         setConfirmation(null);
     } catch (failure) {
-      setError(errorMessage(failure));
+      if (current === sequence.current) setError(errorMessage(failure));
     } finally {
-      pending.current = false;
-      setBusy(false);
+      if (current === sequence.current) {
+        pending.current = false;
+        setBusy(false);
+      }
     }
   }
   const lines = () => draftLines(quote?.lines ?? []);
@@ -81,26 +111,50 @@ export function useSaleDraft() {
     paymentMethod,
     confirmation,
     choosePayment(method: PaymentMethod) {
-      if (!pending.current) setPaymentMethod(method);
+      if (pending.current) return;
+      draft.current = { ...draft.current, paymentMethod: method };
+      draftStore.save(draft.current);
+      setPaymentMethod(method);
+    },
+    discard() {
+      if (pending.current) return;
+      draft.current = emptyDraft(userId);
+      draftStore.clear();
+      setQuote((previous) => previous && { ...previous, lines: [], totalCents: 0, notices: [] });
+      setPaymentMethod(null);
+      setError(undefined);
     },
     async registerSale() {
       if (pending.current || !quote?.lines.length || !paymentMethod) return;
+      const current = ++sequence.current;
+      const saved = draft.current;
       pending.current = true;
       setBusy(true);
       setError(undefined);
       try {
-        const sale = await client.register({ draftId, paymentMethod, lines: lines() });
+        const sale = await client.register({
+          draftId: saved.draftId,
+          paymentMethod,
+          lines: lines(),
+        });
+        if (current !== sequence.current) return;
+        draft.current = emptyDraft(userId);
+        draftStore.clear();
         setConfirmation(sale);
         setQuote({ ...quote, lines: [], totalCents: 0, notices: [] });
         setPaymentMethod(null);
-        setDraftId(crypto.randomUUID());
       } catch (failure) {
+        if (current !== sequence.current) return;
         if (failure instanceof ApiFetchError && failure.code === 'MENU_CHANGED') {
           setError(failure.message);
           try {
-            setQuote(await client.quote({ lines: lines() }));
+            const calculated = await client.quote({ lines: saved.lines });
+            if (current === sequence.current) {
+              draft.current = persistQuote(saved, calculated);
+              setQuote(calculated);
+            }
           } catch (quoteFailure) {
-            setError(errorMessage(quoteFailure));
+            if (current === sequence.current) setError(errorMessage(quoteFailure));
           }
         } else {
           setError(
@@ -110,8 +164,10 @@ export function useSaleDraft() {
           );
         }
       } finally {
-        pending.current = false;
-        setBusy(false);
+        if (current === sequence.current) {
+          pending.current = false;
+          setBusy(false);
+        }
       }
     },
     async addProduct(product: MenuProduct) {

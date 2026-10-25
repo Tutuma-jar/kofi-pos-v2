@@ -6,12 +6,26 @@ import { SalesClientProvider } from '../api/SalesClientProvider.tsx';
 import { createSalesDemoClient } from '../dev/sales-demo-client.ts';
 import { DEMO_IDS, DEMO_MENU } from '../dev/fixtures.ts';
 import { NewSalePage } from './NewSalePage.tsx';
+import { SessionProvider } from '../../auth/index.ts';
+
+beforeEach(() => localStorage.clear());
+const sessionClient = {
+  async getSession() {
+    return { id: DEMO_IDS.cashier, username: 'ana', displayName: 'Ana', role: 'cashier' as const };
+  },
+  async login() {
+    return this.getSession();
+  },
+  async logout() {},
+};
 
 function mount(client = createSalesDemoClient('loaded')) {
   render(
     <MemoryRouter>
       <SalesClientProvider client={client}>
-        <NewSalePage />
+        <SessionProvider client={sessionClient}>
+          <NewSalePage />
+        </SessionProvider>
       </SalesClientProvider>
     </MemoryRouter>,
   );

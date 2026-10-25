@@ -4,9 +4,15 @@ import { SaleDraftLines } from '../components/SaleDraftLines.tsx';
 import { PaymentMethodPicker } from '../components/PaymentMethodPicker.tsx';
 import { SaleConfirmation } from '../components/SaleConfirmation.tsx';
 import { useSaleDraft } from '../state/useSaleDraft.ts';
+import { useSession } from '../../auth/index.ts';
 
 export function NewSalePage() {
-  const draft = useSaleDraft();
+  const { user } = useSession();
+  return user ? <SaleEditor key={user.id} userId={user.id} /> : null;
+}
+
+function SaleEditor({ userId }: { userId: string }) {
+  const draft = useSaleDraft(userId);
   return (
     <main>
       <h1>Nueva venta</h1>
