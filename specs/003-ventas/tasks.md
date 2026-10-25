@@ -58,7 +58,7 @@ Rama: `feat/003-ventas-definicion`.
 
 Rama: `feat/003-ventas-us1`. Empieza cuando se fusionen el PR de definición de 003 y `feat/002-menu-us1`.
 
-- [ ] **T012 [api] [P] [US1]** Escribir `sales.pricing.ts` con `priceDraft` (plan §5.1; RF-4, RF-5, RF-7, RNF-2). Depende de: T005
+- [x] **T012 [api] [P] [US1]** Escribir `sales.pricing.ts` con `priceDraft` (plan §5.1; RF-4, RF-5, RF-7, RNF-2). Depende de: T005
   Hecho cuando: las pruebas unitarias cubren subtotales y total; una venta vacía con total 0; el aviso de precio cambiado con el precio nuevo en formato «Bs 13,00»; el de una línea retirada y el de un producto recién agregado que ya no está; un cambio de nombre o de categoría sin aviso; `menuChanged` solo con cambios de precio o retiros; y 30 líneas de 99 unidades a 100000 centavos con total 297000000.
 - [ ] **T013 [api] [P] [US1]** Escribir en `sales.service.ts` el cálculo de la venta en preparación (`quote`) con el menú vigente inyectado (plan §5.2, D-1, D-2; RF-2 a RF-5). Depende de: T012
   Hecho cuando: las pruebas de integración, con un menú vigente falso, comprueban que la respuesta cumple `saleQuoteSchema`, trae el menú tal como lo da la función y las líneas calculadas, y que un menú vacío devuelve `menu: []` sin líneas.
