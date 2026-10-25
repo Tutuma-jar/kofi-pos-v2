@@ -97,6 +97,19 @@ describe('eslint.config.js: no-restricted-imports', { timeout: 15_000 }, () => {
       ['apps/api/src/app.ts', './modules/dashboard/dashboard.routes.ts'],
       ['apps/api/src/modules/dashboard/dashboard.service.ts', '../sales/sales.repository.ts'],
       ['apps/api/src/modules/sales/sales.service.ts', '../dashboard/dashboard.summary.ts'],
+      // Módulo history (SPEC-005).
+      ['apps/web/src/routes.tsx', './modules/history/pages/DayHistoryPage.tsx'],
+      ['apps/web/src/main.tsx', './modules/history/api/history-client.ts'],
+      ['apps/web/src/modules/history/pages/DayHistoryPage.tsx', '../../sales/api/sales-client.ts'],
+      [
+        'apps/web/src/modules/history/pages/MonthHistoryPage.tsx',
+        '../../dashboard/api/dashboard-client.ts',
+      ],
+      ['apps/web/src/modules/auth/pages/HomePage.tsx', '../../history/pages/DayHistoryPage.tsx'],
+      ['apps/api/src/app.ts', './modules/history/history.routes.ts'],
+      ['apps/api/src/modules/history/history.service.ts', '../sales/sales.repository.ts'],
+      ['apps/api/src/modules/history/history.report.ts', '../dashboard/dashboard.summary.ts'],
+      ['apps/api/src/modules/dashboard/dashboard.service.ts', '../history/history.report.ts'],
     ])('%s no puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toHaveLength(1);
     });
@@ -132,6 +145,12 @@ describe('eslint.config.js: no-restricted-imports', { timeout: 15_000 }, () => {
       ['apps/api/src/app.ts', './modules/dashboard/index.ts'],
       ['apps/api/src/modules/dashboard/dashboard.routes.ts', '../auth/index.ts'],
       ['apps/api/src/modules/dashboard/dashboard.service.ts', '../../shared/calendar.ts'],
+      ['apps/web/src/routes.tsx', './modules/history/index.ts'],
+      ['apps/web/src/modules/history/pages/DayHistoryPage.tsx', '../../auth/index.ts'],
+      ['apps/web/src/modules/history/pages/DayHistoryPage.tsx', '../state/useHistoryQuery.ts'],
+      ['apps/api/src/app.ts', './modules/history/index.ts'],
+      ['apps/api/src/modules/history/history.routes.ts', '../auth/index.ts'],
+      ['apps/api/src/modules/history/history.service.ts', '../../shared/calendar.ts'],
     ])('%s sí puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toEqual([]);
     });
