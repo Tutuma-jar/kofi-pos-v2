@@ -143,7 +143,7 @@ Se aplican desde que existen las aplicaciones (`001-acceso`):
 
 ## 6. Decisiones globales
 
-Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas), [`specs/003-ventas/plan.md`](../specs/003-ventas/plan.md#7-decisiones-técnicas) y [`specs/004-dashboard/plan.md`](../specs/004-dashboard/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
+Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde se indica, en [`specs/002-menu/plan.md`](../specs/002-menu/plan.md#7-decisiones-técnicas), [`specs/003-ventas/plan.md`](../specs/003-ventas/plan.md#7-decisiones-técnicas), [`specs/004-dashboard/plan.md`](../specs/004-dashboard/plan.md#7-decisiones-técnicas) y [`specs/005-historial/plan.md`](../specs/005-historial/plan.md#7-decisiones-técnicas), que tienen el detalle y las alternativas descartadas.
 
 ### 6.1 Mismo origen
 
@@ -198,3 +198,5 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - Se muestra siempre con `formatDateTime` de `packages/contracts`, en hora de Bolivia (`America/La_Paz`): «24/10/2026 14:05», con día, mes, hora y minutos de dos cifras y la hora en formato de 24 horas.
 - Adoptado en SPEC-003 (D-7).
 - **Días y meses:** qué es «hoy» y «el mes en curso» en hora de Bolivia lo decide la API con `apps/api/src/shared/calendar.ts`, a partir de `clock.ts`, nunca la interfaz con la hora de la computadora. Las fechas sin hora y los meses viajan como `YYYY-MM-DD` y `YYYY-MM`, ya en hora de Bolivia, y se muestran con `formatDate` («24/10/2026») y `formatMonth` («Octubre de 2026») de `packages/contracts`. Adoptado en SPEC-004 (D-4, D-5).
+- **Navegación por fechas:** la interfaz no hace aritmética de fechas. Cuando necesita el día o el mes anterior o siguiente, el día de hoy o el día de un instante, los recibe de la API, calculados con `shared/calendar.ts`. Adoptado en SPEC-005 (D-4).
+- **Horas y roles:** una hora sin fecha se muestra con `formatTime` («14:05», en hora de Bolivia) y el nombre de un rol con `formatRole` («Dueño», «Cajero»), los dos de `packages/contracts`. Adoptado en SPEC-005 (D-5).
