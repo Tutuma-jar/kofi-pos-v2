@@ -450,6 +450,12 @@ La API de E2E carga los menús de cada prueba con los servicios del módulo, med
 | RF-14 | solo vigentes; categorías sin productos activos fuera; orden | `CurrentMenuList` sin acciones; menú vacío | US3-1 a US3-3 |
 | RF-15 | `getCurrentMenu(db)`: nombre, categoría y precio vigente de cada producto vendible | — | — |
 
+### 8.6 Resultado del despliegue de comprobación (T035)
+
+El 2026-10-25, a las 01:26:44 de Bolivia, la medición asistida sobre el commit `85650aabb5166612555ab9f7f7827f6ca8b8a602`, con 200 productos vigentes, obtuvo 20/20 aperturas de administración, 20/20 consultas y 20/20 guardados menores de 2 segundos. Se excluyó un calentamiento por operación. La persona ingresó en Chromium y creó manualmente un producto en 11,946 segundos desde la apertura de la administración hasta la confirmación y la lista actualizada: ambos criterios se cumplen.
+
+Las [muestras originales](evidence/menu-performance.json) y la [comprobación del despliegue](evidence/deployment.md) conservan el resultado, las URLs y el commit desplegado en web y API. Esta evidencia acredita esa versión y ese entorno; el commit que la incorpora solo actualiza documentos y evidencia. D-13 describe la corrección de CI anterior a esta medición, cuando T035 aún estaba pendiente.
+
 ## 9. Decisiones globales en `docs/architecture.md`
 
 Afectan a todo el proyecto. En modo delegado se aplican en este mismo PR y se indican en «Observaciones».

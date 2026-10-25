@@ -12,7 +12,7 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | Módulo | Especificación | Estado |
 | --- | --- | --- |
 | Acceso | `specs/001-acceso/` | Implementado; pulido en revisión |
-| Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 pendiente |
+| Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
 | Ventas | `specs/003-ventas/` | Pendiente |
 | Dashboard | `specs/004-dashboard/` | Pendiente |
 | Historial y reportes | `specs/005-historial/` | Pendiente |
@@ -159,7 +159,7 @@ npm run seed:menu -w @kofi/api
 
 El script aplica las migraciones pendientes y carga 200 productos ficticios mediante los servicios de Menú, en una transacción. Se niega a cargar si ya hay productos, incluidos los inactivos; no elimina datos. Un error revierte toda la carga. Estos datos son solo para comprobación, no el menú real del local. Prepara las cuentas con `npm run accounts -w @kofi/api -- create`, introduciendo la contraseña oculta en la terminal.
 
-**T035 sigue pendiente hasta guardar la evidencia real:** el Blueprint y ambos servicios deben apuntar a `feat/002-menu-pulido`, usar la base de comprobación y tener el proxy de `/api` funcionando. `render.yaml` apunta a esa rama para los dos servicios; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir.
+**T035 medida el 2026-10-25:** las tres series cumplieron 20/20 operaciones menores de 2 segundos y la creación humana tardó 11,946 segundos. La [evidencia del despliegue](specs/002-menu/evidence/deployment.md) y las [60 muestras originales](specs/002-menu/evidence/menu-performance.json) registran los resultados. Para repetirla, el Blueprint y ambos servicios deben apuntar a `feat/002-menu-pulido`, usar la base de comprobación y tener el proxy de `/api` funcionando. `render.yaml` apunta a esa rama para los dos servicios; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir.
 
 Para automatizar las series y el cronómetro desde la computadora usada para comprobar el sistema:
 
