@@ -117,6 +117,11 @@ Rama: `feat/002-menu-us3`.
 - [x] **T033 [integración] [US3]** Escribir `e2e/menu-us3-consultar.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-13, RF-14). Depende de: T031, T032
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1, US2 y US3.
 
+**Corrección de CI al integrar US2 (2026-10-25):**
+
+- [x] **T043 [integración] [US3]** Adelantar a US3 la configuración de Vitest de la API ya adoptada en Pulido: 15 segundos por test para las integraciones con PGlite y criptografía real, sin cambiar casos ni aserciones (plan D-15). Depende de: T033, T042
+  Hecho cuando: se conservan los tests y el código de aplicación; las comprobaciones y la CI pasan. El run `40168447613` falló únicamente por timeout de 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 766 casos correctos. La integración en Pulido se hace después mediante merge.
+
 ## Fase 6 — Pulido
 
 Rama: `feat/002-menu-pulido`.
