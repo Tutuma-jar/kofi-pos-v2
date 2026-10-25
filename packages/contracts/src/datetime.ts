@@ -16,10 +16,20 @@ const dateTimeFormat = new Intl.DateTimeFormat('es-BO', {
 // «24/10/2026 14:05». Se arma con formatToParts para no depender de los separadores de cada
 // navegador (plan §5.6).
 export function formatDateTime(iso: string): string {
-  const parts = Object.fromEntries(
+  const parts = dateTimeParts(iso);
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+function dateTimeParts(iso: string): Record<string, string> {
+  return Object.fromEntries(
     dateTimeFormat.formatToParts(new Date(iso)).map((part) => [part.type, part.value]),
   );
-  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+// «10:30»: solo la hora, en hora de Bolivia (SPEC-005 D-5).
+export function formatTime(iso: string): string {
+  const parts = dateTimeParts(iso);
+  return `${parts.hour}:${parts.minute}`;
 }
 
 // Fechas sin hora (`YYYY-MM-DD`) y meses (`YYYY-MM`) que la API ya calculó en hora de Bolivia

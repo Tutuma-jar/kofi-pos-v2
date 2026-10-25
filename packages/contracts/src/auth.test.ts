@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   accountInputSchema,
+  formatRole,
   loginRequestSchema,
   loginResponseSchema,
   PASSWORD_MAX_LENGTH,
@@ -144,5 +145,15 @@ describe('respuestas', () => {
     expect(sessionResponseSchema.safeParse({ user: { ...USER, role: 'admin' } }).success).toBe(
       false,
     );
+  });
+});
+
+// Nombre del rol para la persona (SPEC-005 D-5).
+describe('formatRole (SPEC-005 D-5)', () => {
+  it.each([
+    ['owner', 'Dueño'],
+    ['cashier', 'Cajero'],
+  ] as const)('muestra %s como «%s»', (role, expected) => {
+    expect(formatRole(role)).toBe(expected);
   });
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BOLIVIA_TIME_ZONE, formatDate, formatDateTime, formatMonth } from './index.ts';
+import { BOLIVIA_TIME_ZONE, formatDate, formatDateTime, formatMonth, formatTime } from './index.ts';
 
 describe('formatDateTime (plan §5.6, D-7)', () => {
   afterEach(() => {
@@ -60,6 +60,30 @@ describe('formatDate y formatMonth (SPEC-004 D-5)', () => {
       vi.stubEnv('TZ', timeZone);
       expect(formatDate('2026-10-01')).toBe('01/10/2026');
       expect(formatMonth('2026-10')).toBe('Octubre de 2026');
+    },
+  );
+});
+
+// Hora sin fecha, en hora de Bolivia (SPEC-005 D-5).
+describe('formatTime (SPEC-005 D-5)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it.each([
+    ['2026-10-24T14:30:00.000Z', '10:30'],
+    ['2026-10-25T03:59:00.000Z', '23:59'],
+    ['2026-10-25T04:00:00.000Z', '00:00'],
+    ['2026-10-24T09:05:00-04:00', '09:05'],
+  ])('muestra %s como «%s»', (iso, expected) => {
+    expect(formatTime(iso)).toBe(expected);
+  });
+
+  it.each(['Asia/Tokyo', 'UTC', 'America/New_York'])(
+    'da lo mismo con la zona horaria %s en el proceso',
+    (timeZone) => {
+      vi.stubEnv('TZ', timeZone);
+      expect(formatTime('2026-10-25T03:59:00.000Z')).toBe('23:59');
     },
   );
 });
