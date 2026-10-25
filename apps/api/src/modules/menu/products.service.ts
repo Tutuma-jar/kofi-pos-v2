@@ -7,10 +7,40 @@ import {
   findProductByNameKey,
   insertProduct,
   updateProduct,
+  setProductActive,
 } from './products.repository.ts';
 
 const duplicateName = 'Ya existe un producto con ese nombre';
 const inactiveCategory = 'Elige una categoría activa';
+
+async function changeProductActive(db: Database, id: string, active: boolean) {
+  let categoryName = '';
+  const categoryInactive = () =>
+    new AppError(
+      409,
+      'CATEGORY_INACTIVE',
+      `Reactiva la categoría “${categoryName}” o mueve el producto a otra antes de reactivarlo`,
+    );
+  try {
+    return await db.transaction(async (tx) => {
+      const product = await findProductById(tx, id, { forUpdate: true });
+      if (!product) throw new AppError(404, 'NOT_FOUND', 'No se encontró el producto');
+      if (product.active === active) return product;
+      if (active) {
+        const category = (await findCategoryById(tx, product.categoryId, { lock: 'share' }))!;
+        categoryName = category.name;
+        if (!category.active) throw categoryInactive();
+      }
+      return (await setProductActive(tx, id, active))!;
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code === 'KM001') throw categoryInactive();
+    throw error;
+  }
+}
+
+export const deactivateProduct = (db: Database, id: string) => changeProductActive(db, id, false);
+export const reactivateProduct = (db: Database, id: string) => changeProductActive(db, id, true);
 
 export async function saveProduct(
   db: Database,
