@@ -19,7 +19,7 @@ El resumen de hoy y del mes en curso, con su venta promedio y sus productos más
 | Usuario | Qué puede hacer en el Historial |
 | --- | --- |
 | **Dueño** | Consultar las ventas de cualquier día, el detalle de cualquier venta y las cifras de cualquier mes. |
-| **Cajero** | Nada, mientras no se aclare la duda 1: no ve la opción «Historial de ventas» y no puede consultar ventas pasadas (ver «Dudas abiertas»). |
+| **Cajero** | Nada: no ve la opción «Historial de ventas» y no puede consultar ventas pasadas (ver «Aclaraciones», respuesta de la persona). |
 
 ### Conceptos
 
@@ -29,7 +29,7 @@ El resumen de hoy y del mes en curso, con su venta promedio y sus productos más
 | **Día** | Un día calendario en hora de Bolivia, de 00:00 a 23:59, como en SPEC-004. Una venta es de un día si su fecha y hora de registro, en hora de Bolivia, caen en ese día. |
 | **Mes** | Un mes calendario en hora de Bolivia, desde las 00:00 del día 1 hasta las 23:59 de su último día. |
 | **Hoy** y **mes en curso** | El día y el mes de la fecha actual del sistema en hora de Bolivia, hasta el momento de la consulta. |
-| **Fecha consultable** | Cualquier día hasta hoy y cualquier mes hasta el mes en curso, sin límite hacia atrás, mientras no se aclare la duda 2. Un día o un mes futuro no se puede consultar. |
+| **Fecha consultable** | Cualquier día hasta hoy y cualquier mes hasta el mes en curso, sin límite hacia atrás (ver «Aclaraciones», respuesta de la persona). Un día o un mes futuro no se puede consultar. |
 
 ### Datos de una venta en el Historial
 
@@ -236,8 +236,7 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 
 ## 9. Dudas abiertas
 
-1. **[NECESITA ACLARACIÓN]** ¿El cajero puede usar el Historial y, si puede, qué ventas ve: solo las de hoy, solo las que registró él, o todas? Es una decisión del dueño sobre qué datos del negocio comparte. Mientras no se aclare, solo el dueño usa el Historial (ver «Usuarios» y RF-1).
-2. **[NECESITA ACLARACIÓN]** ¿Hasta qué fecha hacia atrás debe poder consultarse el Historial? Depende de cuánto tiempo quiere Kofi conservar a la vista sus ventas. Mientras no se aclare, se puede consultar cualquier día y cualquier mes hasta hoy, sin límite hacia atrás (ver «Fecha consultable»), porque las ventas registradas nunca se borran (SPEC-003).
+Ninguna. Las dos dudas quedaron respondidas el 2026-10-25 (ver «Respuestas a las dudas abiertas» en «Aclaraciones»).
 
 ## 10. Aclaraciones
 
@@ -259,8 +258,8 @@ La persona delegó la definición completa de 005-historial («Delego la definic
 - **Decisión delegada:** Lo que muestra el Historial se obtiene al abrir, recargar, cambiar de día, de mes o de venta y con «Actualizar», con el momento de los datos visible; no se actualiza solo. Al recargar o volver atrás se conserva lo que se estaba consultando. (Motivo: el mismo criterio que el Dashboard (SPEC-004, RF-6); conservar la consulta evita perder el día o la venta buscados. Alternativa descartada: actualizar cada minuto, que genera tráfico sin que nadie mire.) (Aplicado en RF-5.)
 - **Decisión delegada:** Sin conexión o con un error inesperado se sigue mostrando la consulta anterior, con su propio título y el momento de sus datos, junto al aviso. (Motivo: el mismo criterio que el Dashboard (SPEC-004, RF-7); el título evita confundir el día que se ve con el que se pidió. Alternativa descartada: vaciar la pantalla.) (Aplicado en RF-6.)
 - **Decisión delegada:** La opción de la pantalla inicial se llama «Historial de ventas». (Motivo: describe en español lo que muestra (RNF-1) y no se confunde con «Resumen de ventas» (SPEC-004) ni con «Nueva venta» (SPEC-003). Alternativa descartada: «Reportes», que no dice que se pueden ver las ventas una por una.) (Aplicado en RF-1.)
-- **Decisión delegada:** Mientras no se aclare la duda 1, solo el dueño usa el Historial, y un cajero recibe «No tienes permiso para ver el historial de ventas». (Motivo: SPEC-001 anticipa que el dueño tiene acceso a los reportes; dar acceso al cajero sin confirmarlo mostraría datos del negocio que el dueño quizá no quiera compartir, mientras que darlo después solo añade un permiso, como se hizo en SPEC-004. Alternativa descartada: dar el Historial a los dos roles.) (Aplicado en «Usuarios», RF-1 y «Dudas abiertas».)
-- **Decisión delegada:** Mientras no se aclare la duda 2, se puede consultar cualquier fecha hasta hoy, sin límite hacia atrás. (Motivo: las ventas registradas no se borran ni se modifican (SPEC-003), y un límite escondería datos que existen; poner un límite después solo restringe la consulta. Alternativa descartada: un límite inventado, como 12 meses.) (Aplicado en «Fecha consultable» y «Dudas abiertas».)
+- **Decisión delegada:** Mientras no se aclare la duda 1, solo el dueño usa el Historial, y un cajero recibe «No tienes permiso para ver el historial de ventas». (Motivo: SPEC-001 anticipa que el dueño tiene acceso a los reportes; dar acceso al cajero sin confirmarlo mostraría datos del negocio que el dueño quizá no quiera compartir, mientras que darlo después solo añade un permiso, como se hizo en SPEC-004. Alternativa descartada: dar el Historial a los dos roles.) (Aplicado en «Usuarios», RF-1 y «Dudas abiertas».) *Confirmada el 2026-10-25 por la respuesta de la persona: ver «Respuestas a las dudas abiertas».*
+- **Decisión delegada:** Mientras no se aclare la duda 2, se puede consultar cualquier fecha hasta hoy, sin límite hacia atrás. (Motivo: las ventas registradas no se borran ni se modifican (SPEC-003), y un límite escondería datos que existen; poner un límite después solo restringe la consulta. Alternativa descartada: un límite inventado, como 12 meses.) (Aplicado en «Fecha consultable» y «Dudas abiertas».) *Confirmada el 2026-10-25 por la respuesta de la persona: ver «Respuestas a las dudas abiertas».*
 - **Decisión delegada:** Rapidez de menos de 2 segundos con hasta 400 ventas en un día y 6000 en un mes. (Motivo: 2 segundos es el umbral de SPEC-001 a SPEC-004 para abrir una pantalla; 6000 ventas al mes es el volumen de SPEC-004, y 400 en un día es el doble de su promedio diario, para cubrir los días de más movimiento. Alternativa descartada: no fijar un volumen, que deja el requisito sin medida.) (Aplicado en RNF-3.)
 - **Decisión delegada:** Quedan fuera los productos más vendidos y los reportes por producto, categoría, persona u hora de períodos anteriores, los filtros, los rangos libres, las comparaciones, la exportación, el arqueo y los gráficos. (Motivo: ninguno es necesario para consultar las ventas y las cifras de caja de un día o un mes, y cada uno trae reglas propias que pueden llegar en una especificación nueva. Alternativa descartada: incluir los productos más vendidos de cualquier mes, que repite el cálculo del Dashboard.) (Aplicado en «Fuera de alcance».)
 
@@ -275,3 +274,8 @@ La persona delegó la definición completa de 005-historial («Delego la definic
 - **Decisión delegada:** (Hallazgo 7) Las pruebas de HU-2 y HU-3 parecían depender de HU-1. → Usan solo el acceso de RF-1 y la búsqueda o «Ver por mes», que están en la pantalla que abre el Historial, no la lista de un día; lo que depende de HU-1 (RF-10, «Ver por día», elegir una fila del mes) está marcado con «Donde». (Motivo: cada historia se prueba sola; el acceso es común. Alternativa descartada: una pantalla propia de búsqueda.) (Aplicado en HU-2, HU-3 y RF-11.)
 - **Decisión delegada:** (Hallazgo 8) Desde «Ver por mes» no se podía volver a la vista por día salvo eligiendo una fila. → Las cifras de un mes ofrecen «Ver por día», que muestra las ventas de hoy. (Motivo: es el camino de vuelta simétrico de «Ver por mes». Alternativa descartada: depender del botón atrás del navegador.) (Aplicado en RF-11 y «Casos límite».)
 - **Decisión delegada:** (Hallazgo 9) No se cubría un número de venta enorme. → Cualquier entero mayor que cero sin venta muestra «No existe la venta N.º [número]», por grande que sea. (Motivo: es un número válido que no corresponde a ninguna venta; un límite de cifras sería inventado. Alternativa descartada: «Escribe un número de venta válido».) (Aplicado en RF-9 y «Casos límite».)
+
+**Respuestas a las dudas abiertas.** La persona respondió las dos dudas con las decisiones provisionales («Respondo las dudas con las decisiones provisionales: solo el dueño usa el Historial y no hay límite hacia atrás»).
+
+- **P:** ¿El cajero puede usar el Historial y, si puede, qué ventas ve? → **R:** No: solo el dueño usa el Historial. El cajero no ve la opción «Historial de ventas» y, si intenta consultar sus datos por otra vía, recibe «No tienes permiso para ver el historial de ventas». (Aplicado en «Usuarios» y «Dudas abiertas»; RF-1 ya lo decía.)
+- **P:** ¿Hasta qué fecha hacia atrás debe poder consultarse el Historial? → **R:** Sin límite: se puede consultar cualquier día y cualquier mes hasta hoy. (Aplicado en «Fecha consultable» y «Dudas abiertas».)

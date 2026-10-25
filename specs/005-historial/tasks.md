@@ -10,7 +10,7 @@ Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y 
 - **Dependencia de SPEC-003** (plan, encabezado y D-1): Preparación y Base común no usan nada de sus historias. Las historias del Historial necesitan de la historia 1 de Ventas, que **todavía no está en `develop`**, la exportación de `listRegisteredSales` y `salesPlugin` (SPEC-003 T015) y su registro en `app.ts` (SPEC-003 T020). Por eso **las historias del Historial empiezan cuando se fusionen el PR de definición de 005 y `feat/003-ventas-us1`**. Dentro de cada historia, solo las tareas `[integración]` usan esas piezas; las demás trabajan con ventas falsas o con el cliente simulado.
 - **Dependencia de SPEC-004:** el contrato (`dashboard.ts`, `formatDate`, `formatMonth`) y `shared/calendar.ts` ya están en `develop` (#20). `apps/api/test/test-sales.ts` es de SPEC-004 T009: T009 de esta especificación lo reutiliza si ya está en `develop` o lo crea con la forma de SPEC-004 §8.4 (plan §3). El script `seed:sales` de Pulido es de SPEC-004 T021 (plan D-11).
 - **Dependencias de SPEC-001 y SPEC-002:** `requireSession`, `createAuthService`, la sesión de la interfaz, los enlaces `homeLink` de la pantalla inicial y la ruta de pruebas `POST /api/__test/menu` ya están en `develop`.
-- **Dudas abiertas:** dos, con decisión provisional (plan, encabezado). Ninguna afecta a Preparación ni a Base común: si se responden de otra forma, cambian `HISTORY_ROLES` (T003, duda 1) y la validación de fechas del servicio (T010 y T024, duda 2). **Ninguna historia empieza con ellas abiertas** (`AGENTS.md`): la duda 1 afecta a las tres historias (RF-1 se aplica a todas las rutas del Historial) y la 2, a US1 y US3.
+- **Dudas abiertas:** ninguna. La persona respondió el 2026-10-25 que solo el dueño usa el Historial (`HISTORY_ROLES`, T003; plan D-6) y que no hay límite hacia atrás (plan D-10). La Base común ya lo aplicaba, así que no hay tareas de corrección (plan §11).
 - **Tests primero:** en cada tarea se escriben primero sus tests y después el código (principio 4).
 
 ## Fase 1 — Preparación
@@ -41,7 +41,7 @@ Rama: `feat/005-historial-definicion`.
 
 ## Fase 3 — US1: consultar las ventas de un día (P1)
 
-Rama: `feat/005-historial-us1`. Empieza cuando se fusionen el PR de definición de 005 y `feat/003-ventas-us1`, y con las dudas 1 y 2 de `spec.md` respondidas.
+Rama: `feat/005-historial-us1`. Empieza cuando se fusionen el PR de definición de 005 y `feat/003-ventas-us1`.
 
 - [ ] **T009 [api] [P] [US1]** Escribir en `history.report.ts` `periodTotals` y `listedSales`, y reutilizar o crear `apps/api/test/test-sales.ts` (plan §3, §5.2, §8.4; RF-3, RF-4, RF-7, RNF-2). Depende de: T003
   Hecho cuando: las pruebas unitarias cubren el ejemplo de §4 del plan; un período sin ventas (ceros y los dos medios de pago); `cash` y `qr` siempre en ese orden y sumando el total y el número de ventas; la lista ordenada por número descendente y sin líneas; los datos de cada venta tal como llegan (nombre y rol del momento, `userId` nulo); y 6000 ventas de 30 líneas de 99 unidades a 100000 centavos con el total exacto.

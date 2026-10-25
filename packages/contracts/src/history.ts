@@ -12,7 +12,7 @@ import { saleSchema } from './sales.ts';
 // API (principio 3), también el día o el mes anterior y siguiente (D-4); la interfaz los muestra con
 // formatPrice, formatDate, formatMonth, formatDateTime, formatTime y formatRole.
 
-// Roles que pueden usar el Historial (RF-1, D-6). Provisional mientras no se aclare la duda 1 de
+// Roles que pueden usar el Historial (RF-1, D-6): solo el dueño, por la respuesta a la duda 1 de
 // spec.md. La API rechaza a los demás con 403 y la interfaz no les muestra sus rutas.
 export const HISTORY_ROLES = ['owner'] as const satisfies readonly Role[];
 

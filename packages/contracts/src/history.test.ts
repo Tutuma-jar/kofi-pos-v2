@@ -126,7 +126,7 @@ describe('contrato del Historial (SPEC-005 plan §6)', () => {
     expect(contracts.byPaymentMethodSchema).toBe(byPaymentMethodSchema);
   });
 
-  it('solo el dueño usa el Historial mientras no se aclare la duda 1 (D-6)', () => {
+  it('solo el dueño usa el Historial (D-6)', () => {
     expect(HISTORY_ROLES).toEqual(['owner']);
   });
 
