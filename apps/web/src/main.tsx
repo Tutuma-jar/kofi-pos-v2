@@ -8,6 +8,11 @@ import {
   httpDashboardClient,
   type DashboardClient,
 } from './modules/dashboard/index.ts';
+import {
+  HistoryClientProvider,
+  httpHistoryClient,
+  type HistoryClient,
+} from './modules/history/index.ts';
 import { httpMenuClient, MenuClientProvider, type MenuClient } from './modules/menu/index.ts';
 import { httpSalesClient, SalesClientProvider, type SalesClient } from './modules/sales/index.ts';
 import { requestedScenarios } from './scenarios.ts';
@@ -22,15 +27,18 @@ function renderApp(
   menuClient: MenuClient = httpMenuClient,
   salesClient: SalesClient = httpSalesClient,
   dashboardClient: DashboardClient = httpDashboardClient,
+  historyClient: HistoryClient = httpHistoryClient,
 ) {
   root.render(
     <StrictMode>
       <MenuClientProvider client={menuClient}>
         <SalesClientProvider client={salesClient}>
           <DashboardClientProvider client={dashboardClient}>
-            <BrowserRouter>
-              <AppRoutes key={revision} client={client} />
-            </BrowserRouter>
+            <HistoryClientProvider client={historyClient}>
+              <BrowserRouter>
+                <AppRoutes key={revision} client={client} />
+              </BrowserRouter>
+            </HistoryClientProvider>
           </DashboardClientProvider>
         </SalesClientProvider>
       </MenuClientProvider>
