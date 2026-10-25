@@ -101,6 +101,11 @@ Rama: `feat/002-menu-us2`.
 - [x] **T030 [integración] [US2]** Escribir `e2e/menu-us2-desactivar.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-9 a RF-12). Depende de: T027, T028, T029
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
+**Corrección tras integrar `develop` (2026-10-25):**
+
+- [x] **T042 [integración] [US2]** Restaurar la implementación y las pruebas de US2 perdidas al resolver el merge de `develop` en `feat/002-menu-us2` (RF-1, RF-5, RF-7, RF-9 a RF-12; plan §5.4 y §5.7). Depende de: T030
+  Hecho cuando: vuelven las funciones y rutas de activación, las acciones de la interfaz y la edición en la categoría inactiva propia; los tipos, las pruebas y las comprobaciones pasan. La corrección se integra con merge en US3 y Pulido.
+
 ## Fase 5 — US3: consultar el menú vigente (P3)
 
 Rama: `feat/002-menu-us3`.
