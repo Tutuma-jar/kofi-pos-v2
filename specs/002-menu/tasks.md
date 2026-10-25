@@ -123,6 +123,11 @@ Rama: `feat/002-menu-pulido`.
 - [x] **T036 [integración]** Actualizar `README.md` con el estado del módulo Menú y cómo cargar el menú (RF-1 a RF-15). Depende de: T034; la persona autorizó expresamente ejecutarla sin esperar T035, documentando la medición pendiente
   Hecho cuando: el README describe quién administra y quién consulta el menú y cómo llegar a cada pantalla.
 
+**Corrección de CI durante el pulido (2026-10-25):**
+
+- [x] **T040 [integración]** Configurar el tiempo máximo de cada test de la API en 15 segundos para que las pruebas con PostgreSQL en memoria y criptografía real no agoten el límite predeterminado de 5 segundos al compartir CPU en CI (plan D-13; comprobaciones de Pulido). Depende de: T036
+  Hecho cuando: se conservan todos los casos y aserciones; la suite de bloqueo de Acceso, las comprobaciones automáticas y `technical-checks` del PR pasan. Evidencia inicial: el run `40127991766` falló únicamente por timeout en «solo cuenta la ventana de quince minutos, con límite abierto», con 670 tests correctos y 1 timeout.
+
 ## Cobertura de RF
 
 | RF | Tareas |
