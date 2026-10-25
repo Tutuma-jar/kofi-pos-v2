@@ -88,13 +88,13 @@ Rama: `feat/003-ventas-us1`. Empieza cuando se fusionen el PR de definición de 
 
 Rama: `feat/003-ventas-us2`. Esta historia no tiene tareas `[api]`: lo que pide se resuelve en la interfaz (plan D-8, D-9), y la API ya recalcula cualquier venta en preparación recuperada (US1).
 
-- [ ] **T022 [web] [P] [US2]** Escribir `state/draft-store.ts` sobre `localStorage` (`kofi:sales:draft`) con la cuenta, el `draftId`, el medio de pago elegido y las líneas, sincronizado entre pestañas, y usarlo en `useSaleDraft` en lugar del almacén en memoria (plan §5.5, D-8; RF-10, RF-12, RF-13). Depende de: T019
+- [x] **T022 [web] [P] [US2]** Escribir `state/draft-store.ts` sobre `localStorage` (`kofi:sales:draft`) con la cuenta, el `draftId`, el medio de pago elegido y las líneas, sincronizado entre pestañas, y usarlo en `useSaleDraft` en lugar del almacén en memoria (plan §5.5, D-8; RF-10, RF-12, RF-13). Depende de: T019
   Hecho cuando: las pruebas comprueban que la venta se recupera, con su medio de pago, al volver a montar la página con la misma cuenta y se recalcula, que con otra cuenta se descarta, que un evento `storage` de otra pestaña actualiza la venta mostrada, que registrar o descartar la borra, y que con `localStorage` vacío, inválido o que lanza errores la página empieza vacía.
-- [ ] **T023 [web] [P] [US2]** Añadir a `SessionProvider` el aviso `onSessionEnd('logout' | 'terminated')`, pasarle desde `routes.tsx` `discardStoredSaleDraft` exportado por `modules/sales/index.ts` (plan §5.5, D-9; RF-13). Depende de: T022
+- [x] **T023 [web] [P] [US2]** Añadir a `SessionProvider` el aviso `onSessionEnd('logout' | 'terminated')`, pasarle desde `routes.tsx` `discardStoredSaleDraft` exportado por `modules/sales/index.ts` (plan §5.5, D-9; RF-13). Depende de: T022
   Hecho cuando: las pruebas de componente comprueban que `onSessionEnd` se llama al cerrar sesión y ante `SESSION_TERMINATED`, que no se llama ante `SESSION_EXPIRED` ni `SESSION_MISSING`, y que tras cerrar sesión no queda venta guardada; y las pruebas existentes de `auth` siguen pasando.
-- [ ] **T024 [web] [P] [US2]** Escribir `DiscardSaleDialog.tsx` y la opción «Descartar venta», visible solo con líneas, con «¿Descartar esta venta? Se quitarán todos sus productos», «Descartar» y «Volver» (RF-14). Depende de: T018
+- [x] **T024 [web] [P] [US2]** Escribir `DiscardSaleDialog.tsx` y la opción «Descartar venta», visible solo con líneas, con «¿Descartar esta venta? Se quitarán todos sus productos», «Descartar» y «Volver» (RF-14). Depende de: T018
   Hecho cuando: las pruebas de componente cubren que la opción no aparece con la venta vacía, que «Volver» conserva la venta, que «Descartar» la vacía sin registrar nada y que el diálogo se usa con teclado.
-- [ ] **T025 [integración] [US2]** Escribir `e2e/sales-us2-conservar-venta.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-12, RF-13, RF-14). Depende de: T021, T022, T023, T024
+- [x] **T025 [integración] [US2]** Escribir `e2e/sales-us2-conservar-venta.spec.ts` con los 5 pasos de §8.2 del plan, contra la API real de E2E (RF-12, RF-13, RF-14). Depende de: T021, T022, T023, T024
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
 ## Fase 5 — Pulido

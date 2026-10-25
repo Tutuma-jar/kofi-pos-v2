@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -6,12 +6,60 @@ import { SalesClientProvider } from '../api/SalesClientProvider.tsx';
 import { createSalesDemoClient } from '../dev/sales-demo-client.ts';
 import { DEMO_IDS, DEMO_MENU } from '../dev/fixtures.ts';
 import { NewSalePage } from './NewSalePage.tsx';
+import { SessionProvider } from '../../auth/index.ts';
+import { AppRoutes } from '../../../routes.tsx';
+import { ApiFetchError } from '../../../shared/http/api-fetch.ts';
+import { SALE_DRAFT_KEY } from '../state/draft-store.ts';
+
+beforeEach(() => localStorage.clear());
+const sessionClient = {
+  async getSession() {
+    return { id: DEMO_IDS.cashier, username: 'ana', displayName: 'Ana', role: 'cashier' as const };
+  },
+  async login() {
+    return this.getSession();
+  },
+  async logout() {},
+};
+
+it('el cierre de sesión descarta la venta guardada desde routes.tsx (RF-13)', async () => {
+  let signedIn = true;
+  const client = {
+    async getSession() {
+      if (!signedIn)
+        throw new ApiFetchError(401, {
+          code: 'SESSION_MISSING',
+          message: 'Inicia sesión para continuar',
+        });
+      return sessionClient.getSession();
+    },
+    login: () => sessionClient.getSession(),
+    async logout() {
+      signedIn = false;
+    },
+  };
+  render(
+    <MemoryRouter initialEntries={['/ventas/nueva']}>
+      <SalesClientProvider client={createSalesDemoClient('loaded')}>
+        <AppRoutes client={client} />
+      </SalesClientProvider>
+    </MemoryRouter>,
+  );
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+  expect(localStorage.getItem(SALE_DRAFT_KEY)).not.toBeNull();
+  await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+  expect(await screen.findByRole('heading', { name: 'Ingresar' })).toBeVisible();
+  expect(localStorage.getItem(SALE_DRAFT_KEY)).toBeNull();
+});
 
 function mount(client = createSalesDemoClient('loaded')) {
   render(
     <MemoryRouter>
       <SalesClientProvider client={client}>
-        <NewSalePage />
+        <SessionProvider client={sessionClient}>
+          <NewSalePage />
+        </SessionProvider>
       </SalesClientProvider>
     </MemoryRouter>,
   );
@@ -46,6 +94,74 @@ describe('productos para vender (RF-1, RF-2, RF-3, RNF-4)', () => {
         lines: [{ productId: DEMO_IDS.americano, productName: 'Café americano', quantity: 1 }],
       }),
     );
+  });
+});
+
+describe('descartar la preparación (RF-14)', () => {
+  beforeEach(() => {
+    // jsdom no implementa el diálogo modal; Chromium comprueba su comportamiento nativo en E2E.
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true,
+      value: function (this: HTMLDialogElement) {
+        this.setAttribute('open', '');
+      },
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+      configurable: true,
+      value: function (this: HTMLDialogElement) {
+        this.removeAttribute('open');
+      },
+    });
+  });
+  afterEach(() => {
+    cleanup();
+    delete (HTMLDialogElement.prototype as unknown as { showModal?: unknown }).showModal;
+    delete (HTMLDialogElement.prototype as unknown as { close?: unknown }).close;
+  });
+  it('no ofrece descartar cuando está vacía', async () => {
+    mount();
+    await screen.findByText('Elige los productos de la venta');
+    expect(screen.queryByRole('button', { name: 'Descartar venta' })).not.toBeInTheDocument();
+  });
+  it('Volver conserva y Descartar vacía sin registrar, usando solo teclado', async () => {
+    const client = createSalesDemoClient('loaded');
+    const register = vi.spyOn(client, 'register');
+    mount(client);
+    const user = userEvent.setup();
+    (await screen.findByRole('button', { name: 'Café americano · Bs 12,50' })).focus();
+    await user.keyboard('{Enter}');
+    screen.getByLabelText('QR').focus();
+    await user.keyboard(' ');
+    const trigger = screen.getByRole('button', { name: 'Descartar venta' });
+    trigger.focus();
+    await user.keyboard('{Enter}');
+    const dialog = await screen.findByRole('dialog', {
+      name: '¿Descartar esta venta? Se quitarán todos sus productos',
+    });
+    expect(within(dialog).getByRole('button', { name: 'Volver' })).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Café americano × 1 · Bs 12,50')).toBeVisible();
+    expect(screen.getByLabelText('QR')).toBeChecked();
+    expect(trigger).toHaveFocus();
+    await user.keyboard('{Enter}');
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Descartar' })).toHaveFocus();
+    await user.keyboard(' ');
+    expect(screen.getByText('Elige los productos de la venta')).toBeVisible();
+    expect(screen.getByLabelText('QR')).not.toBeChecked();
+    expect(localStorage.getItem(SALE_DRAFT_KEY)).toBeNull();
+    expect(register).not.toHaveBeenCalled();
+  });
+  it('cancelar el diálogo conserva los productos', async () => {
+    mount();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+    await user.click(screen.getByRole('button', { name: 'Descartar venta' }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent(dialog, new Event('cancel', { cancelable: true }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Café americano × 1 · Bs 12,50')).toBeVisible();
   });
 });
 

@@ -1,12 +1,21 @@
 import { Link } from 'react-router';
+import { useState } from 'react';
 import { ProductPicker } from '../components/ProductPicker.tsx';
 import { SaleDraftLines } from '../components/SaleDraftLines.tsx';
 import { PaymentMethodPicker } from '../components/PaymentMethodPicker.tsx';
 import { SaleConfirmation } from '../components/SaleConfirmation.tsx';
 import { useSaleDraft } from '../state/useSaleDraft.ts';
+import { useSession } from '../../auth/index.ts';
+import { DiscardSaleDialog } from '../components/DiscardSaleDialog.tsx';
 
 export function NewSalePage() {
-  const draft = useSaleDraft();
+  const { user } = useSession();
+  return user ? <SaleEditor key={user.id} userId={user.id} /> : null;
+}
+
+function SaleEditor({ userId }: { userId: string }) {
+  const draft = useSaleDraft(userId);
+  const [discarding, setDiscarding] = useState(false);
   return (
     <main>
       <h1>Nueva venta</h1>
@@ -36,6 +45,23 @@ export function NewSalePage() {
           >
             Registrar venta
           </button>
+          {draft.quote.lines.length > 0 && (
+            <>
+              <button type="button" disabled={draft.busy} onClick={() => setDiscarding(true)}>
+                Descartar venta
+              </button>
+              {discarding && (
+                <DiscardSaleDialog
+                  busy={draft.busy}
+                  onBack={() => setDiscarding(false)}
+                  onDiscard={() => {
+                    draft.discard();
+                    setDiscarding(false);
+                  }}
+                />
+              )}
+            </>
+          )}
         </>
       )}
     </main>

@@ -12,7 +12,15 @@ interface State {
   error: string | null;
 }
 
-export function SessionProvider({ client, children }: { client: AuthClient; children: ReactNode }) {
+export function SessionProvider({
+  client,
+  children,
+  onSessionEnd,
+}: {
+  client: AuthClient;
+  children: ReactNode;
+  onSessionEnd?: (reason: 'logout' | 'terminated') => void;
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const generation = useRef(0);
@@ -28,7 +36,10 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
         return false;
       if (error.code === 'SESSION_EXPIRED' && error.error.userId) {
         returnTo.save(error.error.userId, location.pathname + location.search + location.hash);
-      } else if (error.code === 'SESSION_TERMINATED') returnTo.clear();
+      } else if (error.code === 'SESSION_TERMINATED') {
+        returnTo.clear();
+        onSessionEnd?.('terminated');
+      }
       generation.current++;
       setState({
         user: null,
@@ -43,7 +54,7 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
       }
       return true;
     },
-    [location.key, location.pathname, location.search, location.hash, navigate],
+    [location.key, location.pathname, location.search, location.hash, navigate, onSessionEnd],
   );
 
   const checkSession = useCallback(() => {
@@ -90,10 +101,11 @@ export function SessionProvider({ client, children }: { client: AuthClient; chil
   const logout = useCallback(async () => {
     returnTo.clear();
     await client.logout();
+    onSessionEnd?.('logout');
     generation.current++;
     setState({ user: null, checkedKey: location.key, error: null });
     navigate('/ingresar', { replace: true });
-  }, [client, location.key, navigate]);
+  }, [client, location.key, navigate, onSessionEnd]);
   const checking = state.checkedKey !== location.key;
   return (
     <SessionContext
