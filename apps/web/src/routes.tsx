@@ -11,6 +11,7 @@ import {
   type AuthClient,
   canView,
 } from './modules/auth/index.ts';
+import { DashboardPage } from './modules/dashboard/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
 import { NewSalePage } from './modules/sales/index.ts';
 
@@ -49,6 +50,8 @@ const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
   { path: '/menu', element: <MenuPage />, homeLink: 'Ver menú' },
   // SPEC-003 D-11: /ventas queda libre para el Historial (005).
   { path: '/ventas/nueva', element: <NewSalePage />, homeLink: 'Nueva venta' },
+  // SPEC-004 D-9: los dos roles ven el resumen de hoy; el del mes lo decide la página (D-6).
+  { path: '/resumen', element: <DashboardPage />, homeLink: 'Resumen de ventas' },
 ];
 
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({

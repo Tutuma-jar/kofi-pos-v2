@@ -89,6 +89,14 @@ describe('eslint.config.js: no-restricted-imports', { timeout: 15_000 }, () => {
       ['apps/api/src/app.ts', './modules/sales/sales.routes.ts'],
       ['apps/api/src/modules/sales/sales.service.ts', '../menu/products.repository.ts'],
       ['apps/api/src/modules/menu/menu.views.ts', '../sales/sales.repository.ts'],
+      // Módulo dashboard (SPEC-004).
+      ['apps/web/src/routes.tsx', './modules/dashboard/pages/DashboardPage.tsx'],
+      ['apps/web/src/main.tsx', './modules/dashboard/api/dashboard-client.ts'],
+      ['apps/web/src/modules/dashboard/pages/DashboardPage.tsx', '../../sales/api/sales-client.ts'],
+      ['apps/web/src/modules/auth/pages/HomePage.tsx', '../../dashboard/pages/DashboardPage.tsx'],
+      ['apps/api/src/app.ts', './modules/dashboard/dashboard.routes.ts'],
+      ['apps/api/src/modules/dashboard/dashboard.service.ts', '../sales/sales.repository.ts'],
+      ['apps/api/src/modules/sales/sales.service.ts', '../dashboard/dashboard.summary.ts'],
     ])('%s no puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toHaveLength(1);
     });
@@ -115,6 +123,15 @@ describe('eslint.config.js: no-restricted-imports', { timeout: 15_000 }, () => {
       ['apps/api/src/app.ts', './modules/sales/index.ts'],
       ['apps/api/src/modules/sales/sales.routes.ts', './sales.service.ts'],
       ['apps/api/src/modules/sales/sales.repository.ts', '../../shared/database/database.ts'],
+      ['apps/web/src/routes.tsx', './modules/dashboard/index.ts'],
+      ['apps/web/src/modules/dashboard/pages/DashboardPage.tsx', '../../auth/index.ts'],
+      [
+        'apps/web/src/modules/dashboard/pages/DashboardPage.tsx',
+        '../state/useDashboardSummaries.ts',
+      ],
+      ['apps/api/src/app.ts', './modules/dashboard/index.ts'],
+      ['apps/api/src/modules/dashboard/dashboard.routes.ts', '../auth/index.ts'],
+      ['apps/api/src/modules/dashboard/dashboard.service.ts', '../../shared/calendar.ts'],
     ])('%s sí puede importar %s', async (file, specifier) => {
       expect(await restrictedImports(file, specifier)).toEqual([]);
     });
