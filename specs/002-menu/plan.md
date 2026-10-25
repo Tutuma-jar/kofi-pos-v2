@@ -368,6 +368,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 **D-15 — Decisión delegada (2026-10-25, corrección T043):** adelantar a US3 la configuración de Vitest de la API ya adoptada en el PR de Pulido: `testTimeout: 15_000` para los tests de integración con PGlite y criptografía real. El run `40168447613` agotó los 5 segundos predeterminados únicamente en la prueba de la ventana de bloqueo, mientras 766 casos pasaron. Se conserva íntegro el código de aplicación y cada caso/aserción. Se descartan reintentar hasta obtener verde, reducir la criptografía o simular sus verificaciones. El margen pertenece al ejecutor de pruebas y no altera los límites de rendimiento de RNF-3.
 
+**D-16 — Decisión delegada (2026-10-25, corrección T044):** adelantar a US2 el mismo `testTimeout: 15_000` de Vitest de API ya aprobado en US3 y Pulido. Tras integrar `develop`, el run `40169699691` agotó los 5 segundos en la prueba criptográfica de la ventana de bloqueo y los otros 760 casos pasaron. Se conservan las aserciones, el aislamiento entre archivos y la criptografía real. Se descartan desactivar el aislamiento, simular verificaciones o reintentar hasta obtener verde: la petición es dar margen a la ejecución del test. Esta configuración no cambia el código de aplicación ni sus límites de rendimiento.
+
 ### 7.1 Dependencias
 
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
