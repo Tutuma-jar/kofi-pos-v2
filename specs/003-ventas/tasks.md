@@ -101,7 +101,9 @@ Rama: `feat/003-ventas-us2`. Esta historia no tiene tareas `[api]`: lo que pide 
 
 Rama: `feat/003-ventas-pulido`.
 
-- [ ] **T026 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T025, SPEC-002 T034
+- [x] **T033 [integración]** Preparar la medición asistida de T026: medidor Node/Playwright, tests con datos ficticios, Blueprint en la rama de pulido y guía de ejecución sin compartir credenciales (plan D-14; RNF-3, criterio de 30 segundos). Depende de: T025, SPEC-002 T034
+  Hecho cuando: el medidor exige 200 productos vigentes de prueba, excluye un calentamiento por operación, mide tres series de 20 operaciones reales hasta ver su resultado, cronometra una venta humana de tres productos y guarda las muestras sin secretos; sus pruebas y las comprobaciones pasan y los pasos para Render y Neon quedan documentados. Esta preparación no acredita la medición real de T026.
+- [ ] **T026 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T025, T033, SPEC-002 T034
   Hecho cuando: al menos 19 de cada 20 aperturas de «Nueva venta» y registros tardan menos de 2 segundos, 19 de cada 20 cambios menos de 1 segundo, una persona registra una venta de 3 productos en menos de 30 segundos y los resultados quedan anotados en la descripción del PR de pulido.
 - [ ] **T027 [integración]** Actualizar `README.md` con el estado del módulo Ventas: quién registra ventas, cómo llegar a «Nueva venta» y qué se conserva de una venta en preparación (RF-1 a RF-14). Depende de: T026
   Hecho cuando: el README describe esos tres puntos.
@@ -126,5 +128,5 @@ Rama: `feat/003-ventas-pulido`.
 | RF-14 | T024, T025 |
 | RNF-1 | T017, T018, T019, T021, T024, T025 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T006, T012 |
-| RNF-3 | T026 |
+| RNF-3 | T033 (preparación), T026 (medición real) |
 | RNF-4 | T017, T018, T019, T024 |

@@ -393,6 +393,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 ### 7.1 Dependencias
 
+**D-14 — Decisión delegada (2026-10-25, preparación de T026):** separar la preparación automatizable como T033, conservando T026 para la ejecución humana y su evidencia. Añadir `npm run measure:sales` con Node y Playwright existentes. La persona ingresa directamente en Chromium, sin pasar credenciales por chat, argumentos o archivos. El medidor exige los 200 productos vigentes de `seed:menu`, excluye un calentamiento por operación y mide 20 aperturas, 20 cambios y 20 registros hasta ver la respuesta en la interfaz. Los límites son estrictos: 19/20 aperturas y registros por debajo de 2000 ms y 19/20 cambios por debajo de 1000 ms. Después cronometra una venta humana de tres productos distintos, una unidad de cada uno, desde abrir Nueva venta hasta su confirmación, en menos de 30000 ms. Guarda muestras, fecha de Bolivia y commit local en un JSON de la carpeta Git, primero sin la prueba humana y después completo. Crea 21 ventas automáticas ficticias (incluido el calentamiento) y una humana; no elimina ventas ni reintenta registros fallidos. La rama y los commits desplegados en ambos servicios y la base de Neon de comprobación se contrastan por la persona antes de medir. Se descartan medir solo HTTP y automatizar también la venta humana, porque no comprueban la percepción completa ni el criterio de uso de 30 segundos. Sin dependencias ni cambios del contrato. La guía de ejecución está en `measurement.md`.
+
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
 
 ## 8. Estrategia de tests
@@ -434,7 +436,7 @@ La API de E2E carga el menú con la ruta de SPEC-002 (`POST /api/__test/menu`, 0
 | --- | --- |
 | RNF-1 | Las pruebas de componentes y E2E comparan los textos en español tal como los define la especificación |
 | RNF-2 | Unitarias de `priceDraft` (30 líneas de 99 unidades a 100000 → 297000000 exactos); integración: el disparador rechaza un total distinto de la suma y un subtotal distinto de precio por cantidad |
-| RNF-3 | Medición manual en Pulido (D-12): con 200 productos y el servicio reactivado, 20 aperturas de «Nueva venta», 20 cambios y 20 registros; al menos 19 de cada 20 aperturas y registros por debajo de 2 s y 19 de cada 20 cambios por debajo de 1 s. El resultado se anota en el PR de pulido |
+| RNF-3 | Medición asistida en Pulido (D-12, D-14): con 200 productos y el servicio reactivado, `measure:sales` mide desde Chromium 20 aperturas de «Nueva venta», 20 cambios y 20 registros; al menos 19 de cada 20 aperturas y registros por debajo de 2 s y 19 de cada 20 cambios por debajo de 1 s. El resultado real y las muestras se anotan en el PR de pulido |
 | RNF-4 | Componentes: se arma y se registra una venta solo con teclado (Tab, Intro y barra espaciadora) |
 | Criterio de 30 s | Medición manual en Pulido, junto con RNF-3 |
 
