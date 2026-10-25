@@ -68,3 +68,51 @@ export function boliviaMonthRange(now: Date): BoliviaMonthRange {
   );
   return { month, days, from: startOfBoliviaDay(days[0]!), to: justAfter(now) };
 }
+
+// Días y meses cualesquiera, para el Historial (SPEC-005 plan §5.1, D-4). Las fechas se suman como
+// fechas de calendario, sin zona horaria: Date.UTC solo resuelve los fines de mes y los bisiestos.
+
+const isoDate = (instant: Date) => instant.toISOString().slice(0, 'YYYY-MM-DD'.length);
+
+// 'YYYY-MM-DD' ± n días.
+export function addDays(date: string, days: number): string {
+  const [year, month, day] = date.split('-').map(Number);
+  return isoDate(new Date(Date.UTC(year!, month! - 1, day! + days)));
+}
+
+// 'YYYY-MM' ± n meses.
+export function addMonths(month: string, months: number): string {
+  const [year, number] = month.split('-').map(Number);
+  return isoDate(new Date(Date.UTC(year!, number! - 1 + months, 1))).slice(0, 'YYYY-MM'.length);
+}
+
+// Todas las fechas del mes, del día 1 al último.
+export function daysOfMonth(month: string): string[] {
+  const last = addDays(`${addMonths(month, 1)}-01`, -1);
+  const length = Number(last.slice('YYYY-MM-'.length));
+  return Array.from({ length }, (_, index) => `${month}-${String(index + 1).padStart(2, '0')}`);
+}
+
+const earliest = (a: Date, b: Date) => (a.getTime() <= b.getTime() ? a : b);
+
+// Un día hasta hoy: de sus 00:00 a las 00:00 del día siguiente, o hasta el momento de la consulta si
+// es hoy (RF-2, RF-3). `to` excluido, como en listRegisteredSales.
+export function boliviaDayBounds(date: string, now: Date): { from: Date; to: Date } {
+  return {
+    from: startOfBoliviaDay(date),
+    to: earliest(startOfBoliviaDay(addDays(date, 1)), justAfter(now)),
+  };
+}
+
+// Un mes hasta el mes en curso: todos sus días, o del 1 a hoy si es el mes en curso (RF-12, RF-13).
+export function boliviaMonthBounds(
+  month: string,
+  now: Date,
+): { days: string[]; from: Date; to: Date } {
+  const today = boliviaDate(now);
+  return {
+    days: daysOfMonth(month).filter((date) => date <= today),
+    from: startOfBoliviaDay(`${month}-01`),
+    to: earliest(startOfBoliviaDay(`${addMonths(month, 1)}-01`), justAfter(now)),
+  };
+}
