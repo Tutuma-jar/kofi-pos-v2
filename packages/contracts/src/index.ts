@@ -3,5 +3,6 @@ export * from './auth.ts';
 export * from './dashboard.ts';
 export * from './datetime.ts';
 export * from './errors.ts';
+export * from './history.ts';
 export * from './menu.ts';
 export * from './sales.ts';
