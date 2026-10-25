@@ -79,6 +79,11 @@ Rama: `feat/003-ventas-us1`. Empieza cuando se fusionen el PR de definición de 
 - [x] **T021 [integración] [US1]** Escribir `e2e/sales-us1-registrar-venta.spec.ts` con los 5 pasos de §8.2 del plan; el paso 4 cambia el precio con la ruta de edición del menú y una sesión de dueño (RF-1 a RF-11). Depende de: T020, SPEC-002 T017
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
+**Corrección de la verificación de US1** (PR #26):
+
+- [x] **T032 [web] [US1]** Corregir RF-6: conservar la confirmación anterior si el cálculo rechaza el producto que se intentó agregar porque ya no está en el menú. Depende de: T019, T021
+  Hecho cuando: una regresión de componente y otra E2E registran una venta, retiran el producto e intentan agregarlo a la siguiente; la preparación sigue vacía, aparece el aviso de RF-5 y la confirmación se conserva. Agregar efectivamente otro producto sí borra la confirmación; todas las comprobaciones pasan.
+
 ## Fase 4 — US2: no perder la venta en preparación (P2)
 
 Rama: `feat/003-ventas-us2`. Esta historia no tiene tareas `[api]`: lo que pide se resuelve en la interfaz (plan D-8, D-9), y la API ya recalcula cualquier venta en preparación recuperada (US1).
@@ -110,7 +115,7 @@ Rama: `feat/003-ventas-pulido`.
 | RF-3 | T004, T010, T015, T016, T017, T018, T021 |
 | RF-4 | T005, T012, T013, T016, T018, T021 |
 | RF-5 | T004, T010, T012, T013, T016, T018, T021 |
-| RF-6 | T003, T004, T005, T006, T007, T014, T015, T019, T021, T028, T029, T030, T031 |
+| RF-6 | T003, T004, T005, T006, T007, T014, T015, T019, T021, T028, T029, T030, T031, T032 |
 | RF-7 | T002, T010, T012, T014, T019, T021 |
 | RF-8 | T004, T007, T010, T014, T015, T019, T021, T031 |
 | RF-9 | T006, T010, T014, T016, T019, T021 |

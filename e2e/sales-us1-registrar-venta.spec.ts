@@ -2,6 +2,64 @@ import { expect, test } from '@playwright/test';
 import { adminMenuResponseSchema, saleSchema, formatDateTime } from '@kofi/contracts';
 import { TEST_ACCOUNTS } from './fixtures.ts';
 
+test('RF-6: conserva la confirmación al intentar agregar un producto retirado', async ({
+  page,
+  request,
+  browser,
+}) => {
+  await request.post('/api/__test/menu', {
+    data: {
+      categories: [
+        {
+          name: 'Venta',
+          products: [
+            { name: 'Café', price: '12,50' },
+            { name: 'Empanada', price: '8' },
+          ],
+        },
+      ],
+    },
+  });
+  await page.goto('/ingresar');
+  await page.getByLabel('Usuario', { exact: true }).fill(TEST_ACCOUNTS.cashier.username);
+  await page.getByLabel('Contraseña', { exact: true }).fill(TEST_ACCOUNTS.cashier.password);
+  await page.getByLabel('Contraseña', { exact: true }).press('Enter');
+  await page.getByRole('link', { name: 'Nueva venta', exact: true }).click();
+  await page.getByRole('button', { name: 'Café · Bs 12,50' }).click();
+  await page.getByLabel('Efectivo', { exact: true }).check();
+  await page.getByRole('button', { name: 'Registrar venta', exact: true }).click();
+  const confirmation = page.getByText(/Venta N.º 1 registrada · Bs 12,50 · Efectivo/);
+  await expect(confirmation).toBeVisible();
+  const owner = await browser.newContext({ baseURL: new URL(page.url()).origin });
+  try {
+    expect(
+      (
+        await owner.request.post('/api/auth/login', {
+          data: { username: TEST_ACCOUNTS.owner.username, password: TEST_ACCOUNTS.owner.password },
+        })
+      ).status(),
+    ).toBe(200);
+    const menu = adminMenuResponseSchema.parse(
+      await (await owner.request.get('/api/menu/admin')).json(),
+    );
+    const coffee = menu.categories
+      .flatMap((category) => category.products)
+      .find((product) => product.name === 'Café')!;
+    expect((await owner.request.post(`/api/menu/products/${coffee.id}/deactivate`)).status()).toBe(
+      200,
+    );
+  } finally {
+    await owner.close();
+  }
+  await page.getByRole('button', { name: 'Café · Bs 12,50' }).click();
+  await expect(page.getByText('“Café” ya no está en el menú')).toBeVisible();
+  await expect(page.getByText('Elige los productos de la venta')).toBeVisible();
+  await expect(confirmation).toBeVisible();
+  await page.getByRole('button', { name: 'Empanada · Bs 8,00' }).click();
+  await expect(page.getByText('Empanada × 1 · Bs 8,00')).toBeVisible();
+  await expect(confirmation).toHaveCount(0);
+});
+
 test('Ventas US1: registrar una venta pagada con cambios del menú y conexión (RF-1 a RF-11)', async ({
   page,
   request,

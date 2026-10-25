@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SalesClientProvider } from '../api/SalesClientProvider.tsx';
 import { createSalesDemoClient } from '../dev/sales-demo-client.ts';
-import { DEMO_IDS } from '../dev/fixtures.ts';
+import { DEMO_IDS, DEMO_MENU } from '../dev/fixtures.ts';
 import { NewSalePage } from './NewSalePage.tsx';
 
 function mount(client = createSalesDemoClient('loaded')) {
@@ -56,6 +56,34 @@ describe('registrar la venta (RF-6 a RF-9, RNF-4)', () => {
   });
   afterEach(() => {
     vi.useRealTimers();
+  });
+  it('conserva la confirmación si el producto que se intentó agregar fue retirado (RF-6)', async () => {
+    const client = createSalesDemoClient('loaded');
+    const quote = vi.spyOn(client, 'quote');
+    mount(client);
+    const user = userEvent.setup();
+    const coffee = await screen.findByRole('button', { name: 'Café americano · Bs 12,50' });
+    await user.click(coffee);
+    await user.click(screen.getByLabelText('Efectivo'));
+    await user.click(screen.getByRole('button', { name: 'Registrar venta' }));
+    const confirmation = 'Venta N.º 1 registrada · Bs 12,50 · Efectivo · 24/10/2026 14:05';
+    expect(await screen.findByText(confirmation)).toBeVisible();
+    quote.mockResolvedValueOnce({
+      lines: [],
+      totalCents: 0,
+      notices: ['“Café americano” ya no está en el menú'],
+      menu: DEMO_MENU.map((category) => ({
+        ...category,
+        products: category.products.filter((product) => product.id !== DEMO_IDS.americano),
+      })),
+    });
+    await user.click(coffee);
+    expect(await screen.findByText('“Café americano” ya no está en el menú')).toBeVisible();
+    expect(screen.getByText('Elige los productos de la venta')).toBeVisible();
+    expect(screen.getByText(confirmation)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Empanada · Bs 8,00' }));
+    expect(screen.getByText('Empanada × 1 · Bs 8,00')).toBeVisible();
+    expect(screen.queryByText(confirmation)).not.toBeInTheDocument();
   });
   it.each(['Efectivo', 'QR'])(
     'registra con %s y muestra la confirmación hasta agregar otro producto',

@@ -56,14 +56,16 @@ export function useSaleDraft() {
     };
   }, [client]);
 
-  async function calculate(lines: SaleDraftLine[], adding = false) {
+  async function calculate(lines: SaleDraftLine[], addedProductId?: string) {
     if (pending.current) return;
     pending.current = true;
     setBusy(true);
     setError(undefined);
     try {
-      setQuote(await client.quote({ lines }));
-      if (adding) setConfirmation(null);
+      const calculated = await client.quote({ lines });
+      setQuote(calculated);
+      if (addedProductId && calculated.lines.some((line) => line.productId === addedProductId))
+        setConfirmation(null);
     } catch (failure) {
       setError(errorMessage(failure));
     } finally {
@@ -119,9 +121,9 @@ export function useSaleDraft() {
       else
         return calculate(
           [...desired, { productId: product.id, productName: product.name, quantity: 1 }],
-          true,
+          product.id,
         );
-      await calculate(desired, true);
+      await calculate(desired, product.id);
     },
     increment: (id: string) =>
       calculate(
