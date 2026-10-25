@@ -12,6 +12,22 @@ import { validate } from '../../shared/http/validate.ts';
 import { priceDraft } from './sales.pricing.ts';
 import { AppError, VALIDATION_MESSAGE } from '../../shared/http/errors.ts';
 import { findSaleByDraftId, insertSale, nextSaleNumber } from './sales.repository.ts';
+import type { z } from 'zod';
+
+// Las líneas son un solo campo del formulario: sus errores se entregan en fields.lines (§6.2).
+function validateSales<Schema extends z.ZodType>(schema: Schema, input: unknown): z.output<Schema> {
+  try {
+    return validate(schema, input);
+  } catch (error) {
+    if (error instanceof AppError && error.details.fields) {
+      const fields: Record<string, string> = {};
+      for (const [path, message] of Object.entries(error.details.fields))
+        fields[path.split('.')[0]!] ??= message;
+      throw new AppError(error.statusCode, error.code, error.message, { fields });
+    }
+    throw error;
+  }
+}
 
 export interface SalesDeps {
   db: Database;
@@ -29,13 +45,13 @@ export function createSalesService({ db, clock, currentMenu }: SalesDeps) {
   }
   return {
     async quote(input: unknown): Promise<SaleQuote> {
-      const { lines } = validate(saleQuoteRequestSchema, input);
+      const { lines } = validateSales(saleQuoteRequestSchema, input);
       const menu = await currentMenu(db);
       const priced = priceDraft(lines, menu);
       return { lines: priced.lines, totalCents: priced.totalCents, notices: priced.notices, menu };
     },
     async register(input: unknown, user: SessionUser): Promise<{ sale: Sale; created: boolean }> {
-      const request = validate(registerSaleRequestSchema, input);
+      const request = validateSales(registerSaleRequestSchema, input);
       const existing = await findSaleByDraftId(db, request.draftId);
       if (existing) return existingSale(existing, user);
       const menu = await currentMenu(db);
