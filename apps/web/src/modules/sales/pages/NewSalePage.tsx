@@ -1,8 +1,18 @@
-// Provisional: la venta en preparación y su registro llegan en US1 (T016 a T019).
+import { Link } from 'react-router';
+import { ProductPicker } from '../components/ProductPicker.tsx';
+import { useSaleDraft } from '../state/useSaleDraft.ts';
+
 export function NewSalePage() {
+  const draft = useSaleDraft();
   return (
     <main>
       <h1>Nueva venta</h1>
+      <Link to="/">Volver al inicio</Link>
+      {draft.error && <p role="alert">{draft.error}</p>}
+      {!draft.quote && draft.busy && <p role="status">Cargando productos…</p>}
+      {draft.quote && (
+        <ProductPicker menu={draft.quote.menu} busy={draft.busy} onSelect={draft.addProduct} />
+      )}
     </main>
   );
 }

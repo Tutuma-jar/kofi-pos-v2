@@ -6,6 +6,7 @@ import { AppRoutes, protectedRoutes, publicRoutes } from './routes.tsx';
 import { canView, type AuthClient } from './modules/auth/index.ts';
 import { ApiFetchError } from './shared/http/api-fetch.ts';
 import { MenuClientProvider, httpMenuClient } from './modules/menu/index.ts';
+import { SalesClientProvider, httpSalesClient } from './modules/sales/index.ts';
 
 function CurrentPath() {
   return <output aria-label="ruta actual">{useLocation().pathname}</output>;
@@ -37,7 +38,14 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
       <MenuClientProvider
         client={{ ...httpMenuClient, getAdminMenu: async () => [], getCurrentMenu: async () => [] }}
       >
-        <AppRoutes client={client} />
+        <SalesClientProvider
+          client={{
+            ...httpSalesClient,
+            quote: async () => ({ menu: [], lines: [], totalCents: 0, notices: [] }),
+          }}
+        >
+          <AppRoutes client={client} />
+        </SalesClientProvider>
       </MenuClientProvider>
       <CurrentPath />
     </MemoryRouter>,
