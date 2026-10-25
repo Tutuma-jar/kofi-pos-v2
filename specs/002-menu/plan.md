@@ -368,6 +368,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 **D-13 — Decisión delegada (2026-10-25, corrección T040):** configurar `testTimeout: 15_000` solo en el proyecto Vitest de la API. La CI del PR de pulido agotó los 5 segundos predeterminados en una prueba de bloqueo que ejecuta múltiples verificaciones criptográficas reales, mientras otros procesos de integración con PGlite compartían CPU; los 670 casos restantes pasaron. Se conservan todas las aserciones y la criptografía real. Se descarta reducir el coste de la contraseña, simular su verificación o añadir reintentos automáticos para ocultar el fallo. Este límite del ejecutor de pruebas no mide ni modifica RNF-3; T035 sigue pendiente.
 
+**D-14 — Decisión delegada (2026-10-25, automatización de T035):** añadir `npm run measure:menu`, un medidor asistido en Node y Playwright, sin dependencias nuevas. Abre Chromium para que la persona ingrese en la web; no recibe contraseñas por chat, argumentos ni archivos. Comprueba la sesión de dueño y exactamente 200 productos, excluye un calentamiento por operación y mide 20 aperturas de administración, 20 consultas y 20 guardados con los valores existentes, hasta ver el resultado en la interfaz. Después cronometra una creación manual desde la apertura de la administración hasta la respuesta y la lista actualizada. Guarda las muestras, los límites estrictos y el commit local en un JSON de la carpeta Git; el despliegue de ese commit se contrasta con Render antes de adjuntar evidencia al PR. Se descartan medir solo HTTP o crear el producto automáticamente: no comprueban la percepción completa ni el criterio humano. Una creación manual deja un producto adicional y una repetición exige volver a disponer de un menú de 200 productos, sin que el medidor elimine datos.
+
 ### 7.1 Dependencias
 
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
@@ -418,7 +420,7 @@ La API de E2E carga los menús de cada prueba con los servicios del módulo, med
 | --- | --- |
 | RNF-1 | Las pruebas de componentes y E2E comparan los textos en español tal como los define la especificación |
 | RNF-2 | Unitarias de `parsePrice` y `formatPrice` («12,5» → 1250 → «Bs 12,50»; «0,1» y «0,2» exactos; «1000» → «Bs 1000,00»); integración: el precio guardado se lee idéntico |
-| RNF-3 | Medición manual en Pulido (D-12): con 200 productos cargados por `seed-menu.ts` en la base de comprobación y el servicio ya reactivado, 20 aperturas de la administración, 20 de la consulta y 20 guardados. Al menos 19 de cada 20 deben tardar menos de 2 segundos. El resultado se anota en el PR de pulido |
+| RNF-3 | Medición asistida en Pulido (D-12, D-14): con 200 productos cargados por `seed-menu.ts`, `measure:menu` mide tras el calentamiento 20 aperturas de administración, 20 consultas y 20 guardados reales desde Chromium en la computadora de la persona. Al menos 19 de cada 20 deben tardar menos de 2 segundos. El informe se anota en el PR de pulido |
 | RNF-4 | Componentes: cada formulario se completa, elige la categoría y se guarda solo con el teclado |
 | Criterio de 30 s | Medición manual en Pulido, junto con RNF-3: una persona crea un producto en una categoría existente en menos de 30 segundos |
 

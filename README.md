@@ -159,7 +159,18 @@ npm run seed:menu -w @kofi/api
 
 El script aplica las migraciones pendientes y carga 200 productos ficticios mediante los servicios de Menú, en una transacción. Se niega a cargar si ya hay productos, incluidos los inactivos; no elimina datos. Un error revierte toda la carga. Estos datos son solo para comprobación, no el menú real del local. Prepara las cuentas con `npm run accounts -w @kofi/api -- create`, introduciendo la contraseña oculta en la terminal.
 
-**T035 sigue pendiente:** una persona con acceso a Render y Neon debe apuntar el Blueprint y ambos servicios a `feat/002-menu-pulido`, usar la base de comprobación y verificar el proxy de `/api`. Las dos entradas `branch` de `render.yaml` todavía apuntan al pulido de Acceso; al sincronizar el Blueprint para esta medición también hay que ajustarlas a la rama de Menú. No se ha realizado ese cambio de despliegue en T034 ni T036.
+**T035 sigue pendiente hasta guardar la evidencia real:** el Blueprint y ambos servicios deben apuntar a `feat/002-menu-pulido`, usar la base de comprobación y tener el proxy de `/api` funcionando. `render.yaml` apunta a esa rama para los dos servicios; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir.
+
+Para automatizar las series y el cronómetro desde la computadora usada para comprobar el sistema:
+
+```sh
+npx playwright install chromium
+npm run measure:menu
+```
+
+Chromium se abre en la web de comprobación. Ingresa tú con una cuenta de dueño, escribiendo la contraseña solo en ese navegador. El medidor exige exactamente 200 productos, todos vigentes; excluye un calentamiento por operación y mide las tres series de veinte operaciones reales hasta ver su resultado en la interfaz. Los guardados conservan los datos precargados del producto. No uses esa ventana mientras se ejecutan los ciclos. Después, la terminal te pedirá pulsar Intro: se abrirá la administración y deberás crear tú un producto nuevo, con nombre único, categoría existente y precio. El cronómetro termina al verlo guardado en la lista. Esa creación deja un producto adicional; no se elimina automáticamente. Una repetición exige volver a disponer de 200 productos.
+
+El JSON sin credenciales se guarda en la ruta que muestra `git rev-parse --git-path menu-performance.json`. Incluye todas las duraciones, los límites, la hora de Bolivia y el commit local para contrastarlo con los desplegados en Render. La creación automatizada de un producto no sustituye la prueba humana. `npm run test:measure` verifica los medidores con datos ficticios y `npm run test:measure:menu` comprueba solo el de Menú.
 
 Con los servicios ya reactivados y los 200 productos cargados, mide desde la computadora del local 20 aperturas de la administración, 20 de la consulta y 20 guardados de productos existentes. Cronometra desde la acción hasta ver la lista o la confirmación actualizada: al menos 19 de cada serie deben tardar menos de 2 segundos. Excluye la primera operación tras la suspensión del servicio. Después, cronometra crear un producto en una categoría existente desde que se abre la administración: debe tardar menos de 30 segundos. Anota las duraciones, la fecha en hora de Bolivia, las URLs y el commit desplegado en el PR de pulido. La ejecución de las pruebas locales no sustituye esta medición; consulta [el plan de Menú, §8.3](specs/002-menu/plan.md#83-requisitos-no-funcionales).
 

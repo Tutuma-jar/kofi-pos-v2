@@ -128,6 +128,11 @@ Rama: `feat/002-menu-pulido`.
 - [x] **T040 [integración]** Configurar el tiempo máximo de cada test de la API en 15 segundos para que las pruebas con PostgreSQL en memoria y criptografía real no agoten el límite predeterminado de 5 segundos al compartir CPU en CI (plan D-13; comprobaciones de Pulido). Depende de: T036
   Hecho cuando: se conservan todos los casos y aserciones; la suite de bloqueo de Acceso, las comprobaciones automáticas y `technical-checks` del PR pasan. Evidencia inicial: el run `40127991766` falló únicamente por timeout en «solo cuenta la ventana de quince minutos, con límite abierto», con 670 tests correctos y 1 timeout.
 
+**Ampliación de la delegación por la persona (2026-10-25):** automatizar la parte posible de T035. Queda autorizada la preparación del despliegue de comprobación y la medición asistida; el ingreso y la creación del producto del criterio humano los hace la persona. T035 conserva sus criterios y solo se marca con resultados reales satisfactorios.
+
+- [x] **T041 [integración]** Automatizar la medición asistida de T035 con `scripts/measure-menu.mjs`, sus pruebas con datos ficticios y los comandos `measure:menu` y `test:measure:menu`; documentar el uso y el despliegue de comprobación (plan D-14; RNF-3 y criterio de 30 segundos). Depende de: T040
+  Hecho cuando: las pruebas cubren 20 muestras válidas por operación, límites estrictos, calentamiento excluido, detención ante errores, 200 productos, ausencia de credenciales en el informe y el cronómetro de la creación manual; el comando queda listo para ejecutar por la persona sin argumentos y las comprobaciones pasan. Esta tarea prepara T035 y no la da por cumplida.
+
 ## Cobertura de RF
 
 | RF | Tareas |
