@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import type { MenuProduct, SaleDraftLine, SaleLine, SaleQuote } from '@kofi/contracts';
+import type {
+  MenuProduct,
+  PaymentMethod,
+  Sale,
+  SaleDraftLine,
+  SaleLine,
+  SaleQuote,
+} from '@kofi/contracts';
 import { ApiFetchError } from '../../../shared/http/api-fetch.ts';
 import { useSalesClient } from '../api/SalesClientProvider.tsx';
 
@@ -23,6 +30,9 @@ export function useSaleDraft() {
   const [quote, setQuote] = useState<SaleQuote | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string>();
+  const [draftId, setDraftId] = useState(() => crypto.randomUUID());
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [confirmation, setConfirmation] = useState<Sale | null>(null);
   const pending = useRef(true);
   useEffect(() => {
     let active = true;
@@ -46,13 +56,14 @@ export function useSaleDraft() {
     };
   }, [client]);
 
-  async function calculate(lines: SaleDraftLine[]) {
+  async function calculate(lines: SaleDraftLine[], adding = false) {
     if (pending.current) return;
     pending.current = true;
     setBusy(true);
     setError(undefined);
     try {
       setQuote(await client.quote({ lines }));
+      if (adding) setConfirmation(null);
     } catch (failure) {
       setError(errorMessage(failure));
     } finally {
@@ -65,16 +76,52 @@ export function useSaleDraft() {
     quote,
     busy,
     error,
+    paymentMethod,
+    confirmation,
+    choosePayment(method: PaymentMethod) {
+      if (!pending.current) setPaymentMethod(method);
+    },
+    async registerSale() {
+      if (pending.current || !quote?.lines.length || !paymentMethod) return;
+      pending.current = true;
+      setBusy(true);
+      setError(undefined);
+      try {
+        const sale = await client.register({ draftId, paymentMethod, lines: lines() });
+        setConfirmation(sale);
+        setQuote({ ...quote, lines: [], totalCents: 0, notices: [] });
+        setPaymentMethod(null);
+        setDraftId(crypto.randomUUID());
+      } catch (failure) {
+        if (failure instanceof ApiFetchError && failure.code === 'MENU_CHANGED') {
+          setError(failure.message);
+          try {
+            setQuote(await client.quote({ lines: lines() }));
+          } catch (quoteFailure) {
+            setError(errorMessage(quoteFailure));
+          }
+        } else {
+          setError(
+            failure instanceof ApiFetchError && failure.code === 'NETWORK_ERROR'
+              ? 'No hay conexión. Inténtalo de nuevo: la venta no se registrará dos veces'
+              : errorMessage(failure),
+          );
+        }
+      } finally {
+        pending.current = false;
+        setBusy(false);
+      }
+    },
     async addProduct(product: MenuProduct) {
       const desired = lines();
       const existing = desired.find((line) => line.productId === product.id);
       if (existing) existing.quantity += 1;
       else
-        return calculate([
-          ...desired,
-          { productId: product.id, productName: product.name, quantity: 1 },
-        ]);
-      await calculate(desired);
+        return calculate(
+          [...desired, { productId: product.id, productName: product.name, quantity: 1 }],
+          true,
+        );
+      await calculate(desired, true);
     },
     increment: (id: string) =>
       calculate(

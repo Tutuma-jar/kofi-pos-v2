@@ -1,6 +1,8 @@
 import { Link } from 'react-router';
 import { ProductPicker } from '../components/ProductPicker.tsx';
 import { SaleDraftLines } from '../components/SaleDraftLines.tsx';
+import { PaymentMethodPicker } from '../components/PaymentMethodPicker.tsx';
+import { SaleConfirmation } from '../components/SaleConfirmation.tsx';
 import { useSaleDraft } from '../state/useSaleDraft.ts';
 
 export function NewSalePage() {
@@ -10,6 +12,7 @@ export function NewSalePage() {
       <h1>Nueva venta</h1>
       <Link to="/">Volver al inicio</Link>
       {draft.error && <p role="alert">{draft.error}</p>}
+      {draft.confirmation && <SaleConfirmation sale={draft.confirmation} />}
       {!draft.quote && draft.busy && <p role="status">Cargando productos…</p>}
       {draft.quote && (
         <>
@@ -21,6 +24,18 @@ export function NewSalePage() {
             onDecrement={draft.decrement}
             onRemove={draft.remove}
           />
+          <PaymentMethodPicker
+            value={draft.paymentMethod}
+            busy={draft.busy}
+            onChange={draft.choosePayment}
+          />
+          <button
+            type="button"
+            disabled={draft.busy || !draft.quote.lines.length || !draft.paymentMethod}
+            onClick={() => void draft.registerSale()}
+          >
+            Registrar venta
+          </button>
         </>
       )}
     </main>

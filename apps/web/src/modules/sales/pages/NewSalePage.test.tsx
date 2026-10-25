@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SalesClientProvider } from '../api/SalesClientProvider.tsx';
 import { createSalesDemoClient } from '../dev/sales-demo-client.ts';
 import { DEMO_IDS } from '../dev/fixtures.ts';
@@ -29,7 +29,9 @@ describe('productos para vender (RF-1, RF-2, RF-3, RNF-4)', () => {
   it('explica el menú vacío y no permite agregar', async () => {
     mount(createSalesDemoClient('empty'));
     expect(await screen.findByText('El menú todavía no tiene productos para vender')).toBeVisible();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Productos para vender' })).queryByRole('button'),
+    ).not.toBeInTheDocument();
   });
   it.each(['{Enter}', ' '])('agrega un producto con %s', async (key) => {
     const client = createSalesDemoClient('loaded');
@@ -44,5 +46,112 @@ describe('productos para vender (RF-1, RF-2, RF-3, RNF-4)', () => {
         lines: [{ productId: DEMO_IDS.americano, productName: 'Café americano', quantity: 1 }],
       }),
     );
+  });
+});
+
+describe('registrar la venta (RF-6 a RF-9, RNF-4)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-24T18:05:12Z'));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+  it.each(['Efectivo', 'QR'])(
+    'registra con %s y muestra la confirmación hasta agregar otro producto',
+    async (method) => {
+      const client = createSalesDemoClient('loaded');
+      const register = vi.spyOn(client, 'register');
+      mount(client);
+      const user = userEvent.setup();
+      const product = await screen.findByRole('button', { name: 'Café americano · Bs 12,50' });
+      expect(screen.getByRole('button', { name: 'Registrar venta' })).toBeDisabled();
+      expect(screen.getByLabelText('Efectivo')).not.toBeChecked();
+      expect(screen.getByLabelText('QR')).not.toBeChecked();
+      product.focus();
+      await user.keyboard('{Enter}');
+      expect(screen.getByRole('button', { name: 'Registrar venta' })).toBeDisabled();
+      screen.getByLabelText(method).focus();
+      await user.keyboard(' ');
+      const button = screen.getByRole('button', { name: 'Registrar venta' });
+      button.focus();
+      await user.keyboard('{Enter}');
+      expect(
+        await screen.findByText(`Venta N.º 1 registrada · Bs 12,50 · ${method} · 24/10/2026 14:05`),
+      ).toBeVisible();
+      expect(register).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('Elige los productos de la venta')).toBeVisible();
+      expect(screen.getByLabelText(method)).not.toBeChecked();
+      const firstId = register.mock.calls[0]![0].draftId;
+      await user.click(product);
+      expect(screen.queryByText(/Venta N.º 1 registrada/)).not.toBeInTheDocument();
+      await user.click(screen.getByLabelText(method));
+      await user.click(button);
+      expect(await screen.findByText(/Venta N.º 2 registrada/)).toBeVisible();
+      expect(register.mock.calls[1]![0].draftId).not.toBe(firstId);
+    },
+  );
+  it('un doble clic registra una sola vez y bloquea productos y pagos mientras espera', async () => {
+    const client = createSalesDemoClient('loaded');
+    const real = client.register;
+    let release!: () => void;
+    const register = vi.spyOn(client, 'register').mockImplementation(async (request) => {
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      return real(request);
+    });
+    mount(client);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+    await user.click(screen.getByLabelText('Efectivo'));
+    await user.dblClick(screen.getByRole('button', { name: 'Registrar venta' }));
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText('QR')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Café americano · Bs 12,50' })).toBeDisabled();
+    release();
+    expect(await screen.findByText(/Venta N.º 1 registrada/)).toBeVisible();
+  });
+  it.each(['priceChanged', 'productRemoved'] as const)(
+    'recalcula tras 409 y muestra los avisos: %s',
+    async (scenario) => {
+      mount(createSalesDemoClient(scenario));
+      const user = userEvent.setup();
+      await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+      await user.click(screen.getByLabelText('QR'));
+      await user.click(screen.getByRole('button', { name: 'Registrar venta' }));
+      expect(
+        await screen.findByText('El menú cambió. Revisa la venta antes de registrarla'),
+      ).toBeVisible();
+      if (scenario === 'priceChanged') {
+        expect(
+          screen.getByText('Cambió el precio de “Café americano”: ahora cuesta Bs 13,00'),
+        ).toBeVisible();
+        await user.click(screen.getByRole('button', { name: 'Registrar venta' }));
+        expect(await screen.findByText(/Venta N.º 1 registrada · Bs 13,00 · QR/)).toBeVisible();
+      } else {
+        expect(screen.getByText('Se quitó “Café americano”: ya no está en el menú')).toBeVisible();
+        expect(screen.getByRole('button', { name: 'Registrar venta' })).toBeDisabled();
+      }
+    },
+  );
+  it('reintenta la respuesta perdida con el mismo draftId y confirma el pago original', async () => {
+    const client = createSalesDemoClient('lostResponse');
+    const register = vi.spyOn(client, 'register');
+    mount(client);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+    await user.click(screen.getByLabelText('Efectivo'));
+    await user.click(screen.getByRole('button', { name: 'Registrar venta' }));
+    expect(
+      await screen.findByText(
+        'No hay conexión. Inténtalo de nuevo: la venta no se registrará dos veces',
+      ),
+    ).toBeVisible();
+    expect(screen.getByText('Café americano × 1 · Bs 12,50')).toBeVisible();
+    await user.click(screen.getByLabelText('QR'));
+    await user.click(screen.getByRole('button', { name: 'Registrar venta' }));
+    expect(await screen.findByText(/Venta N.º 1 registrada · Bs 12,50 · Efectivo/)).toBeVisible();
+    expect(register.mock.calls[0]![0].draftId).toBe(register.mock.calls[1]![0].draftId);
   });
 });
