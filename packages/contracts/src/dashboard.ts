@@ -41,7 +41,7 @@ export const topProductSchema = z.object({
 export type TopProduct = z.infer<typeof topProductSchema>;
 
 // Siempre efectivo y QR, en ese orden (RF-4).
-const byPaymentMethodSchema = z.tuple([
+export const byPaymentMethodSchema = z.tuple([
   paymentMethodTotalSchema.extend({ paymentMethod: z.literal('cash') }),
   paymentMethodTotalSchema.extend({ paymentMethod: z.literal('qr') }),
 ]);

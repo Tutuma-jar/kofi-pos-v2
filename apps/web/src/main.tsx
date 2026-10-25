@@ -8,6 +8,11 @@ import {
   httpDashboardClient,
   type DashboardClient,
 } from './modules/dashboard/index.ts';
+import {
+  HistoryClientProvider,
+  httpHistoryClient,
+  type HistoryClient,
+} from './modules/history/index.ts';
 import { httpMenuClient, MenuClientProvider, type MenuClient } from './modules/menu/index.ts';
 import { httpSalesClient, SalesClientProvider, type SalesClient } from './modules/sales/index.ts';
 import { requestedScenarios } from './scenarios.ts';
@@ -22,15 +27,18 @@ function renderApp(
   menuClient: MenuClient = httpMenuClient,
   salesClient: SalesClient = httpSalesClient,
   dashboardClient: DashboardClient = httpDashboardClient,
+  historyClient: HistoryClient = httpHistoryClient,
 ) {
   root.render(
     <StrictMode>
       <MenuClientProvider client={menuClient}>
         <SalesClientProvider client={salesClient}>
           <DashboardClientProvider client={dashboardClient}>
-            <BrowserRouter>
-              <AppRoutes key={revision} client={client} />
-            </BrowserRouter>
+            <HistoryClientProvider client={historyClient}>
+              <BrowserRouter>
+                <AppRoutes key={revision} client={client} />
+              </BrowserRouter>
+            </HistoryClientProvider>
           </DashboardClientProvider>
         </SalesClientProvider>
       </MenuClientProvider>
@@ -42,18 +50,24 @@ const scenarios = requestedScenarios(location.search);
 
 // Escenarios de desarrollo (docs/architecture.md §4.5): import() dinámico bajo import.meta.env.DEV,
 // para que el build de producción no los incluya. Sin ?escenarios=…, se usa la API real
-// (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8). Cambiar de escenario vuelve a
-// montar las rutas.
+// (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8, SPEC-005 D-9). Cambiar de escenario
+// vuelve a montar las rutas.
 if (
   import.meta.env.DEV &&
-  (scenarios.acceso || scenarios.menu || scenarios.ventas || scenarios.dashboard)
+  (scenarios.acceso ||
+    scenarios.menu ||
+    scenarios.ventas ||
+    scenarios.dashboard ||
+    scenarios.historial)
 ) {
   let authClient: AuthClient = httpAuthClient;
   let menuClient: MenuClient = httpMenuClient;
   let salesClient: SalesClient = httpSalesClient;
   let dashboardClient: DashboardClient = httpDashboardClient;
+  let historyClient: HistoryClient = httpHistoryClient;
   let revision = 0;
-  const remount = () => renderApp(authClient, ++revision, menuClient, salesClient, dashboardClient);
+  const remount = () =>
+    renderApp(authClient, ++revision, menuClient, salesClient, dashboardClient, historyClient);
   const pickers: ReactNode[] = [];
 
   if (scenarios.acceso) {
@@ -97,8 +111,18 @@ if (
       <ScenarioPicker key="dashboard" client={dashboardDemoClient} onChange={remount} />,
     );
   }
+  if (scenarios.historial) {
+    const [{ ScenarioPicker }, { createHistoryDemoClient, loadStoredHistoryScenario }] =
+      await Promise.all([
+        import('./modules/history/dev/ScenarioPicker.tsx'),
+        import('./modules/history/dev/history-demo-client.ts'),
+      ]);
+    const historyDemoClient = createHistoryDemoClient(loadStoredHistoryScenario());
+    historyClient = historyDemoClient;
+    pickers.push(<ScenarioPicker key="historial" client={historyDemoClient} onChange={remount} />);
+  }
 
-  renderApp(authClient, revision, menuClient, salesClient, dashboardClient);
+  renderApp(authClient, revision, menuClient, salesClient, dashboardClient, historyClient);
   const picker = document.body.appendChild(document.createElement('div'));
   createRoot(picker).render(<StrictMode>{pickers}</StrictMode>);
 } else {

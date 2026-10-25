@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router';
+import { HISTORY_ROLES } from '@kofi/contracts';
 import { describe, expect, it } from 'vitest';
 import { AppRoutes, protectedRoutes, publicRoutes } from './routes.tsx';
 import { canView, type AuthClient } from './modules/auth/index.ts';
@@ -115,6 +116,37 @@ describe('routes', () => {
     expect(canView('cashier', '/resumen', protectedRoutes)).toBe(true);
   });
 
+  // SPEC-005 Historial (plan §3, D-6, D-7; RF-1): solo los roles de HISTORY_ROLES.
+  it.each([
+    ['/ventas', 'Historial de ventas'],
+    ['/ventas/mes', 'Ventas por mes'],
+    ['/ventas/7', 'Detalle de una venta'],
+  ])('%s muestra su página del historial con una sesión de dueño', async (path, heading) => {
+    await renderAt(path);
+
+    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(screen.getByLabelText('ruta actual')).toHaveTextContent(path);
+  });
+
+  it('/ventas/nueva sigue mostrando la nueva venta y no el detalle de una venta', async () => {
+    await renderAt('/ventas/nueva');
+
+    expect(await screen.findByRole('heading', { name: 'Nueva venta' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Detalle de una venta' })).not.toBeInTheDocument();
+  });
+
+  it('las rutas del historial son de HISTORY_ROLES y solo /ventas tiene enlace', () => {
+    for (const path of ['/ventas', '/ventas/mes', '/ventas/:numero']) {
+      const route = protectedRoutes.find((r) => r.path === path);
+      expect(route?.roles).toEqual(HISTORY_ROLES);
+      expect(route?.homeLink).toBe(path === '/ventas' ? 'Historial de ventas' : undefined);
+    }
+    for (const path of ['/ventas', '/ventas/mes', '/ventas/7']) {
+      expect(canView('owner', path, protectedRoutes)).toBe(true);
+      expect(canView('cashier', path, protectedRoutes)).toBe(false);
+    }
+  });
+
   it('las rutas protegidas declaran sus roles y el enlace de la pantalla inicial', () => {
     expect(protectedRoutes.map(({ path, roles, homeLink }) => ({ path, roles, homeLink }))).toEqual(
       [
@@ -123,6 +155,9 @@ describe('routes', () => {
         { path: '/menu', roles: ['owner', 'cashier'], homeLink: 'Ver menú' },
         { path: '/ventas/nueva', roles: ['owner', 'cashier'], homeLink: 'Nueva venta' },
         { path: '/resumen', roles: ['owner', 'cashier'], homeLink: 'Resumen de ventas' },
+        { path: '/ventas', roles: ['owner'], homeLink: 'Historial de ventas' },
+        { path: '/ventas/mes', roles: ['owner'], homeLink: undefined },
+        { path: '/ventas/:numero', roles: ['owner'], homeLink: undefined },
       ],
     );
   });

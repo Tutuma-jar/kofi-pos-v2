@@ -1,4 +1,4 @@
-import { roleSchema, type Role } from '@kofi/contracts';
+import { HISTORY_ROLES, roleSchema, type Role } from '@kofi/contracts';
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import {
@@ -12,6 +12,7 @@ import {
   canView,
 } from './modules/auth/index.ts';
 import { DashboardPage } from './modules/dashboard/index.ts';
+import { DayHistoryPage, MonthHistoryPage, SaleDetailPage } from './modules/history/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
 import { NewSalePage } from './modules/sales/index.ts';
 
@@ -52,6 +53,16 @@ const protectedRouteDefinitions: ProtectedRouteDefinition[] = [
   { path: '/ventas/nueva', element: <NewSalePage />, homeLink: 'Nueva venta' },
   // SPEC-004 D-9: los dos roles ven el resumen de hoy; el del mes lo decide la página (D-6).
   { path: '/resumen', element: <DashboardPage />, homeLink: 'Resumen de ventas' },
+  // SPEC-005 D-6, D-7: el historial es de HISTORY_ROLES; la consulta va en la URL. Las rutas fijas
+  // (/ventas/nueva, /ventas/mes) tienen prioridad sobre /ventas/:numero.
+  {
+    path: '/ventas',
+    element: <DayHistoryPage />,
+    roles: HISTORY_ROLES,
+    homeLink: 'Historial de ventas',
+  },
+  { path: '/ventas/mes', element: <MonthHistoryPage />, roles: HISTORY_ROLES },
+  { path: '/ventas/:numero', element: <SaleDetailPage />, roles: HISTORY_ROLES },
 ];
 
 export const protectedRoutes = protectedRouteDefinitions.map((route) => ({

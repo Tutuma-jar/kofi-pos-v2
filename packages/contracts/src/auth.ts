@@ -11,6 +11,13 @@ export const roleSchema = z.enum(['owner', 'cashier'], {
 });
 export type Role = z.infer<typeof roleSchema>;
 
+const ROLE_LABELS: Record<Role, string> = { owner: 'Dueño', cashier: 'Cajero' };
+
+// Nombre del rol para la persona (SPEC-005 D-5).
+export function formatRole(role: Role): string {
+  return ROLE_LABELS[role];
+}
+
 const isNotOnlySpaces = (value: string) => value.trim().length > 0;
 
 // Datos de una cuenta (spec.md §2, RF-13).
