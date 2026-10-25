@@ -68,3 +68,7 @@ export const draftStore = {
     return () => window.removeEventListener('storage', onStorage);
   },
 };
+
+export function discardStoredSaleDraft() {
+  draftStore.clear();
+}

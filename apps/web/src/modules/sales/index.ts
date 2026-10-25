@@ -2,3 +2,4 @@
 export { httpSalesClient, type SalesClient } from './api/sales-client.ts';
 export { SalesClientProvider } from './api/SalesClientProvider.tsx';
 export { NewSalePage } from './pages/NewSalePage.tsx';
+export { discardStoredSaleDraft } from './state/draft-store.ts';

@@ -14,7 +14,7 @@ import {
 import { DashboardPage } from './modules/dashboard/index.ts';
 import { DayHistoryPage, MonthHistoryPage, SaleDetailPage } from './modules/history/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
-import { NewSalePage } from './modules/sales/index.ts';
+import { discardStoredSaleDraft, NewSalePage } from './modules/sales/index.ts';
 
 // Rutas de la interfaz (docs/architecture.md §6.6). Cada ruta protegida declara los roles que pueden
 // verla; por defecto, los dos. La interfaz solo usa esa lista para navegar (RF-11) y para no mostrar
@@ -84,7 +84,7 @@ export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
 
 export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) {
   return (
-    <SessionProvider client={client}>
+    <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft}>
       <Routes>
         {publicRoutes.map(({ path, element }) => (
           <Route key={path} path={path} element={element} />

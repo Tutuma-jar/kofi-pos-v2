@@ -7,6 +7,9 @@ import { createSalesDemoClient } from '../dev/sales-demo-client.ts';
 import { DEMO_IDS, DEMO_MENU } from '../dev/fixtures.ts';
 import { NewSalePage } from './NewSalePage.tsx';
 import { SessionProvider } from '../../auth/index.ts';
+import { AppRoutes } from '../../../routes.tsx';
+import { ApiFetchError } from '../../../shared/http/api-fetch.ts';
+import { SALE_DRAFT_KEY } from '../state/draft-store.ts';
 
 beforeEach(() => localStorage.clear());
 const sessionClient = {
@@ -18,6 +21,37 @@ const sessionClient = {
   },
   async logout() {},
 };
+
+it('el cierre de sesión descarta la venta guardada desde routes.tsx (RF-13)', async () => {
+  let signedIn = true;
+  const client = {
+    async getSession() {
+      if (!signedIn)
+        throw new ApiFetchError(401, {
+          code: 'SESSION_MISSING',
+          message: 'Inicia sesión para continuar',
+        });
+      return sessionClient.getSession();
+    },
+    login: () => sessionClient.getSession(),
+    async logout() {
+      signedIn = false;
+    },
+  };
+  render(
+    <MemoryRouter initialEntries={['/ventas/nueva']}>
+      <SalesClientProvider client={createSalesDemoClient('loaded')}>
+        <AppRoutes client={client} />
+      </SalesClientProvider>
+    </MemoryRouter>,
+  );
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: 'Café americano · Bs 12,50' }));
+  expect(localStorage.getItem(SALE_DRAFT_KEY)).not.toBeNull();
+  await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+  expect(await screen.findByRole('heading', { name: 'Ingresar' })).toBeVisible();
+  expect(localStorage.getItem(SALE_DRAFT_KEY)).toBeNull();
+});
 
 function mount(client = createSalesDemoClient('loaded')) {
   render(
