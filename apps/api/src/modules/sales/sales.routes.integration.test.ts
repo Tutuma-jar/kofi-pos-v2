@@ -11,7 +11,7 @@ import { buildApp } from '../../app.ts';
 import { createTestDatabase } from '../../../test/test-database.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { createFakeClock } from '../../shared/clock.ts';
-import { createAccountsService } from '../auth/index.ts';
+import { authPlugin, createAccountsService } from '../auth/index.ts';
 import { salesPlugin, listRegisteredSales } from './index.ts';
 
 describe('rutas de ventas (RF-1, RF-3, RF-6 a RF-11)', () => {
@@ -42,7 +42,8 @@ describe('rutas de ventas (RF-1, RF-3, RF-6 a RF-11)', () => {
     ).rows[0]!.id;
     menu = [{ id: category, name: 'Bebidas', products: [{ id, name: 'Café', priceCents: 1250 }] }];
     const clock = createFakeClock(new Date('2026-10-24T18:05:12Z'));
-    app = buildApp({ db, clock, logger: false });
+    app = buildApp({ logger: false });
+    app.register(authPlugin, { db, clock });
     app.register(salesPlugin, { db, clock, currentMenu: async () => menu });
     for (const role of ['owner', 'cashier']) {
       const result = await app.inject({

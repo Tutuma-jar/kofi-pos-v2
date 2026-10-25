@@ -2,7 +2,8 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 import cookie from '@fastify/cookie';
 import { registerErrorHandler } from './shared/http/errors.ts';
 import { authPlugin } from './modules/auth/index.ts';
-import { menuPlugin } from './modules/menu/index.ts';
+import { getCurrentMenu, menuPlugin } from './modules/menu/index.ts';
+import { salesPlugin } from './modules/sales/index.ts';
 import { systemClock, type Clock } from './shared/clock.ts';
 import type { Database } from './shared/database/database.ts';
 
@@ -36,6 +37,12 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
       db: deps.db,
       clock: deps.clock ?? systemClock,
       production: deps.production ?? false,
+    });
+    app.register(salesPlugin, {
+      db: deps.db,
+      clock: deps.clock ?? systemClock,
+      production: deps.production ?? false,
+      currentMenu: getCurrentMenu,
     });
   }
 
