@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { requestedScenarios } from './scenarios.ts';
 
-const none = { acceso: false, menu: false, ventas: false, dashboard: false };
+const none = { acceso: false, menu: false, ventas: false, dashboard: false, historial: false };
 
-describe('requestedScenarios (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8)', () => {
+describe('requestedScenarios (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8, SPEC-005 D-9)', () => {
   it.each([
     ['', none],
     ['?otra=1', none],
@@ -20,8 +20,17 @@ describe('requestedScenarios (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC
     ['?escenarios=dashboard,menu', { ...none, menu: true, dashboard: true }],
     [
       '?escenarios=acceso,menu,ventas,dashboard',
-      { acceso: true, menu: true, ventas: true, dashboard: true },
+      { ...none, acceso: true, menu: true, ventas: true, dashboard: true },
     ],
+    ['?escenarios=historial', { ...none, historial: true }],
+    ['?escenarios=acceso,historial', { ...none, acceso: true, historial: true }],
+    ['?escenarios=historial,ventas', { ...none, ventas: true, historial: true }],
+    ['?escenarios=dashboard,historial', { ...none, dashboard: true, historial: true }],
+    [
+      '?escenarios=acceso,menu,ventas,dashboard,historial',
+      { acceso: true, menu: true, ventas: true, dashboard: true, historial: true },
+    ],
+    ['?escenarios=history', none],
     ['?escenarios=resumen', none],
   ])('%j activa %o', (search, expected) => {
     expect(requestedScenarios(search)).toEqual(expected);
