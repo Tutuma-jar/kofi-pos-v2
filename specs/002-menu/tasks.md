@@ -1,6 +1,8 @@
 # Tareas — SPEC-002 Menú
 
-Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); Preparación y Base común implementadas · Fecha: 2026-10-24 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (modo delegado, sin bloqueantes); US1, US2, US3 y pulido implementados; T035 medida y cumplida, en revisión · Fecha: 2026-10-25 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+
+**Instrucción de ejecución de la persona (2026-10-24):** implementar US1, US2, US3 y pulido en ramas apiladas, integrando cada predecesora con merge y abriendo cada PR hacia `develop`. La persona fusionará en orden US1 → US2 → US3 → pulido. Inicialmente T035 quedó excluida de la implementación delegada y sin marcar; T036 se ejecutó tras T034, sin esperar la medición, documentando lo que faltaba. Esta excepción no daba por cumplidos RNF-3 ni el criterio de 30 segundos. La ampliación autorizada el 2026-10-25 y su medición real se registran en Pulido.
 
 ## Cómo leer estas tareas
 
@@ -111,23 +113,42 @@ Rama: `feat/002-menu-us2`.
 
 Rama: `feat/002-menu-us3`.
 
-- [ ] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
+- [x] **T031 [api] [P] [US3]** Añadir a `menu.routes.ts` `GET /api/menu` con `getCurrentMenu`, para las sesiones de dueño y de cajero (plan §5.5, §6.2; RF-13, RF-14, RF-15). Depende de: T016, T017
   Hecho cuando: las pruebas con `app.inject` comprueban el menú vigente ordenado con las dos sesiones, sin categorías sin productos activos, y `401` sin sesión.
-- [ ] **T032 [web] [P] [US3]** Escribir `MenuPage.tsx` y `CurrentMenuList.tsx`: solo lectura, precio con `formatPrice`, aviso «El menú todavía no tiene productos disponibles», y el enlace «Ver menú» en la pantalla inicial para los dos roles (plan §5.7; RF-13, RF-14). Depende de: T011, T012, T018
+- [x] **T032 [web] [P] [US3]** Escribir `MenuPage.tsx` y `CurrentMenuList.tsx`: solo lectura, precio con `formatPrice`, aviso «El menú todavía no tiene productos disponibles», y el enlace «Ver menú» en la pantalla inicial para los dos roles (plan §5.7; RF-13, RF-14). Depende de: T011, T012, T018
   Hecho cuando: las pruebas de componente cubren el menú cargado sin ninguna acción de edición, el menú vacío y el enlace para el cajero y para el dueño.
-- [ ] **T033 [integración] [US3]** Escribir `e2e/menu-us3-consultar.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-13, RF-14). Depende de: T031, T032
+- [x] **T033 [integración] [US3]** Escribir `e2e/menu-us3-consultar.spec.ts` con los 3 pasos de §8.2 del plan, contra la API real de E2E (RF-13, RF-14). Depende de: T031, T032
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1, US2 y US3.
+
+**Corrección de CI al integrar US2 (2026-10-25):**
+
+- [x] **T043 [integración] [US3]** Adelantar a US3 la configuración de Vitest de la API ya adoptada en Pulido: 15 segundos por test para las integraciones con PGlite y criptografía real, sin cambiar casos ni aserciones (plan D-15). Depende de: T033, T042
+  Hecho cuando: se conservan los tests y el código de aplicación; las comprobaciones y la CI pasan. El run `40168447613` falló únicamente por timeout de 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 766 casos correctos. La integración en Pulido se hace después mediante merge.
+
+- [x] **T045 [integración] [US3]** Restaurar la importación de `getCurrentMenu` y la decisión D-15 perdidas al integrar `develop` en US3 (RF-13 a RF-15; plan §5.5 y §6.2). Depende de: T033, T043
+  Hecho cuando: desaparece TS2304, la consulta vigente responde con ambas sesiones y se conserva la trazabilidad de T043; las comprobaciones y la CI pasan. El run `40171291962` falló en tipos por la importación ausente. Después se integra la corrección en Pulido mediante merge.
 
 ## Fase 6 — Pulido
 
 Rama: `feat/002-menu-pulido`.
 
-- [ ] **T034 [integración]** Escribir `apps/api/test/seed-menu.ts` y su script `npm run seed:menu -w @kofi/api`, que carga 200 productos de prueba con los servicios del módulo en la base de `DATABASE_URL` y se niega a hacerlo si la base ya tiene productos (plan D-12; RNF-3). Depende de: T033
+- [x] **T034 [integración]** Escribir `apps/api/test/seed-menu.ts` y su script `npm run seed:menu -w @kofi/api`, que carga 200 productos de prueba con los servicios del módulo en la base de `DATABASE_URL` y se niega a hacerlo si la base ya tiene productos (plan D-12; RNF-3). Depende de: T033
   Hecho cuando: una prueba lo ejecuta sobre PGlite y comprueba 200 productos en el menú vigente, y que con productos previos no carga nada.
-- [ ] **T035 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T034
+- [x] **T035 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T034
   Hecho cuando: al menos 19 de cada 20 aperturas de la administración, de la consulta y de guardados tardan menos de 2 segundos, una persona crea un producto en menos de 30 segundos y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T036 [integración]** Actualizar `README.md` con el estado del módulo Menú y cómo cargar el menú (RF-1 a RF-15). Depende de: T035
+  Resultado (2026-10-25, 01:26:44 de Bolivia): 20/20 en cada serie; creación humana en 11,946 s. [Muestras originales](evidence/menu-performance.json) y [despliegue comprobado](evidence/deployment.md). Se midió el commit `85650aabb5166612555ab9f7f7827f6ca8b8a602`, desplegado en ambos servicios.
+- [x] **T036 [integración]** Actualizar `README.md` con el estado del módulo Menú y cómo cargar el menú (RF-1 a RF-15). Depende de: T034; la persona autorizó expresamente ejecutarla sin esperar T035, documentando la medición pendiente
   Hecho cuando: el README describe quién administra y quién consulta el menú y cómo llegar a cada pantalla.
+
+**Corrección de CI durante el pulido (2026-10-25):**
+
+- [x] **T040 [integración]** Configurar el tiempo máximo de cada test de la API en 15 segundos para que las pruebas con PostgreSQL en memoria y criptografía real no agoten el límite predeterminado de 5 segundos al compartir CPU en CI (plan D-13; comprobaciones de Pulido). Depende de: T036
+  Hecho cuando: se conservan todos los casos y aserciones; la suite de bloqueo de Acceso, las comprobaciones automáticas y `technical-checks` del PR pasan. Evidencia inicial: el run `40127991766` falló únicamente por timeout en «solo cuenta la ventana de quince minutos, con límite abierto», con 670 tests correctos y 1 timeout.
+
+**Ampliación de la delegación por la persona (2026-10-25):** automatizar la parte posible de T035. Queda autorizada la preparación del despliegue de comprobación y la medición asistida; el ingreso y la creación del producto del criterio humano los hace la persona. T035 conserva sus criterios y solo se marca con resultados reales satisfactorios.
+
+- [x] **T041 [integración]** Automatizar la medición asistida de T035 con `scripts/measure-menu.mjs`, sus pruebas con datos ficticios y los comandos `measure:menu` y `test:measure:menu`; documentar el uso y el despliegue de comprobación (plan D-14; RNF-3 y criterio de 30 segundos). Depende de: T040
+  Hecho cuando: las pruebas cubren 20 muestras válidas por operación, límites estrictos, calentamiento excluido, detención ante errores, 200 productos, ausencia de credenciales en el informe y el cronómetro de la creación manual; el comando queda listo para ejecutar por la persona sin argumentos y las comprobaciones pasan. Esta tarea prepara T035 y no la da por cumplida.
 
 ## Cobertura de RF
 

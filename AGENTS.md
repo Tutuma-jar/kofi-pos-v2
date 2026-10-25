@@ -157,10 +157,12 @@ Requisitos: Node 24 y npm 11.
 | Probar la detección de módulos de desarrollo | `npm run test:build` |
 | Pruebas de las reglas de Git y del guardián de comandos | `npm run test:git` |
 | Ver los hooks de Git | `npm run hooks` |
-| Probar el medidor de acceso con datos ficticios | `npm run test:measure` |
+| Probar los medidores de acceso y menú con datos ficticios | `npm run test:measure` |
+| Probar solo el medidor de menú con datos ficticios | `npm run test:measure:menu` |
 | Medir acceso en el despliegue de prueba³ | `npm run measure:access` |
+| Medir menú en el despliegue de prueba³ | `npm run measure:menu` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
 
-³ Medición interactiva que ejecuta la persona en su terminal: introduce su contraseña sin eco y luego hace un ingreso manual en Chromium. Se ejecuta al medir T043, fuera de las comprobaciones automáticas; estas usan `npm run test:measure` con datos ficticios. No recibe credenciales por chat, archivos ni argumentos.
+³ Mediciones interactivas que ejecuta la persona en su terminal, fuera de las comprobaciones automáticas. Acceso (T043) pide una contraseña sin eco y después un ingreso manual en Chromium. Menú (T035) pide ingresar directamente en Chromium, mide las tres series de veinte operaciones y cronometra una creación manual. No reciben credenciales por chat, archivos ni argumentos. Las comprobaciones automáticas usan `npm run test:measure` con datos ficticios.
