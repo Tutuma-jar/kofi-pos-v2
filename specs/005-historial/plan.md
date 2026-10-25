@@ -73,7 +73,7 @@ apps/web/src/
     ├── components/
     │   ├── counts.ts                    «1 venta», «2 ventas»
     │   ├── SaleSearch.tsx               «Buscar venta por número»                                  RF-9
-    │   ├── QueryStatus.tsx              «Actualizar», «Cargando…», «Datos al …» y avisos             RF-5, RF-6
+    │   ├── QueryStatus.tsx              «Actualizar», «Cargando…», «Datos al …» si hay asOf, avisos   RF-5, RF-6
     │   ├── PeriodTotals.tsx             total, ventas y los dos medios de pago                     RF-4, RF-12
     │   ├── SalesList.tsx                filas de las ventas de un día, cada una con enlace al detalle RF-3, RF-10
     │   ├── SaleDetailView.tsx           datos y líneas de una venta                                RF-8
@@ -253,10 +253,10 @@ DayHistoryPage (/ventas?fecha=YYYY-MM-DD):  # sin fecha, la API responde hoy
 
 SaleDetailPage (/ventas/:numero):
   data ← useHistoryQuery(() => client.sale(numero), numero)
-  «Venta N.º {number}», SaleDetailView, «Volver» → /ventas?fecha=data.date; SaleSearch
+  «Venta N.º {number}», SaleDetailView, «Volver» → /ventas?fecha=data.date; SaleSearch; QueryStatus sin «Datos al …» (el detalle no tiene asOf)
 
 MonthHistoryPage (/ventas/mes?mes=YYYY-MM): # sin mes, la API responde el mes en curso
-  «{formatMonth(month)}», PeriodTotals, «Datos al …», MonthDaysTable o «No hay ventas registradas este mes» junto a las cifras en cero
+  «{formatMonth(month)}», PeriodTotals, «Datos al …», «No hay ventas registradas este mes» si no hay ventas, y MonthDaysTable siempre (con los días en cero)
   «Mes anterior» / «Mes siguiente» con previousMonth / nextMonth; campo de mes con max = data.currentMonth
   «Ver por día» → /ventas;  cada fila → /ventas?fecha=día;  SaleSearch
 
@@ -411,7 +411,7 @@ El reloj de la API de E2E empieza el 24/10/2026 a las 08:00 de Bolivia (`e2e-ser
 5. Se elige el 24/10/2026 en el campo de fecha → solo «N.º 1»; se recarga la pantalla → sigue en el 24/10/2026; se vuelve atrás con el navegador → el 25/10/2026 (RF-2, RF-5).
 6. Se abre `/ventas?fecha=2026-10-27` → «No se pueden consultar fechas futuras», sin ventas; `/ventas?fecha=2026-02-30` → «La fecha no es válida» (RF-2).
 7. En el 25/10, se corta la red y se elige «Actualizar» → «No hay conexión. Inténtalo de nuevo» y sigue visible «Ventas del 25/10/2026» con sus cifras (RF-6).
-8. Se avanza el reloj al 27/10 00:05 sin actualizar la pantalla del 26/10 → «Día siguiente» sigue deshabilitado; tras «Actualizar», se puede elegir (RF-2, RF-5).
+8. Se avanza el reloj al 26/10 23:58, el dueño vuelve a ingresar y abre «Historial de ventas» (26/10); se avanza a las 00:05 del 27/10 sin actualizar la pantalla → «Día siguiente» sigue deshabilitado; tras «Actualizar», se puede elegir (RF-2, RF-5).
 9. Se llega a «Historial de ventas», «Día anterior», el campo de fecha y «Actualizar» con Tab y se eligen con Intro (RNF-4).
 
 **US2 — Ver el detalle de una venta** (`e2e/history-us2-detalle-venta.spec.ts`)
@@ -473,3 +473,14 @@ Afectan a todo el proyecto. En modo delegado se aplican en este mismo PR y se in
 
 1. **Navegación por fechas (§6.8; D-4):** la interfaz no hace aritmética de fechas; cuando necesita el día o el mes anterior o siguiente, o el día de un instante, los recibe de la API, calculados con `shared/calendar.ts`.
 2. **Horas y roles (§6.8; D-5):** una hora sin fecha se muestra con `formatTime` («14:05») de `packages/contracts`, y el nombre de un rol con `formatRole` («Dueño», «Cajero»).
+
+## 10. Cambios tras el análisis de consistencia
+
+Correcciones del 2026-10-25 a los hallazgos menores del análisis (ninguno bloqueante):
+
+| Hallazgo | Corrección | Dónde |
+| --- | --- | --- |
+| 1 | `QueryStatus` muestra «Datos al …» solo cuando la respuesta tiene `asOf`: el detalle de una venta no lo tiene (RF-5) | §3, §5.5; `tasks.md` T014, T020 |
+| 2 | Un mes sin ventas muestra el aviso y además todas sus filas por día en cero (RF-13) | §5.5; `tasks.md` T025 |
+| 3 | El paso de la medianoche de la E2E de US1 vuelve a ingresar antes de acercarse a la medianoche, para que la sesión no venza | §8.2 (US1-8) |
+| 4 | La duda 1 afecta a las tres historias; la 2, a US1 y US3 | `tasks.md`, «Cómo leer estas tareas» |
