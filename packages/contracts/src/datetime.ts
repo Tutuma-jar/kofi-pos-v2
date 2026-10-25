@@ -21,3 +21,33 @@ export function formatDateTime(iso: string): string {
   );
   return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
 }
+
+// Fechas sin hora (`YYYY-MM-DD`) y meses (`YYYY-MM`) que la API ya calculó en hora de Bolivia
+// (SPEC-004 D-5): se muestran reordenando el texto, sin pasar por ninguna zona horaria.
+
+// «24/10/2026».
+export function formatDate(date: string): string {
+  const [year, month, day] = date.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+const MONTH_NAMES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+] as const;
+
+// «Octubre de 2026».
+export function formatMonth(month: string): string {
+  const [year, number] = month.split('-');
+  return `${MONTH_NAMES[Number(number) - 1]} de ${year}`;
+}

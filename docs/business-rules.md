@@ -10,6 +10,7 @@ Kofi POS es el sistema web de punto de venta de Kofi, una cafetería ficticia qu
 - Una sola sucursal.
 - Se usa desde una computadora del local, con conexión.
 - Cobra en efectivo y con QR, y no emite factura (SPEC-003).
+- Atiende dentro del día: la jornada no pasa de la medianoche, así que cada día de ventas es el día calendario en hora de Bolivia (SPEC-004).
 
 ## Módulos
 
