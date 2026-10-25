@@ -106,6 +106,9 @@ Rama: `feat/002-menu-us2`.
 - [x] **T042 [integración] [US2]** Restaurar la implementación y las pruebas de US2 perdidas al resolver el merge de `develop` en `feat/002-menu-us2` (RF-1, RF-5, RF-7, RF-9 a RF-12; plan §5.4 y §5.7). Depende de: T030
   Hecho cuando: vuelven las funciones y rutas de activación, las acciones de la interfaz y la edición en la categoría inactiva propia; los tipos, las pruebas y las comprobaciones pasan. La corrección se integra con merge en US3 y Pulido.
 
+- [x] **T044 [integración] [US2]** Adelantar a US2 el margen de 15 segundos por test de API ya adoptado en US3 y Pulido, tras el timeout de Acceso al integrar `develop` (plan D-16). Depende de: T042
+  Hecho cuando: las pruebas, sus aserciones y el aislamiento se conservan, las comprobaciones pasan y la CI aplica el nuevo límite. El run `40169699691` agotó los 5 segundos en «solo cuenta la ventana de quince minutos, con límite abierto», con 760 casos correctos. Después se integra en las ramas siguientes con merge.
+
 ## Fase 5 — US3: consultar el menú vigente (P3)
 
 Rama: `feat/002-menu-us3`.

@@ -1,18 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { requestedScenarios } from './scenarios.ts';
 
-describe('requestedScenarios (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10)', () => {
+const none = { acceso: false, menu: false, ventas: false, dashboard: false };
+
+describe('requestedScenarios (SPEC-001 DD-17, SPEC-002 D-10, SPEC-003 D-10, SPEC-004 D-8)', () => {
   it.each([
-    ['', { acceso: false, menu: false, ventas: false }],
-    ['?otra=1', { acceso: false, menu: false, ventas: false }],
-    ['?escenarios=acceso', { acceso: true, menu: false, ventas: false }],
-    ['?escenarios=menu', { acceso: false, menu: true, ventas: false }],
-    ['?escenarios=acceso,menu', { acceso: true, menu: true, ventas: false }],
-    ['?escenarios=menu,%20acceso', { acceso: true, menu: true, ventas: false }],
-    ['?escenarios=ventas', { acceso: false, menu: false, ventas: true }],
-    ['?escenarios=acceso,menu,ventas', { acceso: true, menu: true, ventas: true }],
-    ['?escenarios=ventas,acceso', { acceso: true, menu: false, ventas: true }],
-    ['?escenarios=venta', { acceso: false, menu: false, ventas: false }],
+    ['', none],
+    ['?otra=1', none],
+    ['?escenarios=acceso', { ...none, acceso: true }],
+    ['?escenarios=menu', { ...none, menu: true }],
+    ['?escenarios=acceso,menu', { ...none, acceso: true, menu: true }],
+    ['?escenarios=menu,%20acceso', { ...none, acceso: true, menu: true }],
+    ['?escenarios=ventas', { ...none, ventas: true }],
+    ['?escenarios=acceso,menu,ventas', { ...none, acceso: true, menu: true, ventas: true }],
+    ['?escenarios=ventas,acceso', { ...none, acceso: true, ventas: true }],
+    ['?escenarios=venta', none],
+    ['?escenarios=dashboard', { ...none, dashboard: true }],
+    ['?escenarios=acceso,dashboard', { ...none, acceso: true, dashboard: true }],
+    ['?escenarios=dashboard,menu', { ...none, menu: true, dashboard: true }],
+    [
+      '?escenarios=acceso,menu,ventas,dashboard',
+      { acceso: true, menu: true, ventas: true, dashboard: true },
+    ],
+    ['?escenarios=resumen', none],
   ])('%j activa %o', (search, expected) => {
     expect(requestedScenarios(search)).toEqual(expected);
   });

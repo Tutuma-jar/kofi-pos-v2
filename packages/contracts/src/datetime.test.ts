@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BOLIVIA_TIME_ZONE, formatDateTime } from './index.ts';
+import { BOLIVIA_TIME_ZONE, formatDate, formatDateTime, formatMonth } from './index.ts';
 
 describe('formatDateTime (plan §5.6, D-7)', () => {
   afterEach(() => {
@@ -26,6 +26,40 @@ describe('formatDateTime (plan §5.6, D-7)', () => {
     (timeZone) => {
       vi.stubEnv('TZ', timeZone);
       expect(formatDateTime('2026-10-25T03:59:00.000Z')).toBe('24/10/2026 23:59');
+    },
+  );
+});
+
+// Fechas sin hora y meses ya calculados en Bolivia por la API (SPEC-004 D-5): solo se reordena el
+// texto, sin zona horaria.
+describe('formatDate y formatMonth (SPEC-004 D-5)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it.each([
+    ['2026-10-24', '24/10/2026'],
+    ['2027-01-05', '05/01/2027'],
+    ['2028-02-29', '29/02/2028'],
+  ])('muestra la fecha %s como «%s»', (date, expected) => {
+    expect(formatDate(date)).toBe(expected);
+  });
+
+  it.each([
+    ['2026-10', 'Octubre de 2026'],
+    ['2027-01', 'Enero de 2027'],
+    ['2026-12', 'Diciembre de 2026'],
+    ['2026-09', 'Septiembre de 2026'],
+  ])('muestra el mes %s como «%s»', (month, expected) => {
+    expect(formatMonth(month)).toBe(expected);
+  });
+
+  it.each(['Pacific/Kiritimati', 'UTC', 'Pacific/Pago_Pago'])(
+    'da lo mismo con la zona horaria %s en el proceso',
+    (timeZone) => {
+      vi.stubEnv('TZ', timeZone);
+      expect(formatDate('2026-10-01')).toBe('01/10/2026');
+      expect(formatMonth('2026-10')).toBe('Octubre de 2026');
     },
   );
 });
