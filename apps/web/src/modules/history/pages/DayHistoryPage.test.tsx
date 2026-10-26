@@ -175,6 +175,8 @@ describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
     await user.tab();
     expect(screen.getByLabelText('Fecha')).toHaveFocus();
     await user.tab();
+    expect(screen.getByRole('link', { name: /^N.º 1/ })).toHaveFocus();
+    await user.tab();
     expect(screen.getByRole('button', { name: 'Actualizar' })).toHaveFocus();
     await user.keyboard('{Enter}');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Actualizar' })).toBeEnabled());
