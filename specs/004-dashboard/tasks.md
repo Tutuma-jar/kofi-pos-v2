@@ -94,7 +94,7 @@ Rama: `feat/004-dashboard-pulido`.
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas repartidas en los días del mes que cumplen `saleSchema` y suman lo esperado, y otra comprueba que con `NODE_ENV=production` no escribe nada.
 - [x] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y la base indicada por la persona (`docs/architecture.md` §6.5), usar su menú de comprobación de al menos 200 productos vigentes, completar 6000 ventas del mes con `seed:sales -- --complete` (T028, T029) y documentar los volúmenes reales. Medir RNF-3 y los recorridos humanos según plan §8.3 y spec §8. Requiere el ingreso y los recorridos manuales de la persona. Depende de: T021, T032, SPEC-002 T034
   Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, los recorridos manuales del dueño y cajero quedan cronometrados con objetivo de 10 segundos o con su exceso aceptado expresamente según spec §8, y los resultados reales y la aceptación quedan anotados en la descripción del PR de pulido. La persona aceptó el exceso manual el 2026-10-26; RNF-3 sigue exigido sin cambios.
-- [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Excepción autorizada por la persona: hacer T023 antes de T022, dejando explícita la medición pendiente en el README y en el PR; T022 sigue reservada a la persona y sin marcar.
+- [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Antecedente: la persona autorizó hacer T023 antes de T022, documentando entonces la medición pendiente en el README y en el PR. T022 se cerró posteriormente con su evidencia real y la aceptación expresa del exceso manual.
   Hecho cuando: el README describe esos tres puntos.
 
 **Corrección de Pulido autorizada para usar la base existente:**
@@ -113,6 +113,9 @@ Rama: `feat/004-dashboard-pulido`.
 
 - [x] **T032 [integración]** Conservar la primera medición, documentar la aceptación expresa del exceso manual y controlar foco/visibilidad en el medidor antes de repetir solo las series del cajero (RNF-3; spec §8; plan §7.1). Depende de: T031
   Hecho cuando: los tests rechazan muestras con la página oculta o sin foco, incluso si lo recupera después; el navegador se trae al frente antes del cronómetro, se conservan los informes originales y la aceptación humana no cambia la evaluación automática ni las duraciones.
+
+- [x] **T033 [integración]** Corregir las referencias documentales desactualizadas a T022 que señaló el verificador: actualizar el cierre en README y conservar la excepción de T023 como antecedente histórico, sin afirmar que T022 sigue pendiente (RF-1 a RF-10, coherencia del handoff). Depende de: T022
+  Hecho cuando: README y tasks.md coinciden con el informe real y con la casilla marcada de T022; no se modifican mediciones, criterios ni código funcional y las comprobaciones existentes siguen en verde.
 
 ## Cobertura de RF
 
