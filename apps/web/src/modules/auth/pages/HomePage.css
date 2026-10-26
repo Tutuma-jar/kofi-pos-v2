@@ -1,8 +1,9 @@
-/* Pantalla inicial: saludo y un acceso por módulo, cada uno con el color de su franja del aguayo. */
+/* Pantalla inicial: saludo y una lista de accesos, uno por fila, cada uno con el rombo tejido del
+   color de su módulo. «Nueva venta», la tarea del mostrador, va más grande sin cambiar el orden. */
 .home {
   display: grid;
   gap: var(--space-3);
-  max-width: 60rem;
+  max-width: 44rem;
 }
 
 .home h1 {
@@ -18,12 +19,14 @@
 }
 
 .home__modules {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-  gap: var(--space-2);
   margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+
+.home__modules li {
+  border-bottom: 1px solid var(--color-line);
 }
 
 .home__module {
@@ -31,24 +34,18 @@
   display: flex;
   gap: var(--space-2);
   align-items: center;
-  min-height: 5.5rem;
-  padding: var(--space-2) var(--space-3);
+  min-height: 4.5rem;
+  padding: var(--space-2);
   font-size: var(--text-large);
   font-weight: 700;
   color: var(--color-ink);
   text-decoration: none;
-  background: var(--color-field);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius);
-  transition:
-    border-color 150ms var(--ease-out),
-    background-color 150ms var(--ease-out);
+  transition: background-color 150ms var(--ease-out);
 }
 
 .home__module:hover {
   color: var(--color-ink);
   background: var(--color-cream-deep);
-  border-color: var(--tone);
 }
 
 .home__module[href^='/menu'] {
@@ -57,6 +54,9 @@
 
 .home__module[href='/ventas/nueva'] {
   --tone: var(--color-weave-orange);
+  min-height: 6rem;
+  font-size: var(--text-feature);
+  font-weight: 800;
 }
 
 .home__module[href='/resumen'] {
@@ -68,23 +68,34 @@
 }
 
 .home__swatch {
-  position: relative;
   flex: none;
   width: 2.5rem;
   height: 2.5rem;
   background: var(--tone);
-  border-radius: 0.25rem;
 }
 
-.home__swatch::after {
-  position: absolute;
-  inset: 0.625rem;
-  content: '';
-  background: var(--color-weave-light);
-  transform: rotate(45deg);
-  transition: transform 300ms var(--ease-out);
+.home__module[href='/ventas/nueva'] .home__swatch {
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
-.home__module:hover .home__swatch::after {
-  transform: rotate(135deg);
+.home__label {
+  flex: 1;
+}
+
+.home__arrow {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease-out);
+}
+
+.home__module:hover .home__arrow {
+  stroke: var(--tone);
+  transform: translateX(0.25rem);
 }
