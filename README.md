@@ -192,7 +192,7 @@ Dueño y cajero abren **Resumen de ventas** desde la pantalla inicial (`/resumen
 
 La API calcula las cifras usando las ventas registradas y sus nombres y precios históricos. Las fechas y el momento «Datos al…» se muestran en hora de Bolivia, y los importes, en bolivianos. **Actualizar** vuelve a consultar los resúmenes; no hay actualización automática. Durante la carga o ante un error de conexión o del servidor se conservan las cifras anteriores. Un período sin ventas muestra ceros, «—» como promedio y su aviso.
 
-**T022 pendiente:** todavía falta desplegar y medir RNF-3 y el criterio de 10 segundos en Render y Neon. Las pruebas locales y E2E no acreditan esos tiempos. La persona ejecutará esa tarea; [el PR de pulido](https://github.com/Tutuma-jar/kofi-pos-v2/pull/33) contiene los pasos exactos de preparación, carga y medición. Esta documentación (T023) se entrega antes de T022 por autorización expresa, sin declarar terminada la fase de Pulido.
+**T022 pendiente:** el despliegue de Dashboard y la primera medición real están registrados en el [PR de pulido](https://github.com/Tutuma-jar/kofi-pos-v2/pull/33). El [informe original](specs/004-dashboard/evidence/measurement-attempt-1.json) conserva todas las muestras: el dueño cumplió las series automáticas, pero el cajero no alcanzó RNF-3. El recorrido humano del dueño superó 10 segundos y la persona aceptó expresamente ese exceso el 2026-10-26, conservando su duración real; esa aceptación no flexibiliza RNF-3. Falta comprobar las series del cajero con control del foco de Chromium. Las pruebas locales y E2E no sustituyen esa medición.
 
 Para preparar la base de comprobación nueva, después de las migraciones, las cuentas y los 200 productos de `seed:menu`, se dispone de:
 

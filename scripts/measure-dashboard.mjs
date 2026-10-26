@@ -12,6 +12,10 @@ function duration(value) {
   if (!Number.isFinite(value) || value < 0) throw new MeasurementError('La duración no es válida.');
   return value;
 }
+export function requireForeground(state) {
+  if (state?.visibilityState !== 'visible' || state?.hasFocus !== true || state?.lostFocus === true)
+    throw new MeasurementError('Chromium perdió el primer plano durante la serie. Conserva la ventana visible y sin usar otras aplicaciones antes de repetir la serie completa.');
+}
 export function buildReport(input, metadata = {}) {
   if (!Number.isInteger(metadata.productCount) || metadata.productCount < 200 || metadata.monthlySalesCount !== 6000)
     throw new MeasurementError('Se requieren al menos 200 productos vigentes y 6000 ventas del mes.');
@@ -92,6 +96,17 @@ export async function createBrowserDriver(role, options = {}) {
       return result;
     };
     const querySummary = async action => {
+      await page.bringToFront();
+      requireForeground(await page.evaluate(() => {
+        const state = { visibilityState: document.visibilityState, hasFocus: document.hasFocus(), lostFocus: false };
+        const check = () => { if (document.visibilityState !== 'visible' || !document.hasFocus()) state.lostFocus = true; };
+        window.__kofiDashboardForeground = { state, check };
+        window.addEventListener('blur',check);
+        document.addEventListener('visibilitychange',check);
+        return state;
+      }));
+      const foreground = () => page.evaluate(() => ({ visibilityState: document.visibilityState, hasFocus: document.hasFocus(), lostFocus: window.__kofiDashboardForeground?.state.lostFocus ?? true }));
+      try {
       const today = responseFor('/api/dashboard/today');
       const month = role === 'owner' ? responseFor('/api/dashboard/month') : null;
       const start = performance.now();
@@ -104,9 +119,21 @@ export async function createBrowserDriver(role, options = {}) {
         if (monthly.salesCount !== 6000) throw new MeasurementError('Cambió el volumen de ventas durante la medición.');
         await show(monthly,'month');
       } else if (await page.locator('#month-title').count()) throw new MeasurementError('El cajero no debe ver el mes.');
+      requireForeground(await foreground());
       await paint();
+      requireForeground(await foreground());
       if (new URL(page.url()).origin !== new URL(target).origin) throw new MeasurementError('El navegador salió del sitio de comprobación.');
       return duration(performance.now()-start);
+      } finally {
+        await page.evaluate(() => {
+          const guard = window.__kofiDashboardForeground;
+          if (guard) {
+            window.removeEventListener('blur',guard.check);
+            document.removeEventListener('visibilitychange',guard.check);
+            delete window.__kofiDashboardForeground;
+          }
+        }).catch(() => {});
+      }
     };
     return {
       async login() {

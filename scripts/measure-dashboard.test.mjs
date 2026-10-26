@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildReport, measureCycles, runMeasurement, verifyDeployedFrontend, createBrowserDriver } from './measure-dashboard.mjs';
+import { buildReport, measureCycles, runMeasurement, verifyDeployedFrontend, createBrowserDriver, requireForeground } from './measure-dashboard.mjs';
 
 const samples = () => ({ openMs: Array(20).fill(200), refreshMs: Array(20).fill(150) });
 const metadata = { productCount: 202, monthlySalesCount: 6000, month: '2026-10', localCommit: 'ficticio' };
+test('solo admite muestras visibles y con foco durante todo el intervalo', () => {
+  assert.doesNotThrow(() => requireForeground({visibilityState:'visible',hasFocus:true,lostFocus:false}));
+  for(const state of [{visibilityState:'hidden',hasFocus:false,lostFocus:true},{visibilityState:'visible',hasFocus:false,lostFocus:false},{visibilityState:'visible',hasFocus:true,lostFocus:true}]) assert.throws(()=>requireForeground(state),/primer plano/);
+});
 const fakeFrontend = bundle => async url => ({ ok: true, text: async () => String(url).endsWith('.js') ? bundle : '<script type="module" src="/assets/index-test.js"></script>' });
 test('rechaza una web anterior al Dashboard antes de pedir el ingreso', async () => {
   let opened = false;
