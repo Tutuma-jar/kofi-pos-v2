@@ -1,4 +1,5 @@
-import type { DayHistory, ListedSale, Sale } from '@kofi/contracts';
+import type { DayHistory, ListedSale, MonthHistory, Sale } from '@kofi/contracts';
+import { boliviaDate } from '../../shared/calendar.ts';
 
 export function periodTotals(
   sales: Sale[],
@@ -28,4 +29,17 @@ export function listedSales(sales: Sale[]): ListedSale[] {
       paymentMethod: sale.paymentMethod,
       totalCents: sale.totalCents,
     }));
+}
+
+export function salesByDay(sales: Sale[], days: string[]): MonthHistory['days'] {
+  const rows = days.map((date) => ({ date, totalCents: 0, salesCount: 0 }));
+  const byDate = new Map(rows.map((row) => [row.date, row]));
+  for (const sale of sales) {
+    const row = byDate.get(boliviaDate(new Date(sale.registeredAt)));
+    if (row) {
+      row.totalCents += sale.totalCents;
+      row.salesCount++;
+    }
+  }
+  return rows;
 }

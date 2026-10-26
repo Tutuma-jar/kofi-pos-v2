@@ -93,7 +93,7 @@ Rama: `feat/005-historial-us2`.
 
 Rama: `feat/005-historial-us3`.
 
-- [ ] **T023 [api] [P] [US3]** Escribir en `history.report.ts` `salesByDay` (plan §5.2; RF-13, RNF-2). Depende de: T009
+- [x] **T023 [api] [P] [US3]** Escribir en `history.report.ts` `salesByDay` (plan §5.2; RF-13, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
 - [ ] **T024 [api] [P] [US3]** Añadir el mes (`month`) a `history.service.ts` y `GET /api/history/month` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-4, D-10; RF-7, RF-11, RF-12, RF-13). Depende de: T010, T011, T023
   Hecho cuando: las pruebas comprueban que sin mes se consulta el mes en curso; que se pide el rango de `boliviaMonthBounds`; que la respuesta cumple `monthHistorySchema` con `currentMonth`, `previousMonth` (nulo en enero de 0001), `nextMonth` (nulo en el mes en curso), `asOf` y los días (todo el mes pasado, del 1 a hoy el en curso); que una venta del último día del mes anterior a las 23:59 no cuenta; que un mes futuro responde `400` «No se pueden consultar meses futuros» y uno inválido («2026-13», «octubre») `400` «El mes no es válido», sin llamar a la función de ventas; y que la ruta responde `403` al cajero y `401` sin sesión.
