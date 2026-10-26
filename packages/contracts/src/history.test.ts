@@ -121,6 +121,27 @@ const month = {
 const errorBody = (code: string, message: string) => ({ error: { code, message } });
 
 describe('contrato del Historial (SPEC-005 plan §6)', () => {
+  it('admite el primer día/mes con retroceso nulo y rechaza año cero o retroceso fuera de formato (T030)', () => {
+    const firstDay = {
+      ...emptyToday,
+      date: '0001-01-01',
+      previousDate: null,
+      nextDate: '0001-01-02',
+    };
+    expect(dayHistorySchema.safeParse(firstDay).success).toBe(true);
+    expect(dayHistorySchema.safeParse({ ...firstDay, date: '0000-01-01' }).success).toBe(false);
+    expect(dayHistorySchema.safeParse({ ...firstDay, previousDate: '0000-12-31' }).success).toBe(
+      false,
+    );
+    expect(dayHistorySchema.safeParse({ ...day, previousDate: null }).success).toBe(false);
+    const firstMonth = { ...month, month: '0001-01', previousMonth: null, nextMonth: '0001-02' };
+    expect(monthHistorySchema.safeParse(firstMonth).success).toBe(true);
+    expect(monthHistorySchema.safeParse({ ...firstMonth, month: '0000-01' }).success).toBe(false);
+    expect(monthHistorySchema.safeParse({ ...firstMonth, previousMonth: '0000-12' }).success).toBe(
+      false,
+    );
+    expect(monthHistorySchema.safeParse({ ...month, previousMonth: null }).success).toBe(false);
+  });
   it('se exporta desde index.ts', () => {
     expect(contracts.dayHistorySchema).toBe(dayHistorySchema);
     expect(contracts.byPaymentMethodSchema).toBe(byPaymentMethodSchema);

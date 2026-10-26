@@ -49,6 +49,36 @@ describe('fixtures del historial (plan D-9)', () => {
 });
 
 describe('createHistoryDemoClient', () => {
+  it('conserva años pequeños y límites de día/mes, sin inventar una antigüedad de negocio (T030)', async () => {
+    const client = createHistoryDemoClient('withSales');
+    expect(await client.day('0099-12-31')).toMatchObject({
+      previousDate: '0099-12-30',
+      nextDate: '0100-01-01',
+      sales: [],
+    });
+    expect(await client.day('0001-01-01')).toMatchObject({
+      previousDate: null,
+      nextDate: '0001-01-02',
+    });
+    expect(await client.month('0099-12')).toMatchObject({
+      previousMonth: '0099-11',
+      nextMonth: '0100-01',
+    });
+    expect(await client.month('0001-01')).toMatchObject({
+      previousMonth: null,
+      nextMonth: '0001-02',
+    });
+    expect((await client.month('0012-02')).days).toHaveLength(29);
+    expect((await client.month('0100-02')).days).toHaveLength(28);
+    expect(await rejection(client.day('0000-12-31'))).toMatchObject({
+      status: 400,
+      message: HISTORY_MESSAGES.invalidDate,
+    });
+    expect(await rejection(client.month('0000-12'))).toMatchObject({
+      status: 400,
+      message: HISTORY_MESSAGES.invalidMonth,
+    });
+  });
   afterEach(() => {
     vi.useRealTimers();
   });

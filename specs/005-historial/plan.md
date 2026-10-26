@@ -8,24 +8,24 @@ Añade el módulo `history` a las dos aplicaciones y al contrato, sobre el monor
 
 - De **SPEC-001** usa `requireSession`, `createAuthService` y la sesión de la interfaz (`SessionProvider`, `RequireSession`, `AuthenticatedLayout`). Todo eso **ya está en `develop`**.
 - De **SPEC-002** usa, en las pruebas de punta a punta, la pantalla inicial con los enlaces `homeLink` y la ruta de pruebas `POST /api/__test/menu`, que **ya están en `develop`** (#21).
-- De **SPEC-003** usa `saleSchema`, `saleResponseSchema`, `formatPaymentMethod` y `formatDateTime` del contrato (ya en `develop`, #19) y `listRegisteredSales(db, { from?, to? })` (plan de 003, §6.3), que está en `apps/api/src/modules/sales/sales.repository.ts`. Su exportación desde `modules/sales/index.ts` es de la historia 1 de Ventas (003 T015), y el registro de ventas por la API (`POST /api/sales`, `salesPlugin` en `app.ts`) llega con 003 T015 y T020. **Nada de eso está en `develop`.**
+- De **SPEC-003** usa `saleSchema`, `saleResponseSchema`, `formatPaymentMethod` y `formatDateTime` del contrato (ya en `develop`, #19) y `listRegisteredSales(db, { from?, to? })` (plan de 003, §6.3), que está en `apps/api/src/modules/sales/sales.repository.ts`. Su exportación desde `modules/sales/index.ts` es de la historia 1 de Ventas (003 T015), y el registro de ventas por la API (`POST /api/sales`, `salesPlugin` en `app.ts`) llegó con 003 T015 y T020. **Estas piezas están fusionadas en `develop` mediante el PR #26 (US1 de Ventas).**
 - De **SPEC-004** usa `boliviaDateSchema`, `boliviaMonthSchema`, `paymentMethodTotalSchema` y `dayTotalSchema` del contrato, `formatDate` y `formatMonth`, y `apps/api/src/shared/calendar.ts`, todo ya en `develop` (#20). No usa nada de las historias de 004.
 
 Por eso:
 
 - La Preparación y la Base común de este plan **no dependen** de las historias de 003 ni de 004: contrato, días y meses de Bolivia en la API, cliente de la interfaz, cliente simulado y rutas provisionales. El servicio del Historial recibe las ventas registradas como funciones inyectadas (D-1, como SPEC-003 D-1 y SPEC-004 D-1), que las pruebas reemplazan por falsas.
-- Las historias del Historial empiezan cuando se fusionen el PR de definición de 005 **y** la historia 1 de Ventas (`feat/003-ventas-us1`). Dentro de cada historia, solo las tareas `[integración]` usan esas piezas; las demás trabajan con ventas falsas o con el cliente simulado. Las tareas que las usan lo indican como «SPEC-003 T0NN».
+- Los prerrequisitos de las historias del Historial están fusionados: definición de 005 (PR #25) y US1 de Ventas (PR #26). Dentro de cada historia, solo las tareas `[integración]` usan esas piezas; las demás trabajan con ventas falsas o con el cliente simulado. Las tareas que las usan lo indican como «SPEC-003 T0NN».
 - Las dos dudas de `spec.md` quedaron respondidas el 2026-10-25 con las decisiones provisionales: solo el dueño usa el Historial (`HISTORY_ROLES`, D-6) y no hay límite hacia atrás (D-10). Los cambios están en §11.
 
 ## 1. Versión de la constitución
 
-Se planifica con la **versión 2.0.0** de [`docs/constitution.md`](../../docs/constitution.md) (2026-10-24).
+Se planificó con la versión 2.0.0 y se revisa para implementar con la **versión 3.0.0** de [`docs/constitution.md`](../../docs/constitution.md) (2026-10-25). Los seis principios siguen cumpliéndose.
 
 ## 2. Control de la constitución
 
 | Principio | ¿Se cumple? | Cómo / excepción justificada |
 | --- | --- | --- |
-| 1. Stack mínimo | Sí | Sin dependencias nuevas: se usan las de SPEC-001 (§7.1 de su plan). Los días y los meses se calculan con `Intl.DateTimeFormat` y `Date.UTC`, que vienen con Node 24 (D-4). Sin bibliotecas de gráficos ni de selección de fechas: el campo de fecha es `<input type="date">` y el de mes, `<input type="month">` (D-7). |
+| 1. Stack mínimo | Sí | Sin dependencias nuevas: se usan las de SPEC-001 (§7.1 de su plan). Los días y los meses se calculan con `Intl.DateTimeFormat` y las operaciones UTC de `Date`, que vienen con Node 24 (D-4). Sin bibliotecas de gráficos ni de selección de fechas: el campo de fecha es `<input type="date">` y el de mes, `<input type="month">` (D-7). |
 | 2. Especificación antes que código | Sí | Cada parte de este plan indica sus RF (§3 a §8), y entre todas cubren RF-1 a RF-13 (tabla de cobertura, §8.5). |
 | 3. Lógica separada de la interfaz | Sí | Totales, números de ventas, importes por medio de pago, ventas por día, qué día es hoy y cuál es el mes en curso, el día y el mes anterior y siguiente, el día de una venta y el momento de los datos los calcula la API (`history.report.ts`, `history.service.ts`, `shared/calendar.ts`). La interfaz los muestra con `formatPrice`, `formatDate`, `formatMonth`, `formatDateTime`, `formatTime`, `formatPaymentMethod` y `formatRole` del contrato, que no calculan nada (D-4, D-5). El cliente simulado de `dev/` devuelve cifras fijas ya calculadas y no llega al build (D-9). El contrato vive en `packages/contracts/src/history.ts`. |
 | 4. Tests primero | Sí | Cada RF tiene al menos un test automatizado (§8.5), que se escribe antes del código de su tarea. |
@@ -96,7 +96,7 @@ e2e/
 - `apps/api/src/modules/history` tiene un archivo por capa (`routes`, `service`, `report`), así que no lleva subcarpetas (`docs/architecture.md` §4.3).
 - `history` no importa nada interno de `sales` ni de `dashboard`: en la API recibe `listRegisteredSales` y `findSaleByNumber` desde `app.ts`, que los importa de `modules/sales/index.ts` (D-1); en la interfaz no usa los módulos `sales` ni `dashboard`.
 - `apps/web/src/modules/history` tiene más de dos componentes y tres páginas, en sus subcarpetas por tipo (`docs/architecture.md` §4.3).
-- `apps/api/test/test-sales.ts` lo define SPEC-004 (T009). Si cuando empiece US1 de 005 ya está en `develop`, se reutiliza; si no, lo crea la primera tarea `[api]` de US1 con la forma de SPEC-004 §8.4, y la otra rama lo integra con `git pull`.
+- `apps/api/test/test-sales.ts` lo define SPEC-004 (T009). Ya está fusionado en `develop` (PR #29) y US1 de 005 lo reutiliza.
 
 ## 4. Modelo de datos
 
@@ -127,14 +127,20 @@ sales  N.º 3 14:30Z Luis Mamani owner qr 2050 · N.º 2 13:15Z Ana Quispe cashi
 
 ### 5.1 Días y meses de Bolivia (`shared/calendar.ts`; RF-2, RF-11, RF-13; D-4)
 
-Se añaden a las funciones de SPEC-004 (`boliviaDate`, `startOfBoliviaDay`, `boliviaDayRange`, `boliviaMonthRange`), sin cambiarlas:
+Se añaden a las funciones de SPEC-004 (`boliviaDate`, `startOfBoliviaDay`, `boliviaDayRange`, `boliviaMonthRange`), corrigiendo la representación de años y el primer instante local (T030/T031):
 
 ```text
+startOfBoliviaDay(date):                    # primer instante que tiene esa fecha local
+  target ← fecha de calendario en UTC (solo como ordinal)
+  buscar por bisección, entre target − 48 h y target + 48 h, el primer milisegundo
+    cuya fecha local obtenida con Intl sea mayor o igual a target
+  return ese instante                         # puede empezar a la 01:00 si no existió la medianoche
+
 addDays(date, n):                           # 'YYYY-MM-DD' ± n días, aritmética de calendario sin zona
-  d ← Date.UTC(año, mes − 1, día + n);  return d en 'YYYY-MM-DD' (getUTC…)
+  d ← new Date(0); d.setUTCFullYear(año, mes − 1, día + n);  return d en 'YYYY-MM-DD' (getUTC…)
 
 addMonths(month, n):                        # 'YYYY-MM' ± n meses
-  d ← Date.UTC(año, mes − 1 + n, 1);  return d en 'YYYY-MM'
+  d ← new Date(0); d.setUTCFullYear(año, mes − 1 + n, 1);  return d en 'YYYY-MM'
 
 daysOfMonth(month):                         # todas las fechas del mes, del 1 al último
   [`${month}-01`, …, addDays(`${addMonths(month, 1)}-01`, −1)]
@@ -152,9 +158,9 @@ boliviaMonthBounds(month, now):             # un mes hasta el mes en curso
   return { days, from, to }
 ```
 
-- `to` es exclusivo, como en `listRegisteredSales`: para un día pasado es las 00:00 del día siguiente, y para hoy, `now + 1 ms`, igual que `boliviaDayRange` (SPEC-004 §5.1).
+- `to` es exclusivo, como en `listRegisteredSales`: para un día pasado es el primer instante real del día siguiente, y para hoy, `now + 1 ms`, igual que `boliviaDayRange` (SPEC-004 §5.1).
 - Las fechas `YYYY-MM-DD` se comparan como texto: el orden alfabético es el cronológico.
-- `addDays` y `addMonths` operan sobre fechas de calendario, sin zona horaria: `Date.UTC` solo hace la aritmética (fin de mes, años bisiestos). La zona de Bolivia entra solo en `boliviaDate` y `startOfBoliviaDay`.
+- `addDays` y `addMonths` operan sobre fechas de calendario, sin zona horaria: `setUTCFullYear` hace la aritmética conservando los años 0001–0099 (fin de mes, años bisiestos). La zona de Bolivia entra solo en `boliviaDate` y `startOfBoliviaDay`.
 
 ### 5.2 Cifras (`history.report.ts`; RF-3, RF-4, RF-7, RF-12, RF-13, RNF-2)
 
@@ -185,21 +191,21 @@ salesByDay(sales, days):                    # days: los de boliviaMonthBounds
 day(dateParam?):                            # US1
   now ← clock.now();  today ← boliviaDate(now)
   date ← dateParam ?? today
-  si date no es una fecha válida (boliviaDateSchema) → 400 VALIDATION_ERROR «La fecha no es válida»
+  si date no es una fecha válida (historyDateSchema) → 400 VALIDATION_ERROR «La fecha no es válida»
   si date > today → 400 VALIDATION_ERROR «No se pueden consultar fechas futuras»
   { from, to } ← boliviaDayBounds(date, now)
   sales ← listSales(db, { from, to })       # listRegisteredSales, inyectada (D-1)
-  return { date, today, previousDate: addDays(date, −1), nextDate: date < today ? addDays(date, 1) : null,
+  return { date, today, previousDate: date = HISTORY_MIN_DATE ? null : addDays(date, −1), nextDate: date < today ? addDays(date, 1) : null,
            asOf: now, ...periodTotals(sales), sales: listedSales(sales) }
 
 month(monthParam?):                         # US3
   now ← clock.now();  currentMonth ← boliviaDate(now)[0..7]
   month ← monthParam ?? currentMonth
-  si month no es un mes válido (boliviaMonthSchema) → 400 VALIDATION_ERROR «El mes no es válido»
+  si month no es un mes válido (historyMonthSchema) → 400 VALIDATION_ERROR «El mes no es válido»
   si month > currentMonth → 400 VALIDATION_ERROR «No se pueden consultar meses futuros»
   { days, from, to } ← boliviaMonthBounds(month, now)
   sales ← listSales(db, { from, to })
-  return { month, currentMonth, previousMonth: addMonths(month, −1),
+  return { month, currentMonth, previousMonth: month = HISTORY_MIN_MONTH ? null : addMonths(month, −1),
            nextMonth: month < currentMonth ? addMonths(month, 1) : null,
            asOf: now, ...periodTotals(sales), days: salesByDay(sales, days) }
 
@@ -247,8 +253,8 @@ useHistoryQuery(load, key):                 # key: la fecha, el mes o el número
 DayHistoryPage (/ventas?fecha=YYYY-MM-DD):  # sin fecha, la API responde hoy
   data ← useHistoryQuery(() => client.day(fecha), fecha)
   «Ventas del {formatDate(data.date)}», PeriodTotals, «Datos al {formatDateTime(asOf)}», SalesList o «No hay ventas registradas este día»
-  «Día anterior» → ?fecha=data.previousDate;  «Día siguiente» → ?fecha=data.nextDate (deshabilitado si es null)
-  campo de fecha: max = data.today; al elegir → ?fecha=valor
+  «Día anterior» → ?fecha=data.previousDate (deshabilitado si es null);  «Día siguiente» → ?fecha=data.nextDate (deshabilitado si es null)
+  campo de fecha: min = HISTORY_MIN_DATE; max = data.today; al elegir → ?fecha=valor
   SaleSearch; «Ver por mes» → /ventas/mes (US3)
 
 SaleDetailPage (/ventas/:numero):
@@ -257,7 +263,7 @@ SaleDetailPage (/ventas/:numero):
 
 MonthHistoryPage (/ventas/mes?mes=YYYY-MM): # sin mes, la API responde el mes en curso
   «{formatMonth(month)}», PeriodTotals, «Datos al …», «No hay ventas registradas este mes» si no hay ventas, y MonthDaysTable siempre (con los días en cero)
-  «Mes anterior» / «Mes siguiente» con previousMonth / nextMonth; campo de mes con max = data.currentMonth
+  «Mes anterior» / «Mes siguiente» con previousMonth / nextMonth, deshabilitados si son null; campo de mes con min = HISTORY_MIN_MONTH; max = data.currentMonth
   «Ver por día» → /ventas;  cada fila → /ventas?fecha=día;  SaleSearch
 
 SaleSearch:
@@ -267,7 +273,7 @@ SaleSearch:
 
 - La fecha, el mes y el número viven en la URL: recargar o volver atrás muestra la misma consulta (RF-5, D-7).
 - Un rechazo (`400`, `403`, `404`) borra los datos anteriores y muestra el mensaje de la API: no se muestran ventas de un día, un mes o una venta que no se pueden consultar (RF-1, RF-2, RF-9, RF-11). Sin conexión o con un error inesperado se conservan los datos anteriores con su propio título y su «Datos al …» (RF-6).
-- Ninguna pantalla calcula fechas: el día y el mes anterior y siguiente, el máximo de los campos y el día de una venta llegan de la API (D-4).
+- Ninguna pantalla calcula fechas: el día y el mes anterior y siguiente, el mínimo y el máximo de los campos y el día de una venta llegan de la API (D-4).
 - `counts.ts` elige singular o plural («1 venta»): es texto, no una cifra. Cada fila usa `number` o `date` como clave.
 - No hay actualización automática (RF-5).
 
@@ -288,9 +294,11 @@ Ubicación: **`packages/contracts/src/history.ts`** (constantes, funciones, esqu
 | `formatRole(role)` | `'owner'` → «Dueño», `'cashier'` → «Cajero» (D-5) | RF-3, RF-8 |
 | `byPaymentMethodSchema` | Ya existía en `dashboard.ts` sin exportar: tupla `[cash, qr]` de `paymentMethodTotalSchema`, en ese orden (D-3) | RF-4, RF-12 |
 | `listedSaleSchema` | `saleSchema` sin `lines`: `{ id, number, registeredAt, registeredBy, totalCents, paymentMethod }` | RF-3 |
-| `dayHistorySchema` | `{ date, today, previousDate: boliviaDate, nextDate: boliviaDate \| null, asOf: ISO 8601 con zona, totalCents: int ≥ 0, salesCount: int ≥ 0, byPaymentMethod, sales: ListedSale[] }`; `salesCount` es igual a `sales.length`, `date ≤ today` y `nextDate` es `null` si y solo si `date = today` | RF-2–RF-5 |
-| `monthHistorySchema` | `{ month, currentMonth, previousMonth: boliviaMonth, nextMonth: boliviaMonth \| null, asOf, totalCents, salesCount, byPaymentMethod, days: DayTotal[] (1–31) }`; `month ≤ currentMonth` y `nextMonth` es `null` si y solo si `month = currentMonth` | RF-11–RF-13 |
+| `dayHistorySchema` | `{ date, today, previousDate: historyDate (nullable), nextDate: historyDate \| null, asOf: ISO 8601 con zona, totalCents: int ≥ 0, salesCount: int ≥ 0, byPaymentMethod, sales: ListedSale[] }`; `salesCount` es igual a `sales.length`, `date ≤ today`, `previousDate` es `null` si y solo si `date = HISTORY_MIN_DATE`, y `nextDate` es `null` si y solo si `date = today` | RF-2–RF-5 |
+| `monthHistorySchema` | `{ month, currentMonth, previousMonth: historyMonth (nullable), nextMonth: historyMonth \| null, asOf, totalCents, salesCount, byPaymentMethod, days: DayTotal[] (1–31) }`; `month ≤ currentMonth`, `previousMonth` es `null` si y solo si `month = HISTORY_MIN_MONTH`, y `nextMonth` es `null` si y solo si `month = currentMonth` | RF-11–RF-13 |
 | `historySaleResponseSchema` | `{ sale: saleSchema, date: boliviaDate }`: la venta tal como se registró y su día en Bolivia, para «Volver» | RF-8 |
+| `HISTORY_MIN_DATE`, `HISTORY_MIN_MONTH` | `0001-01-01`, `0001-01`: extremos técnicos del calendario, sin recorte de antigüedad | RF-2, RF-11 |
+| `historyDateSchema`, `historyMonthSchema` | Derivan de los esquemas de Dashboard y rechazan el año cero | RF-2, RF-11 |
 | `historyDayQuerySchema` | `{ date?: string }` | RF-2 |
 | `historyMonthQuerySchema` | `{ month?: string }` | RF-11 |
 
@@ -368,17 +376,17 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 | # | Decisión | Por qué | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
-| D-1 | **Las ventas llegan al Historial como funciones inyectadas:** `historyPlugin` y el servicio reciben `listSales: (db, { from?, to? }) => Promise<Sale[]>` y `findSale: (db, number: number) => Promise<Sale \| null>`, y `app.ts` les pasa `listRegisteredSales` y `findSaleByNumber` de `modules/sales/index.ts`. `findSaleByNumber` se añade a `sales.repository.ts` en US2, junto a `findSaleByDraftId`, y se exporta en la integración de US2. Las pruebas pasan funciones falsas con ventas de `apps/api/test/test-sales.ts` | La exportación de `listRegisteredSales` es de la historia 1 de Ventas y aún no está en `develop`; así la Base común y la API de las historias se prueban sin ella, y `history` no conoce las tablas de ventas (`docs/architecture.md` §4.2, SPEC-003 D-1, SPEC-004 D-1). La búsqueda por número es una lectura de una venta y pertenece a `sales`, que es el dueño de esas tablas | Leer `sales` y `sale_lines` con SQL desde `history`: rompería la frontera entre módulos y duplicaría `toSale`. Buscar la venta con `listRegisteredSales` sin rango y filtrar: lee todas las ventas para devolver una | RF-3, RF-7–RF-9, RF-12 |
+| D-1 | **Las ventas llegan al Historial como funciones inyectadas:** `historyPlugin` y el servicio reciben `listSales: (db, { from?, to? }) => Promise<Sale[]>` y `findSale: (db, number: number) => Promise<Sale \| null>`, y `app.ts` les pasa `listRegisteredSales` y `findSaleByNumber` de `modules/sales/index.ts`. `findSaleByNumber` se añade a `sales.repository.ts` en US2, junto a `findSaleByDraftId`, y se exporta en la integración de US2. Las pruebas pasan funciones falsas con ventas de `apps/api/test/test-sales.ts` | La exportación de `listRegisteredSales` llegó con la historia 1 de Ventas (PR #26), ya fusionada; la Base común y la API de las historias se prueban sin ella, y `history` no conoce las tablas de ventas (`docs/architecture.md` §4.2, SPEC-003 D-1, SPEC-004 D-1). La búsqueda por número es una lectura de una venta y pertenece a `sales`, que es el dueño de esas tablas | Leer `sales` y `sale_lines` con SQL desde `history`: rompería la frontera entre módulos y duplicaría `toSale`. Buscar la venta con `listRegisteredSales` sin rango y filtrar: lee todas las ventas para devolver una | RF-3, RF-7–RF-9, RF-12 |
 | D-2 | **Una ruta por consulta:** `GET /api/history/day` (US1), `GET /api/history/sales/:number` (US2) y `GET /api/history/month` (US3), con la fecha y el mes como parámetros de consulta opcionales | Cada historia se integra y se prueba sola, y el contrato completo se escribe en la Base común. Sin parámetro, la API decide hoy y el mes en curso (RF-2, RF-11) | Una sola ruta con un rango libre `from`/`to`: la interfaz tendría que calcular los límites del día y del mes, que son reglas de la API (principio 3) | RF-2, RF-8, RF-11 |
-| D-3 | **La API calcula las cifras en memoria** con funciones puras propias del Historial (`history.report.ts`: `periodTotals`, `listedSales`, `salesByDay`), y el contrato reutiliza `byPaymentMethodSchema`, `paymentMethodTotalSchema` y `dayTotalSchema` de `dashboard.ts` (exportando `byPaymentMethodSchema`, que ya existía) | Las cifras son las mismas que las del Dashboard, y el contrato las describe una vez. Las funciones de cálculo de 004 (`dashboard.summary.ts`) todavía no existen (son de sus historias) y `history` no puede importar archivos internos de `dashboard`; las del Historial son unas pocas sumas, se prueban sin base y no hacen esperar a 005 por 004. Con 6000 ventas al mes (RNF-3), sumar en memoria tarda milisegundos; el costo está en leerlas, y se mide en Pulido (D-11) | Recibir `summarizeSales` del `index.ts` de `dashboard`: haría depender las historias de 005 de las de 004, y entrega también promedio y productos, que el Historial no muestra. Llevar las sumas a `shared/`: cambiaría el plan de 004 desde 005. Sumar con SQL en una función nueva de `sales`: reparte la regla entre dos módulos; queda como plan B si Pulido no cumple RNF-3 | RF-3, RF-4, RF-7, RF-12, RF-13, RNF-2, RNF-3 |
+| D-3 | **La API calcula las cifras en memoria** con funciones puras propias del Historial (`history.report.ts`: `periodTotals`, `listedSales`, `salesByDay`), y el contrato reutiliza `byPaymentMethodSchema`, `paymentMethodTotalSchema` y `dayTotalSchema` de `dashboard.ts` (exportando `byPaymentMethodSchema`, que ya existía) | Las cifras son las mismas que las del Dashboard, y el contrato las describe una vez. Las funciones de cálculo de 004 (`dashboard.summary.ts`) ya están fusionadas (PR #29), pero `history` no puede importar archivos internos de `dashboard`; las del Historial son unas pocas sumas, se prueban sin base y no hacen esperar a 005 por 004. Con 6000 ventas al mes (RNF-3), sumar en memoria tarda milisegundos; el costo está en leerlas, y se mide en Pulido (D-11) | Recibir `summarizeSales` del `index.ts` de `dashboard`: haría depender las historias de 005 de las de 004, y entrega también promedio y productos, que el Historial no muestra. Llevar las sumas a `shared/`: cambiaría el plan de 004 desde 005. Sumar con SQL en una función nueva de `sales`: reparte la regla entre dos módulos; queda como plan B si Pulido no cumple RNF-3 | RF-3, RF-4, RF-7, RF-12, RF-13, RNF-2, RNF-3 |
 | D-4 | **`shared/calendar.ts` crece con `addDays`, `addMonths`, `daysOfMonth`, `boliviaDayBounds` y `boliviaMonthBounds`**, y la API devuelve hecho todo lo que la interfaz necesita para navegar: `today`, `previousDate`, `nextDate`, `currentMonth`, `previousMonth`, `nextMonth` y el día de una venta (`date`) | Los límites de un día o un mes cualquiera son la misma regla que SPEC-004 puso en `shared/calendar.ts` (`docs/architecture.md` §6.8), y la interfaz no decide fechas. Con los datos de navegación en la respuesta, «Día siguiente» y «Mes siguiente» dependen del hoy de cuando se obtuvieron los datos (RF-2, RF-11), y la interfaz no hace aritmética de fechas | Calcular el día anterior y siguiente en la interfaz con `Date`: depende de la zona de la computadora y contradice §6.8. Un desfase fijo `-04:00`: depende de que Bolivia nunca cambie de hora | RF-2, RF-8, RF-11, RF-13 |
 | D-5 | **`formatTime` en `datetime.ts`** («10:30», en hora de Bolivia, con `formatToParts` como `formatDateTime`) y **`formatRole` en `auth.ts`** («Dueño», «Cajero») | La lista de un día muestra solo la hora (spec, «Datos de una venta en el Historial»), y el rol del momento del registro necesita su nombre en español; una sola forma de mostrarlos, como `formatPrice` y `formatPaymentMethod`. `formatRole` va en `auth.ts` porque el rol es de Acceso | Recortar el texto de `formatDateTime`: depende de su formato exacto. Escribir «Dueño»/«Cajero» en el Historial: una tercera copia de la etiqueta, además de la de `AuthenticatedLayout` | RF-3, RF-8 |
 | D-6 | **`HISTORY_ROLES` en el contrato** (`['owner']`), usado por la API para rechazar con `403` todas las rutas del módulo y por `routes.tsx` como `roles` de las tres rutas del Historial, para no mostrar «Historial de ventas» al cajero | Respuesta de la persona a la duda 1 de `spec.md`: solo el dueño usa el Historial. Si algún día se da al cajero, cambia esta lista (y, si solo ve una parte, el servicio filtra esa parte), sin tocar el resto. Una sola lista para la API y la interfaz, como `DASHBOARD_MONTH_ROLES` (SPEC-004 D-6). Los permisos reales los aplica la API (`docs/architecture.md` §6.6) | Escribir `['owner']` en la interfaz y en la API por separado: dos lugares que pueden quedar distintos | RF-1 |
 | D-7 | **Rutas `/ventas` (día, `?fecha=YYYY-MM-DD`), `/ventas/mes` (`?mes=YYYY-MM`) y `/ventas/:numero` (detalle)**, con `homeLink: 'Historial de ventas'` solo en `/ventas` y `roles: HISTORY_ROLES` en las tres. La consulta vive en la URL; los campos son `<input type="date">` y `<input type="month">` con `max` de la API | `/ventas` quedó reservada para el Historial (SPEC-003 D-11). Con la consulta en la URL, recargar y volver atrás conservan lo consultado (RF-5) y cada consulta se puede abrir directamente en las pruebas. `react-router` prefiere las rutas fijas (`/ventas/nueva`, `/ventas/mes`) a `/ventas/:numero`. Los campos nativos no traen dependencias y se usan con teclado (RNF-4) | Guardar el día o la venta solo en el estado de la página: se pierde al recargar. Un selector de fechas propio o de una biblioteca: más código o una dependencia nueva | RF-1, RF-2, RF-5, RF-8, RF-11, RNF-4 |
 | D-8 | **`parseSaleNumber` en el contrato**, usado por `SaleSearch` (para no buscar con un texto inválido) y por la API (para validar `:number`); los números mayores que `SALE_NUMBER_MAX` responden `404` sin consultar la base, y el mensaje usa el número ya normalizado | Una sola regla de qué es un número válido para la interfaz y la API, como los esquemas de Zod (`docs/architecture.md` §4.4). El número se trata como texto hasta compararlo con el máximo, así que uno de 20 cifras no pierde precisión ni rompe la consulta (spec, «Casos límite») | Validar con `z.coerce.number()`: acepta `'2.5'` y `'1e3'` y pierde precisión con 20 cifras. Responder `400` por encima del máximo: la especificación dice que es un número válido sin venta (RF-9) | RF-9 |
 | D-9 | **`HistoryClientProvider` y escenarios de desarrollo:** como en SPEC-002 a SPEC-004, la interfaz obtiene el cliente de un contexto; `main.tsx` provee el real, también en desarrollo, y el simulado con su selector solo con `?escenarios=historial`, combinable (`?escenarios=acceso,historial`). El cliente simulado devuelve **cifras fijas ya calculadas** de `fixtures.ts` (ventas de los días 23, 24 y 25/10/2026, con hoy el 25, y de septiembre y octubre de 2026), validadas con el contrato, con `asOf` de cada pedido; para un día o un mes sin datos en los fixtures responde vacío, y calcula su navegación (día o mes anterior y siguiente) con una función de `dev/` que nunca llega al build. Sus escenarios son «Con ventas», «Sin ventas», «Sin conexión», «Con error» (`500 INTERNAL_ERROR`), «Sin permiso» (`403 FORBIDDEN` con `HISTORY_MESSAGES.forbidden` en todas las operaciones) y «Lento» (responde a los 1,5 s); en todos, una fecha o un mes futuros responden su `400`, y un número sin venta, su `404` | Permite trabajar la interfaz sin la API (`docs/architecture.md` §4.5) y recorrer todos los estados de RF-1 a RF-13. Las cifras oficiales no se calculan en `dev/`: son fijas. La navegación del cliente simulado solo existe para poder moverse por días en desarrollo | Calcular las cifras en el cliente simulado a partir de ventas falsas: duplicaría la lógica de la API. Un fixture por cada día posible: imposible sin calcular | RF-1–RF-13 |
-| D-10 | **Validación de fechas y meses en el servicio**, con los esquemas del contrato (`boliviaDateSchema`, `boliviaMonthSchema`) y los mensajes propios del Historial (`400 VALIDATION_ERROR` con `message` «La fecha no es válida», «No se pueden consultar fechas futuras», «El mes no es válido» o «No se pueden consultar meses futuros»), sin límite hacia atrás | La especificación pide esos mensajes (RF-2, RF-11), que la interfaz muestra tal cual (`docs/architecture.md` §6.3), en lugar del genérico «Revisa los datos» de `validate`. Sin límite hacia atrás, por la respuesta de la persona a la duda 2; si algún día se fija uno, se añade aquí una comprobación más | Usar `validate` con `fields`: la página tendría que traducir el campo a un mensaje. Inventar un límite hacia atrás | RF-2, RF-11 |
-| D-11 | **Medición de RNF-3** en un despliegue de comprobación con 6000 ventas en un mes y 400 en uno de sus días, cargadas con el script de ventas de prueba de SPEC-004 (`seed:sales`, SPEC-004 T021), y los 200 productos de `seed:menu` (SPEC-002 T034). Si al llegar a Pulido `seed:sales` no está en `develop`, la tarea de Pulido lo crea como indica SPEC-004 D-11 y lo amplía para cargar 400 ventas en un día | RNF-3 fija el volumen. Las ventas con fechas pasadas solo se pueden crear desde el módulo `sales` (SPEC-004 D-11), y reutilizar su script evita un segundo cargador | Registrar las ventas por `POST /api/sales`: quedarían todas con la hora actual. Medir con PGlite: no representa a Neon | RNF-3 |
+| D-10 | **Validación de fechas y meses en el servicio**, con los esquemas del contrato (`historyDateSchema`, `historyMonthSchema`) y los mensajes propios del Historial (`400 VALIDATION_ERROR` con `message` «La fecha no es válida», «No se pueden consultar fechas futuras», «El mes no es válido» o «No se pueden consultar meses futuros»), sin límite hacia atrás | La especificación pide esos mensajes (RF-2, RF-11), que la interfaz muestra tal cual (`docs/architecture.md` §6.3), en lugar del genérico «Revisa los datos» de `validate`. Sin límite hacia atrás, por la respuesta de la persona a la duda 2; si algún día se fija uno, se añade aquí una comprobación más | Usar `validate` con `fields`: la página tendría que traducir el campo a un mensaje. Inventar un límite hacia atrás | RF-2, RF-11 |
+| D-11 | **Medición de RNF-3** en un despliegue de comprobación con 6000 ventas en un mes y 400 en uno de sus días, cargadas con el script de ventas de prueba de SPEC-004 (`seed:sales`, SPEC-004 T021), y los 200 productos de `seed:menu` (SPEC-002 T034). El cargador está fusionado en `develop` (PR #33); Pulido lo reutiliza y lo amplía para cargar 400 ventas en un día | RNF-3 fija el volumen. Las ventas con fechas pasadas solo se pueden crear desde el módulo `sales` (SPEC-004 D-11), y reutilizar su script evita un segundo cargador | Registrar las ventas por `POST /api/sales`: quedarían todas con la hora actual. Medir con PGlite: no representa a Neon | RNF-3 |
 | D-12 | **La lista de un día viaja completa y sin líneas** (`listedSaleSchema`), y el detalle se pide aparte | La lista muestra todas las ventas del día (RF-3, sin paginar) y no necesita las líneas; 400 ventas sin líneas son unas decenas de kilobytes. El detalle sale de una consulta por número, que sirve también a la búsqueda (RF-9) | Enviar las ventas con sus líneas para abrir el detalle sin pedirlo: hasta 30 líneas por venta en cada carga del día. Paginar: la especificación pide la lista completa | RF-3, RF-8, RNF-3 |
 
 ### 7.1 Dependencias
@@ -439,9 +447,9 @@ El reloj de la API de E2E empieza el 24/10/2026 a las 08:00 de Bolivia (`e2e-ser
 | --- | --- |
 | RNF-1 | Las pruebas de componentes y E2E comparan los textos en español tal como los define la especificación |
 | RNF-2 | Unitarias de `periodTotals` y `salesByDay`: sumas por medio de pago y por día iguales al total; 6000 ventas de 30 líneas de 99 unidades a Bs 1000,00 dan el total exacto (1 782 000 000 000 centavos, dentro de `Number.MAX_SAFE_INTEGER`) |
-| RNF-3 | Medición manual en Pulido (D-11): con 6000 ventas en un mes, 400 de ellas en un día, y el servicio reactivado, 20 aperturas de ese día, 20 de ese mes y 20 detalles; al menos 19 de cada 20 por debajo de 2 s. El resultado se anota en el PR de pulido |
+| RNF-3 | Medición automatizada de la interfaz completa en Render y Neon de comprobación (T028), conservando las muestras reales y los commits desplegados: con 6000 ventas en un mes, 400 de ellas en un día, y el servicio reactivado, 20 aperturas de ese día, 20 de ese mes y 20 detalles; al menos 19 de cada 20 por debajo de 2 s. El resultado se anota en el PR de pulido |
 | RNF-4 | Componentes y E2E: cada opción del Historial se alcanza con Tab y se elige con Intro |
-| Criterios de 15 s | Medición manual en Pulido, junto con RNF-3 |
+| Criterios de 15 s | Pendientes de comprobación humana (T028-H); no se ejecutan recorridos manuales en este desarrollo ni se acredita una ejecución automatizada como prueba humana |
 
 ### 8.4 Datos
 
@@ -494,3 +502,26 @@ El 2026-10-25 la persona respondió las dos dudas de `spec.md` con las decisione
 | `HISTORY_ROLES` (`['owner']`) pasa de provisional a respuesta de la persona | encabezado, §6.1, D-6; `packages/contracts/src/history.ts` (comentario y nombre de su prueba) |
 | Sin límite hacia atrás, confirmado | encabezado, D-10 |
 | Las historias ya no esperan respuestas a dudas abiertas | `tasks.md`, «Cómo leer estas tareas» y fase 3 |
+
+## 12. Revisión delegada para la implementación (2026-10-26)
+
+- **Decisión delegada:** reutilizar las dependencias fusionadas: PR #25 (definición), #26 (Ventas US1), #29 (Dashboard US1 y `test-sales.ts`) y #33 (`seed:sales`). Motivo: sus implementaciones ya están en `origin/develop`; se descarta mantener dependencias como pendientes.
+- **Decisión delegada:** T028 automatiza las mediciones sobre la interfaz completa del entorno de comprobación, con muestras reales, sin modificar cuentas ni datos existentes. T028-H conserva pendientes los criterios humanos de 15 segundos y la acreditación desde la computadora del local de RNF-3. Motivo: instrucción de la persona; se descarta presentar automatización como prueba humana. La documentación depende del desarrollo integrado, y la verificación final informa los criterios pendientes como impedimento para acreditar el cierre completo.
+
+- **Decisión delegada (T010):** interpretar el desfase de `Intl` también cuando contiene segundos y convertirlo a milisegundos al obtener las 00:00. Motivo: las fechas antiguas válidas como 1900-01-01 deben poder consultarse (RF-2, D-10); se descarta un desfase fijo moderno o limitar las fechas a las posteriores a la primera venta. Prueba de regresión del servicio y pruebas existentes del calendario.
+
+- **Decisión delegada (T014):** al abrir el día sin `fecha`, reemplazar esa entrada de la URL por la fecha devuelta por la API, conservando los otros parámetros. Motivo: recargar y actualizar tras medianoche deben conservar el día consultado (RF-2, RF-5); se descarta seguir consultando hoy sin fecha en cada actualización. El reemplazo no añade un paso al historial del navegador.
+
+## 13. Corrección del calendario (T030, verificación de US1)
+
+**Decisión delegada:** sumar días y meses con `setUTCFullYear` sobre un instante UTC, sin la conversión especial de años 0–99 de `Date.UTC`; rellenar a cuatro cifras el año que devuelve `Intl`. El cliente simulado aplica la misma corrección. Motivo: RF-2/RF-3 requieren rangos de un solo día y navegación fiel al año; se descarta desplazar a 1900 los años pequeños.
+
+**Cambio de contrato durante US1:** `history.ts` define `HISTORY_MIN_DATE = 0001-01-01`, `HISTORY_MIN_MONTH = 0001-01`, `historyDateSchema` y `historyMonthSchema`, que conservan el formato de cuatro cifras y rechazan el año cero. Solo el contrato de Historial usa estos esquemas; Dashboard conserva su contrato. `previousDate` y `previousMonth` admiten null si y solo si se consulta el extremo inferior. La interfaz deshabilita el retroceso cuando recibe null y fija el mínimo del campo con las constantes del contrato; no calcula fechas. Los meses de US3 deberán aplicar esta misma regla. Motivo: una prueba real de Chromium confirma que sus campos de fecha no representan el año cero; no es un límite de antigüedad del negocio. Se descarta devolver fechas negativas, saturar la navegación o introducir un recorte de años con ventas.
+
+Regresiones: años 0001–0099, salto 0099→0100, febrero de 0012 y 0100, límites inferiores de día/mes, exclusión de una venta de 1950 al consultar 0099 y paridad del cliente simulado. QA de la aclaración y análisis de consistencia: sin RF huérfanos, sin tareas huérfanas, todas las historias conservan integración/E2E, sin conflictos con los seis principios ni aclaraciones abiertas; el hallazgo del verificador se cubre con T030.
+
+## 14. Primer instante local de cada día (T031)
+
+**Decisión delegada:** sustituir la aproximación de desfase al mediodía de T010 por la búsqueda del primer instante con la fecha local solicitada, usando Intl y bisección a precisión de milisegundos en un margen UTC de 48 horas a cada lado. La comparación usa ordinales de calendario UTC, conserva los años pequeños y considera la era para el límite de 0001. Motivo: Bolivia omitió la medianoche del 15/10/1931; ese día empieza en 1931-10-15T04:32:36Z (01:00 local), no con el desfase observado al mediodía. Se descarta un desfase fijo, extrapolar el del mediodía o restringir las fechas antiguas. Sin dependencias nuevas ni cambio de contrato.
+
+Regresiones: ventas de ambos lados del salto en servicio y API real/PGlite; límites del 14, 15 y 16 de octubre de 1931 en cuatro zonas del proceso; recorrido automatizado de todos los días de 1850–1949 contra Intl, verificando que el milisegundo anterior todavía es del día previo. Se mantiene la precisión de segundos históricos y el extremo de año 0001. Análisis: T031 cubre RF-2/RF-3 y el segundo hallazgo, sin tareas huérfanas, contradicciones, dudas abiertas ni conflictos constitucionales.

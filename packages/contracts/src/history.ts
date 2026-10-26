@@ -47,6 +47,12 @@ export function parseSaleNumber(text: string): string | null {
 const centsSchema = z.int().min(0);
 const countSchema = z.int().min(0);
 
+// Formato del calendario civil de los campos nativos: cuatro cifras y sin año cero.
+export const HISTORY_MIN_DATE = '0001-01-01';
+export const HISTORY_MIN_MONTH = '0001-01';
+export const historyDateSchema = boliviaDateSchema.refine((date) => date >= HISTORY_MIN_DATE);
+export const historyMonthSchema = boliviaMonthSchema.refine((month) => month >= HISTORY_MIN_MONTH);
+
 // Una fila de la lista de un día (RF-3, D-12): la venta tal como se registró, sin sus líneas.
 export const listedSaleSchema = saleSchema.omit({ lines: true }).strict();
 export type ListedSale = z.infer<typeof listedSaleSchema>;
@@ -62,12 +68,16 @@ const totalsShape = {
 // GET /api/history/day (US1; RF-2 a RF-5). `nextDate` es null si y solo si el día es hoy.
 export const dayHistorySchema = z
   .object({
-    date: boliviaDateSchema,
-    today: boliviaDateSchema,
-    previousDate: boliviaDateSchema,
-    nextDate: boliviaDateSchema.nullable(),
+    date: historyDateSchema,
+    today: historyDateSchema,
+    previousDate: historyDateSchema.nullable(),
+    nextDate: historyDateSchema.nullable(),
     ...totalsShape,
     sales: z.array(listedSaleSchema),
+  })
+  .refine((day) => (day.previousDate === null) === (day.date === HISTORY_MIN_DATE), {
+    error: 'El día anterior es null solo en el primer día del calendario',
+    path: ['previousDate'],
   })
   .refine((day) => day.salesCount === day.sales.length, {
     error: 'El número de ventas es el de la lista',
@@ -86,12 +96,16 @@ export type DayHistory = z.infer<typeof dayHistorySchema>;
 // GET /api/history/month (US3; RF-11 a RF-13). `nextMonth` es null si y solo si es el mes en curso.
 export const monthHistorySchema = z
   .object({
-    month: boliviaMonthSchema,
-    currentMonth: boliviaMonthSchema,
-    previousMonth: boliviaMonthSchema,
-    nextMonth: boliviaMonthSchema.nullable(),
+    month: historyMonthSchema,
+    currentMonth: historyMonthSchema,
+    previousMonth: historyMonthSchema.nullable(),
+    nextMonth: historyMonthSchema.nullable(),
     ...totalsShape,
     days: z.array(dayTotalSchema).min(1).max(31),
+  })
+  .refine((month) => (month.previousMonth === null) === (month.month === HISTORY_MIN_MONTH), {
+    error: 'El mes anterior es null solo en el primer mes del calendario',
+    path: ['previousMonth'],
   })
   .refine((month) => month.month <= month.currentMonth, {
     error: 'El mes no puede ser posterior al mes en curso',
@@ -105,7 +119,7 @@ export type MonthHistory = z.infer<typeof monthHistorySchema>;
 
 // GET /api/history/sales/:number (US2; RF-8, RF-9): la venta tal como se registró y su día en
 // Bolivia, para «Volver» (D-4).
-export const historySaleResponseSchema = z.object({ sale: saleSchema, date: boliviaDateSchema });
+export const historySaleResponseSchema = z.object({ sale: saleSchema, date: historyDateSchema });
 export type HistorySaleResponse = z.infer<typeof historySaleResponseSchema>;
 
 // Parámetros de consulta: la fecha y el mes llegan como texto y los valida el servicio, con los
