@@ -174,8 +174,11 @@ Requisitos: Node 24 y npm 11.
 | Medir acceso en el despliegue de prueba³ | `npm run measure:access` |
 | Medir menú en el despliegue de prueba³ | `npm run measure:menu` |
 | Medir ventas en el despliegue de prueba³ | `npm run measure:sales` |
+| Medir Dashboard en el despliegue de prueba³ | `npm run measure:dashboard` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
 
 ³ Mediciones interactivas que ejecuta la persona en su terminal, fuera de las comprobaciones automáticas. Acceso (T043) pide una contraseña sin eco y después un ingreso manual en Chromium. Menú (T035) y Ventas (T026) piden ingresar directamente en Chromium, miden tres series de veinte operaciones y cronometran una creación o venta manual. No reciben credenciales por chat, archivos ni argumentos. Las comprobaciones automáticas usan `npm run test:measure` con datos ficticios.
+
+Dashboard (T022) pide ingresar directamente en Chromium con cada rol, mide veinte aperturas y veinte actualizaciones por rol y muestra controles para que la persona cronometre su propio recorrido e identificación del total de hoy. No automatiza el recorrido humano ni recibe credenciales fuera del navegador.

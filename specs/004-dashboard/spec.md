@@ -175,7 +175,7 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 
 ## 8. Criterios de finalización
 
-- El dueño o el cajero ve el total vendido hoy, separado en efectivo y QR, en menos de 10 segundos desde la pantalla inicial.
+- El dueño o el cajero identifica el total vendido hoy, separado en efectivo y QR, desde la pantalla inicial. El objetivo del recorrido manual es menos de 10 segundos; un exceso puede aceptarse expresamente por la persona, conservando el tiempo real, su incumplimiento del objetivo y la aceptación documentada. Esta aceptación no modifica RNF-3 ni sus series automáticas.
 - En el 100 % de los resúmenes, el total vendido es la suma exacta de los totales de sus ventas, los importes por medio de pago suman el total vendido y, en el del mes, las filas por día suman el total del mes.
 - Ninguna venta se cuenta en un día o un mes distinto del de su fecha y hora de registro en hora de Bolivia.
 - Ninguna sesión ve cifras del resumen de ventas que su rol no puede ver según «Usuarios».
@@ -186,6 +186,10 @@ Como **dueño**, quiero **ver cuánto se vendió en lo que va del mes, cómo se 
 Ninguna.
 
 ## 10. Aclaraciones
+
+### 2026-10-26
+
+- **Decisión de la persona:** «Listo acepta el tiempo del recorrido manual asi se exceda». Se acepta el exceso del recorrido manual de esta comprobación, manteniendo la duración original en la evidencia. El objetivo de 10 segundos no se presenta como cumplido si se excede; la aceptación expresa permite cerrar ese criterio manual. Motivo: instrucción explícita de la persona. Alternativa descartada: alterar el tiempo o declarar cumplido el objetivo original. Aplicado en §8; RNF-3 permanece sin cambios.
 
 ### 2026-10-24
 

@@ -56,48 +56,74 @@ Rama: `feat/004-dashboard-definicion`.
 
 Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición de 004 y `feat/003-ventas-us1`.
 
-- [ ] **T009 [api] [P] [US1]** Escribir en `dashboard.summary.ts` `summarizeSales`: total, número de ventas, promedio redondeado, importes por medio de pago y productos más vendidos; y `apps/api/test/test-sales.ts` para construir ventas de prueba (plan §5.2, §8.4; RF-3, RF-4, RF-5, RF-8, RNF-2). Depende de: T003
+- [x] **T009 [api] [P] [US1]** Escribir en `dashboard.summary.ts` `summarizeSales`: total, número de ventas, promedio redondeado, importes por medio de pago y productos más vendidos; y `apps/api/test/test-sales.ts` para construir ventas de prueba (plan §5.2, §8.4; RF-3, RF-4, RF-5, RF-8, RNF-2). Depende de: T003
   Hecho cuando: las pruebas unitarias cubren el ejemplo de §4 del plan; un período sin ventas (`null`, ceros y sin productos); los promedios 4550/3 → 1517 y 75/2 → 38; `cash` y `qr` siempre en ese orden y sumando el total; productos ordenados por unidades, importe y nombre (`compareMenuNames`), como máximo 5; un producto renombrado contado una vez con el nombre de su venta de mayor número; dos productos con el mismo nombre separados; un precio cambiado sumando cada venta con su precio; y 6000 ventas de 30 líneas de 99 unidades a 100000 centavos con el total exacto.
-- [ ] **T010 [api] [P] [US1]** Escribir en `dashboard.service.ts` el resumen de hoy (`today`) con `listSales` inyectada y el reloj (plan §5.4, D-1; RF-2, RF-6, RF-8). Depende de: T004, T009
+- [x] **T010 [api] [P] [US1]** Escribir en `dashboard.service.ts` el resumen de hoy (`today`) con `listSales` inyectada y el reloj (plan §5.4, D-1; RF-2, RF-6, RF-8). Depende de: T004, T009
   Hecho cuando: las pruebas, con un reloj falso y una función de ventas falsa, comprueban que se pide el rango de `boliviaDayRange`, que la respuesta cumple `todaySummarySchema` con la `date` de Bolivia y `asOf` del reloj, y que tras la medianoche de Bolivia el resumen es el del día nuevo.
-- [ ] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession`, para el dueño y el cajero; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2; RF-1, RF-8). Depende de: T010
+- [x] **T011 [api] [P] [US1]** Escribir `dashboard.routes.ts` con `dashboardPlugin` y `GET /api/dashboard/today` con `requireSession`, para el dueño y el cajero; exportar `dashboardPlugin` desde `modules/dashboard/index.ts` (plan §5.4, §6.2; RF-1, RF-8). Depende de: T010
   Hecho cuando: las pruebas con `app.inject`, PGlite y una función de ventas falsa cubren `200` con sesión de dueño y con sesión de cajero, `401` sin sesión sin llamar a la función de ventas, y que la ruta no acepta `POST`.
-- [ ] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007, T024, T027
+- [x] **T012 [web] [P] [US1]** Escribir `state/useDashboardSummaries.ts` con el resumen de hoy: carga al montar, «Actualizar», `loading` sin borrar los datos anteriores, sin conexión o con un error inesperado conservando los datos (plan §5.5, §6.3; RF-1, RF-6, RF-7). Depende de: T007, T024, T027
   Hecho cuando: las pruebas del hook, con el cliente simulado, cubren la carga inicial, «Actualizar» con los datos anteriores visibles mientras carga, el escenario sin conexión tras una carga correcta, un `500 INTERNAL_ERROR` («Ocurrió un error. Inténtalo de nuevo») con los datos conservados, el de sin permiso (el resumen de hoy se muestra) y que no hay recargas automáticas.
-- [ ] **T013 [web] [P] [US1]** Escribir `components/counts.ts` y `components/PeriodSummaryView.tsx`: total con `formatPrice`, «N venta(s)», promedio o «—», los dos medios de pago con `formatPaymentMethod` y los productos más vendidos con clave `productId`, o el aviso de período sin ventas que recibe (plan §5.5; RF-3, RF-4, RF-5, RNF-1). Depende de: T007
+- [x] **T013 [web] [P] [US1]** Escribir `components/counts.ts` y `components/PeriodSummaryView.tsx`: total con `formatPrice`, «N venta(s)», promedio o «—», los dos medios de pago con `formatPaymentMethod` y los productos más vendidos con clave `productId`, o el aviso de período sin ventas que recibe (plan §5.5; RF-3, RF-4, RF-5, RNF-1). Depende de: T007
   Hecho cuando: las pruebas de componente muestran tal como llegan los resúmenes de `fixtures.ts`: «Bs 45,50», «2 ventas», «Bs 22,75», «Efectivo: Bs 25,00 · 1 venta», «QR: Bs 20,50 · 1 venta», «Café americano · 3 unidades · Bs 37,50», «Empanada · 1 unidad · Bs 8,00»; el resumen vacío con «Bs 0,00», «0 ventas», «—» y el aviso; y dos productos con el mismo nombre en dos filas.
-- [ ] **T014 [web] [P] [US1]** Escribir `TodaySummarySection.tsx` y `DashboardPage.tsx`: «Resumen de ventas», «Hoy · [fecha]» con `formatDate`, «Datos al …» con `formatDateTime`, «Actualizar», «Cargando…», «Todavía no hay ventas hoy» y el aviso sin conexión o con error (plan §5.5; RF-1, RF-2, RF-5, RF-6, RF-7, RNF-4). Depende de: T012, T013, T026
+- [x] **T014 [web] [P] [US1]** Escribir `TodaySummarySection.tsx` y `DashboardPage.tsx`: «Resumen de ventas», «Hoy · [fecha]» con `formatDate`, «Datos al …» con `formatDateTime`, «Actualizar», «Cargando…», «Todavía no hay ventas hoy» y el aviso sin conexión o con error (plan §5.5; RF-1, RF-2, RF-5, RF-6, RF-7, RNF-4). Depende de: T012, T013, T026
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada escenario de `dev/`, «Actualizar» deshabilitado mientras carga, «Actualizar» con Tab e Intro, y que la página no hace cuentas (muestra los valores de los fixtures tal cual).
-- [ ] **T015 [integración] [US1]** Registrar `dashboardPlugin` en `app.ts` con `listRegisteredSales` de `modules/sales/index.ts` y la sesión de SPEC-001, y comprobar que la aplicación usa el cliente real del dashboard sin `?escenarios=dashboard` (plan D-1; RF-1, RF-2, RF-8). Depende de: T011, T014, SPEC-003 T015, SPEC-003 T020, SPEC-002 T018
+- [x] **T015 [integración] [US1]** Registrar `dashboardPlugin` en `app.ts` con `listRegisteredSales` de `modules/sales/index.ts` y la sesión de SPEC-001, y comprobar que la aplicación usa el cliente real del dashboard sin `?escenarios=dashboard` (plan D-1; RF-1, RF-2, RF-8). Depende de: T011, T014, SPEC-003 T015, SPEC-003 T020, SPEC-002 T018
   Hecho cuando: una prueba de integración con `buildApp` registra dos ventas con `POST /api/sales` en días distintos (reloj falso) y `GET /api/dashboard/today` cuenta solo la de hoy, sin modificar ninguna venta; la interfaz en `vite preview` muestra el resumen de hoy contra la API de E2E; la pantalla inicial muestra «Resumen de ventas» al dueño y al cajero; y `npm test` sigue pasando.
-- [ ] **T016 [integración] [US1]** Escribir `e2e/dashboard-us1-resumen-hoy.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-8, RNF-4). Depende de: T015, SPEC-002 T023
+- [x] **T016 [integración] [US1]** Escribir `e2e/dashboard-us1-resumen-hoy.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-8, RNF-4). Depende de: T015, SPEC-002 T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: ver el resumen del mes en curso (P2)
 
 Rama: `feat/004-dashboard-us2`.
 
-- [ ] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
+- [x] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
-- [ ] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
+- [x] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
   Hecho cuando: las pruebas comprueban que se pide el rango de `boliviaMonthRange`, que la respuesta cumple `monthSummarySchema` con el `month` y los días del 1 a hoy, y que la ruta responde `200` al dueño, `403 FORBIDDEN` con «No tienes permiso para ver el resumen del mes» al cajero sin llamar a la función de ventas, y `401` sin sesión.
-- [ ] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy, solo con los roles de `DASHBOARD_MONTH_ROLES`, y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate`; un `403` del mes muestra su mensaje en lugar de la sección, sin cifras del mes (plan §5.5, D-6, D-7; RF-6, RF-7, RF-9, RF-10). Depende de: T014
+- [x] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy, solo con los roles de `DASHBOARD_MONTH_ROLES`, y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate`; un `403` del mes muestra su mensaje en lugar de la sección, sin cifras del mes (plan §5.5, D-6, D-7; RF-6, RF-7, RF-9, RF-10). Depende de: T014
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran «Octubre de 2026» con sus cifras y sus días tal como llegan («01/10/2026 · Bs 8,00 · 1 venta», «02/10/2026 · Bs 0,00 · 0 ventas»), el mes vacío con su aviso, la sección del mes después de la de hoy, que con una sesión de cajero no se pide el mes ni aparece su sección, que el escenario sin permiso muestra «No tienes permiso para ver el resumen del mes» con el resumen de hoy visible, y que «Actualizar» y sin conexión se aplican a los dos resúmenes.
-- [ ] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
+- [x] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
+
+**Corrección de integración tras el squash merge de US1:**
+
+- [x] **T034 [integración] [US2]** Integrar `origin/develop` mediante merge en la rama de US2 y resolver las adiciones duplicadas de US1, conservando las ampliaciones del mes y las pruebas de ambas historias (RF-1 a RF-10). Depende de: T020
+  Hecho cuando: no quedan conflictos ni cambios funcionales respecto a la implementación verificada de US2, pasan las comprobaciones existentes y el PR se publica actualizado hacia `develop`.
 
 ## Fase 5 — Pulido
 
 Rama: `feat/004-dashboard-pulido`.
 
-- [ ] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
+- [x] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas repartidas en los días del mes que cumplen `saleSchema` y suman lo esperado, y otra comprueba que con `NODE_ENV=production` no escribe nada.
-- [ ] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las 6000 ventas con `seed:sales`, y medir RNF-3 y el criterio de 10 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T021, SPEC-002 T034
-  Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, el dueño y el cajero ven el total de hoy en menos de 10 segundos desde la pantalla inicial, y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T022
+- [x] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y la base indicada por la persona (`docs/architecture.md` §6.5), usar su menú de comprobación de al menos 200 productos vigentes, completar 6000 ventas del mes con `seed:sales -- --complete` (T028, T029) y documentar los volúmenes reales. Medir RNF-3 y los recorridos humanos según plan §8.3 y spec §8. Requiere el ingreso y los recorridos manuales de la persona. Depende de: T021, T032, SPEC-002 T034
+  Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, los recorridos manuales del dueño y cajero quedan cronometrados con objetivo de 10 segundos o con su exceso aceptado expresamente según spec §8, y los resultados reales y la aceptación quedan anotados en la descripción del PR de pulido. La persona aceptó el exceso manual el 2026-10-26; RNF-3 sigue exigido sin cambios.
+- [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Antecedente: la persona autorizó hacer T023 antes de T022, documentando entonces la medición pendiente en el README y en el PR. T022 se cerró posteriormente con su evidencia real y la aceptación expresa del exceso manual.
   Hecho cuando: el README describe esos tres puntos.
 
+**Corrección de Pulido autorizada para usar la base existente:**
+
+- [x] **T028 [api]** Añadir a `seed:sales` el modo explícito `--complete` para completar 6000 ventas del mes sin modificar datos existentes, con al menos 200 productos vigentes; conservar el modo estricto y el rechazo en producción (plan §7.1; RNF-3). Depende de: T021
+  Hecho cuando: las pruebas comprueban que conserva las ventas y los productos previos, añade solo las ventas que faltan, no vuelve a escribir al alcanzar 6000, rechaza más de 6000 y sigue bloqueado en producción; los números son correlativos y la carga sigue siendo atómica. T022 usa este modo por instrucción expresa de la persona y registra los volúmenes reales.
+
+- [x] **T029 [api]** Enviar la carga `--complete` en lotes con parámetros, reservando los números en la misma transacción, para evitar un viaje de red por campo o línea al cargar Neon (RNF-3; plan §7.1). Depende de: T028
+  Hecho cuando: las pruebas de integración comprueban ventas válidas, números correlativos y reversión de ventas, líneas y contador; el modo estricto conserva su comportamiento y las ventas anteriores siguen intactas.
+
+- [x] **T030 [integración]** Preparar `measure:dashboard` con tests del medidor y salida de muestras sin secretos, para ejecutar las series de T022 y cronometrar los dos recorridos manuales desde la computadora del local (RNF-3, criterio de 10 segundos; plan §7.1). Depende de: T029
+  Hecho cuando: los tests rechazan volúmenes y tiempos inválidos, aplican 19/20 y límites estrictos de 2 s y 10 s, excluyen un calentamiento por operación, preservan las muestras y comprueban que los recorridos humanos y las credenciales no son automatizados; el comando queda disponible en Windows para ambas herramientas.
+
+- [x] **T031 [integración]** Corregir las ramas del Blueprint de comprobación y detectar una web anterior al Dashboard antes de abrir Chromium en el medidor (RNF-3; plan §7.1). Depende de: T030
+  Hecho cuando: el medidor rechaza bundles sin las dos secciones antes de abrir el navegador, acepta el bundle actual sin leer credenciales y rechaza recursos de otro origen; ambos servicios del Blueprint apuntan a la rama de Pulido de Dashboard. El despliegue real y sus mediciones continúan en T022.
+
+- [x] **T032 [integración]** Conservar la primera medición, documentar la aceptación expresa del exceso manual y controlar foco/visibilidad en el medidor antes de repetir solo las series del cajero (RNF-3; spec §8; plan §7.1). Depende de: T031
+  Hecho cuando: los tests rechazan muestras con la página oculta o sin foco, incluso si lo recupera después; el navegador se trae al frente antes del cronómetro, se conservan los informes originales y la aceptación humana no cambia la evaluación automática ni las duraciones.
+
+- [x] **T033 [integración]** Corregir las referencias documentales desactualizadas a T022 que señaló el verificador: actualizar el cierre en README y conservar la excepción de T023 como antecedente histórico, sin afirmar que T022 sigue pendiente (RF-1 a RF-10, coherencia del handoff). Depende de: T022
+  Hecho cuando: README y tasks.md coinciden con el informe real y con la casilla marcada de T022; no se modifican mediciones, criterios ni código funcional y las comprobaciones existentes siguen en verde.
+
 ## Cobertura de RF
+
 
 | RF | Tareas |
 | --- | --- |
