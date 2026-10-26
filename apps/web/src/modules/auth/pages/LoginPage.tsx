@@ -3,6 +3,8 @@ import { LoginForm } from '../components/LoginForm.tsx';
 import { useSession } from '../components/useSession.ts';
 import type { Role } from '@kofi/contracts';
 import { returnTo } from '../api/return-to.ts';
+import { WeaveStrip } from '../../../shared/components/WeaveStrip.tsx';
+import './LoginPage.css';
 
 export function LoginPage({
   canView = (_role, path) => path === '/',
@@ -13,25 +15,43 @@ export function LoginPage({
   const navigate = useNavigate();
   const location = useLocation();
   const notice: unknown = location.state?.notice;
-  if (checking) return <p role="status">Comprobando sesión…</p>;
-  if (user) return <Navigate to="/" replace />;
+  if (!checking && user) return <Navigate to="/" replace />;
   return (
-    <main>
-      <h1>Ingresar</h1>
-      {typeof notice === 'string' && notice && <p role="alert">{notice}</p>}
-      <LoginForm
-        client={client}
-        onSuccess={(signedInUser) => {
-          const target = returnTo.take();
-          acceptSession(signedInUser);
-          navigate(
-            target?.userId === signedInUser.id && canView(signedInUser.role, target.path)
-              ? target.path
-              : '/',
-            { replace: true },
-          );
-        }}
-      />
-    </main>
+    <div className="login">
+      <div className="login__brand">
+        <p className="login__name">Kofi POS</p>
+      </div>
+      <WeaveStrip orientation="vertical" />
+      <WeaveStrip orientation="horizontal" />
+      <main className="login__main">
+        {checking ? (
+          <p role="status" className="login__checking">
+            Comprobando sesión…
+          </p>
+        ) : (
+          <div className="login__content">
+            <h1>Ingresar</h1>
+            {typeof notice === 'string' && notice && (
+              <p role="alert" className="notice">
+                {notice}
+              </p>
+            )}
+            <LoginForm
+              client={client}
+              onSuccess={(signedInUser) => {
+                const target = returnTo.take();
+                acceptSession(signedInUser);
+                navigate(
+                  target?.userId === signedInUser.id && canView(signedInUser.role, target.path)
+                    ? target.path
+                    : '/',
+                  { replace: true },
+                );
+              }}
+            />
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
