@@ -30,8 +30,11 @@ export function startOfBoliviaDay(date: string): Date {
   const zoneName = offsetFormat
     .formatToParts(new Date(`${date}T12:00:00Z`))
     .find((part) => part.type === 'timeZoneName')!.value;
-  const offset = zoneName.slice('GMT'.length) || '+00:00';
-  return new Date(`${date}T00:00:00${offset}`);
+  const offset = zoneName.slice('GMT'.length);
+  const [hours = 0, minutes = 0, seconds = 0] = offset.slice(1).split(':').map(Number);
+  const offsetSeconds = (hours * 3600 + minutes * 60 + seconds) * (offset.startsWith('-') ? -1 : 1);
+  // Los desfases históricos pueden incluir segundos, que Date no acepta en un sufijo ISO.
+  return new Date(new Date(`${date}T00:00:00Z`).getTime() - offsetSeconds * 1000);
 }
 
 export interface BoliviaDayRange {
