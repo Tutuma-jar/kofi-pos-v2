@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { todaySummarySchema } from '@kofi/contracts';
+import { todaySummarySchema, monthSummarySchema, DASHBOARD_MESSAGES } from '@kofi/contracts';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../app.ts';
 import { authPlugin, createAccountsService } from '../auth/index.ts';
@@ -67,5 +67,27 @@ describe('rutas del dashboard (RF-1, RF-8)', () => {
       ).statusCode,
     ).toBe(404);
     expect(listSales).not.toHaveBeenCalled();
+  });
+  it('entrega el mes al dueño y rechaza al cajero antes de leer ventas (RF-9, RF-10)', async () => {
+    const denied = await app.inject({
+      url: '/api/dashboard/month',
+      headers: { cookie: cookies.cashier! },
+    });
+    expect(denied.statusCode).toBe(403);
+    expect(denied.json()).toEqual({
+      error: { code: 'FORBIDDEN', message: DASHBOARD_MESSAGES.forbiddenMonth },
+    });
+    expect((await app.inject('/api/dashboard/month')).statusCode).toBe(401);
+    expect(listSales).not.toHaveBeenCalled();
+    const allowed = await app.inject({
+      url: '/api/dashboard/month',
+      headers: { cookie: cookies.owner! },
+    });
+    expect(allowed.statusCode).toBe(200);
+    expect(monthSummarySchema.parse(allowed.json())).toMatchObject({
+      month: '2026-10',
+      salesCount: 1,
+    });
+    expect(listSales).toHaveBeenCalledOnce();
   });
 });
