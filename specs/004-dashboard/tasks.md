@@ -90,7 +90,7 @@ Rama: `feat/004-dashboard-us2`.
 
 Rama: `feat/004-dashboard-pulido`.
 
-- [ ] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
+- [x] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas repartidas en los días del mes que cumplen `saleSchema` y suman lo esperado, y otra comprueba que con `NODE_ENV=production` no escribe nada.
 - [ ] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las 6000 ventas con `seed:sales`, y medir RNF-3 y el criterio de 10 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T021, SPEC-002 T034
   Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, el dueño y el cajero ven el total de hoy en menos de 10 segundos desde la pantalla inicial, y los resultados quedan anotados en la descripción del PR de pulido.

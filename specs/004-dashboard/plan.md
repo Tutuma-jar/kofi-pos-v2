@@ -300,6 +300,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 ### 7.1 Dependencias
 
+**Decisión delegada de T021 (2026-10-26):** la carga de comprobación requiere una base sin ventas, exactamente 200 productos vigentes y una cuenta existente (prefiere cajero). En una sola transacción bloquea el contador, impide repetir o ejecutar dos cargas a la vez y genera 6000 ventas repartidas del día 1 a hoy, sin fechas futuras, alternando efectivo y QR y cantidades de 1 a 3. Motivo: reproducir el volumen de RNF-3 sin borrar ni duplicar datos y con importes calculados desde el menú de prueba. Alternativa descartada: añadir ventas a una base con datos previos, porque el volumen y los resultados dejarían de ser reproducibles. No cambia el contrato ni las reglas de ventas reales.
+
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
 
 ## 8. Estrategia de tests
