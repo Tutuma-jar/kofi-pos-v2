@@ -80,7 +80,7 @@ Rama: `feat/005-historial-us2`.
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran tal cual el detalle de los fixtures con sus líneas en orden; «Volver» lleva al día de la venta; un número sin venta muestra «No existe la venta N.º 99»; los escenarios «Sin conexión», «Con error», «Sin permiso» y «Lento» se ven como en el día; una fila de la lista abre su detalle; y todo se alcanza con Tab y se elige con Intro.
 - [x] **T021 [integración] [US2]** Exportar `findSaleByNumber` desde `modules/sales/index.ts` y pasarlo a `historyPlugin` en `app.ts` (plan D-1; RF-7, RF-8). Depende de: T015, T017, T018, T020
   Hecho cuando: una prueba de integración con `buildApp` registra una venta con `POST /api/sales`, cambia el precio de un producto y elimina la cuenta que la registró, y `GET /api/history/sales/:number` devuelve la venta con los precios, el nombre y el rol del registro; y `npm test` sigue pasando.
-- [ ] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
+- [x] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
 - [ ] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
