@@ -3,7 +3,7 @@ import cookie from '@fastify/cookie';
 import { registerErrorHandler } from './shared/http/errors.ts';
 import { authPlugin } from './modules/auth/index.ts';
 import { getCurrentMenu, menuPlugin } from './modules/menu/index.ts';
-import { salesPlugin, listRegisteredSales } from './modules/sales/index.ts';
+import { salesPlugin, listRegisteredSales, findSaleByNumber } from './modules/sales/index.ts';
 import { dashboardPlugin } from './modules/dashboard/index.ts';
 import { historyPlugin } from './modules/history/index.ts';
 import { systemClock, type Clock } from './shared/clock.ts';
@@ -57,6 +57,7 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
       clock: deps.clock ?? systemClock,
       production: deps.production ?? false,
       listSales: listRegisteredSales,
+      findSale: findSaleByNumber,
     });
   }
 

@@ -78,10 +78,13 @@ Rama: `feat/005-historial-us2`.
   Hecho cuando: las pruebas de componente comprueban que « 007 » lleva a `/ventas/7`; que vacío, «0», «-3», «2,5» y «abc» muestran «Escribe un número de venta válido» sin navegar; que «Buscar» se elige con Intro desde el campo; y que la búsqueda aparece en las ventas de un día.
 - [x] **T020 [web] [P] [US2]** Escribir `SaleDetailView.tsx` y `SaleDetailPage.tsx`: «Venta N.º [número]», fecha y hora con `formatDateTime`, «Registrada por [nombre] · [rol]», «Medio de pago: [medio]», las líneas en orden «[producto] · [categoría] · [precio] × [cantidad] · [subtotal]», el total, «Volver» a `/ventas?fecha=date`, `SaleSearch`, `QueryStatus` sin «Datos al …» y el `404` con su mensaje; y hacer que cada fila de `SalesList` enlace a `/ventas/[número]` (plan §5.5; RF-5, RF-6, RF-8, RF-9, RF-10, RNF-4). Depende de: T019
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran tal cual el detalle de los fixtures con sus líneas en orden; «Volver» lleva al día de la venta; un número sin venta muestra «No existe la venta N.º 99»; los escenarios «Sin conexión», «Con error», «Sin permiso» y «Lento» se ven como en el día; una fila de la lista abre su detalle; y todo se alcanza con Tab y se elige con Intro.
-- [ ] **T021 [integración] [US2]** Exportar `findSaleByNumber` desde `modules/sales/index.ts` y pasarlo a `historyPlugin` en `app.ts` (plan D-1; RF-7, RF-8). Depende de: T015, T017, T018, T020
+- [x] **T021 [integración] [US2]** Exportar `findSaleByNumber` desde `modules/sales/index.ts` y pasarlo a `historyPlugin` en `app.ts` (plan D-1; RF-7, RF-8). Depende de: T015, T017, T018, T020
   Hecho cuando: una prueba de integración con `buildApp` registra una venta con `POST /api/sales`, cambia el precio de un producto y elimina la cuenta que la registró, y `GET /api/history/sales/:number` devuelve la venta con los precios, el nombre y el rol del registro; y `npm test` sigue pasando.
 - [ ] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
+
+- [ ] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
+  Hecho cuando: pruebas de ruta y E2E cubren más de 100 caracteres, conservan el número completo en el 404, normalizan ceros iniciales para abrir una venta existente y rechazan sesiones sin permiso antes de buscar; todas las comprobaciones automatizadas pasan y se solicita la verificación de US2.
 
 ## Fase 5 — US3: consultar las cifras de un mes (P3)
 

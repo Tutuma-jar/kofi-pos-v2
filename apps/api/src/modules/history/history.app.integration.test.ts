@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { dayHistorySchema, saleResponseSchema } from '@kofi/contracts';
+import { dayHistorySchema, historySaleResponseSchema, saleResponseSchema } from '@kofi/contracts';
 import { buildApp } from '../../app.ts';
 import { createFakeClock } from '../../shared/clock.ts';
 import { createTestDatabase } from '../../../test/test-database.ts';
@@ -9,6 +9,76 @@ import { saveCategory, saveProduct } from '../menu/index.ts';
 import { listRegisteredSales } from '../sales/index.ts';
 
 describe('historial integrado con ventas reales (RF-1, RF-3, RF-7)', () => {
+  it('el detalle conserva la instantánea tras cambiar menú y cuenta y eliminarla (T021, RF-7/RF-8)', async () => {
+    const db = await createTestDatabase();
+    const clock = createFakeClock(new Date('2026-10-24T14:30:00Z'));
+    const app = buildApp({ db, clock, logger: false });
+    try {
+      const accounts = createAccountsService(db);
+      for (const role of ['owner', 'cashier'] as const)
+        await accounts.create({
+          username: role,
+          displayName: role === 'cashier' ? 'Nombre al registrar' : 'Dueño de prueba',
+          role,
+          password: 'historial ficticio',
+        });
+      const category = await saveCategory(db, { name: 'Bebidas calientes' });
+      const product = await saveProduct(db, {
+        name: 'Café americano',
+        categoryId: category.id,
+        price: '12,50',
+      });
+      const login = async (role: 'owner' | 'cashier') => {
+        const response = await app.inject({
+          method: 'POST',
+          url: '/api/auth/login',
+          payload: { username: role, password: 'historial ficticio' },
+        });
+        expect(response.statusCode).toBe(200);
+        expect(response.json().user.role).toBe(role);
+        return { cookie: String(response.headers['set-cookie']).split(';')[0]! };
+      };
+      const registered = await app.inject({
+        method: 'POST',
+        url: '/api/sales',
+        headers: await login('cashier'),
+        payload: {
+          draftId: randomUUID(),
+          paymentMethod: 'qr',
+          lines: [
+            {
+              productId: product.id,
+              productName: product.name,
+              unitPriceCents: product.priceCents,
+              quantity: 2,
+            },
+          ],
+        },
+      });
+      expect(registered.statusCode).toBe(201);
+      const original = saleResponseSchema.parse(registered.json()).sale;
+      const headers = await login('owner');
+      await saveProduct(
+        db,
+        { name: 'Café actual', categoryId: category.id, price: '13,00' },
+        product.id,
+      );
+      await saveCategory(db, { name: 'Bebidas actuales' }, category.id);
+      await accounts.update('cashier', { displayName: 'Nombre nuevo', role: 'owner' });
+      await accounts.delete('cashier');
+      const before = await listRegisteredSales(db);
+      const response = await app.inject({ url: `/api/history/sales/${original.number}`, headers });
+      expect(response.statusCode).toBe(200);
+      expect(historySaleResponseSchema.parse(response.json())).toEqual({
+        date: '2026-10-24',
+        sale: { ...original, registeredBy: { ...original.registeredBy, userId: null } },
+      });
+      expect(await listRegisteredSales(db)).toEqual(before);
+    } finally {
+      await app.close();
+      await db.close();
+    }
+  });
   it('la API conserva las ventas del 14 y 15 de octubre de 1931 en su día local (T031)', async () => {
     const db = await createTestDatabase();
     const clock = createFakeClock(new Date('1931-10-15T04:00:00Z'));

@@ -19,8 +19,7 @@ export interface HistoryDeps {
   db: Database;
   clock: Clock;
   listSales(db: Database, range: { from?: Date; to?: Date }): Promise<Sale[]>;
-  // La integración T021 hará obligatoria esta dependencia al conectar el lector real.
-  findSale?(db: Database, number: number): Promise<Sale | null>;
+  findSale(db: Database, number: number): Promise<Sale | null>;
 }
 
 export function createHistoryService({ db, clock, listSales, findSale }: HistoryDeps) {
@@ -36,7 +35,6 @@ export function createHistoryService({ db, clock, listSales, findSale }: History
       ) {
         throw new AppError(404, 'NOT_FOUND', saleNotFoundMessage(number));
       }
-      if (!findSale) throw new Error('Falta configurar la lectura de ventas');
       const sale = await findSale(db, Number(number));
       if (!sale) throw new AppError(404, 'NOT_FOUND', saleNotFoundMessage(number));
       return { sale, date: boliviaDate(new Date(sale.registeredAt)) };
