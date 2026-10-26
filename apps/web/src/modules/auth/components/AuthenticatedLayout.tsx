@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ApiFetchError } from '../../../shared/http/api-fetch.ts';
+import { WeaveStrip } from '../../../shared/components/WeaveStrip.tsx';
 import { useSession } from './useSession.ts';
+import './AuthenticatedLayout.css';
 
 export function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const { user, logout, refresh } = useSession();
@@ -29,23 +31,31 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <>
-      <header>
-        <span>{user.displayName}</span>
-        {' · '}
-        <span>{user.role === 'owner' ? 'Dueño' : 'Cajero'}</span>{' '}
+    <div className="shell">
+      <header className="shell__bar">
+        <p className="shell__who">
+          <span className="shell__name">{user.displayName}</span>{' '}
+          <span className="shell__role">{user.role === 'owner' ? 'Dueño' : 'Cajero'}</span>
+        </p>
         <button
           type="button"
           disabled={closing}
+          className="shell__logout"
           onClick={() => {
             void close();
           }}
         >
           {closing ? 'Cerrando sesión…' : 'Cerrar sesión'}
         </button>
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p role="alert" className="alert shell__error">
+            {error}
+          </p>
+        )}
       </header>
-      {children}
-    </>
+      <WeaveStrip orientation="vertical" />
+      <WeaveStrip orientation="horizontal" />
+      <div className="shell__content">{children}</div>
+    </div>
   );
 }
