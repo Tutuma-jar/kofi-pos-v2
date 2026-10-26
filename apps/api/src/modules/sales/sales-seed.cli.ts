@@ -6,7 +6,14 @@ import { boliviaMonthRange, startOfBoliviaDay } from '../../shared/calendar.ts';
 import { createPgDatabase, type Database } from '../../shared/database/database.ts';
 import { loadEnv } from '../../shared/config/env.ts';
 import { migrate } from '../../shared/database/migrate.ts';
-import { insertSale, nextSaleNumber, listRegisteredSales } from './sales.repository.ts';
+import {
+  insertSale,
+  nextSaleNumber,
+  listRegisteredSales,
+  reserveSaleNumbers,
+  insertSalesBatch,
+  type NewSale,
+} from './sales.repository.ts';
 
 const messages = {
   production: 'No se cargan ventas de prueba en producción',
@@ -55,6 +62,8 @@ export async function seedSales(
     const account = accounts.find((user) => user.role === 'cashier') ?? accounts[0];
     if (!account) throw new Error(messages.account);
     let totalCents = 0;
+    const firstNumber = options.complete ? await reserveSaleNumbers(tx, count) : null;
+    const pending: NewSale[] = [];
     for (let index = 0; index < count; index++) {
       const product = products[index % products.length]!;
       const quantity = (index % 3) + 1;
@@ -63,8 +72,8 @@ export async function seedSales(
       const registeredAt = new Date(
         Math.min(startOfBoliviaDay(date).getTime() + 8 * 3600000, now.getTime()),
       );
-      await insertSale(tx, {
-        number: await nextSaleNumber(tx),
+      const sale: NewSale = {
+        number: firstNumber === null ? await nextSaleNumber(tx) : firstNumber + index,
         draftId: randomUUID(),
         registeredAt,
         registeredBy: { userId: account.id, displayName: account.displayName, role: account.role },
@@ -80,7 +89,14 @@ export async function seedSales(
           },
         ],
         totalCents: subtotalCents,
-      });
+      };
+      if (options.complete) {
+        pending.push(sale);
+        if (pending.length === 250 || index + 1 === count) {
+          await insertSalesBatch(tx, pending);
+          pending.length = 0;
+        }
+      } else await insertSale(tx, sale);
       totalCents += subtotalCents;
       if ((index + 1) % 250 === 0 || index + 1 === count) options.onProgress?.(index + 1, count);
     }

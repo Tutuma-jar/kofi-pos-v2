@@ -23,6 +23,42 @@ export async function nextSaleNumber(tx: Queryable): Promise<number> {
   return result.rows[0]!.number;
 }
 
+// Solo preparación de datos de comprobación: reservar el bloque bajo la misma transacción.
+export async function reserveSaleNumbers(tx: Queryable, count: number): Promise<number> {
+  if (!Number.isSafeInteger(count) || count < 1) throw new Error('Cantidad de ventas inválida');
+  const first = await nextSaleNumber(tx);
+  if (count > 1)
+    await tx.query('UPDATE sale_counter SET last_number = last_number + $1', [count - 1]);
+  return first;
+}
+
+// Un viaje de red por lote; los mismos disparadores comprueban cada venta al confirmar.
+export async function insertSalesBatch(tx: Queryable, sales: NewSale[]): Promise<void> {
+  await tx.query(
+    `
+    WITH input AS (SELECT value AS data FROM jsonb_array_elements($1::jsonb)),
+    inserted AS (
+      INSERT INTO sales (number, draft_id, registered_at, registered_by_user_id,
+        registered_by_name, registered_by_role, total_cents, payment_method)
+      SELECT (data->>'number')::integer, (data->>'draftId')::uuid,
+        (data->>'registeredAt')::timestamptz, (data->'registeredBy'->>'userId')::uuid,
+        data->'registeredBy'->>'displayName', data->'registeredBy'->>'role',
+        (data->>'totalCents')::integer, data->>'paymentMethod'
+      FROM input RETURNING id, number
+    )
+    INSERT INTO sale_lines (sale_id, position, product_id, product_name, category_name,
+      unit_price_cents, quantity, subtotal_cents)
+    SELECT s.id, line.position::smallint, (line.data->>'productId')::uuid,
+      line.data->>'productName', line.data->>'categoryName',
+      (line.data->>'unitPriceCents')::integer, (line.data->>'quantity')::integer,
+      (line.data->>'subtotalCents')::integer
+    FROM inserted s JOIN input i ON (i.data->>'number')::integer = s.number
+    CROSS JOIN LATERAL jsonb_array_elements(i.data->'lines') WITH ORDINALITY AS line(data, position)
+  `,
+    [JSON.stringify(sales)],
+  );
+}
+
 // Debe llamarse dentro de una transacción: el disparador diferido comprueba las líneas al confirmar.
 export async function insertSale(tx: Queryable, sale: NewSale): Promise<Sale> {
   const inserted = await tx.query<{ id: string }>(

@@ -102,7 +102,11 @@ Rama: `feat/004-dashboard-pulido`.
 - [x] **T028 [api]** Añadir a `seed:sales` el modo explícito `--complete` para completar 6000 ventas del mes sin modificar datos existentes, con al menos 200 productos vigentes; conservar el modo estricto y el rechazo en producción (plan §7.1; RNF-3). Depende de: T021
   Hecho cuando: las pruebas comprueban que conserva las ventas y los productos previos, añade solo las ventas que faltan, no vuelve a escribir al alcanzar 6000, rechaza más de 6000 y sigue bloqueado en producción; los números son correlativos y la carga sigue siendo atómica. T022 usa este modo por instrucción expresa de la persona y registra los volúmenes reales.
 
+- [x] **T029 [api]** Enviar la carga `--complete` en lotes con parámetros, reservando los números en la misma transacción, para evitar un viaje de red por campo o línea al cargar Neon (RNF-3; plan §7.1). Depende de: T028
+  Hecho cuando: las pruebas de integración comprueban ventas válidas, números correlativos y reversión de ventas, líneas y contador; el modo estricto conserva su comportamiento y las ventas anteriores siguen intactas.
+
 ## Cobertura de RF
+
 
 | RF | Tareas |
 | --- | --- |

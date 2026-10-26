@@ -300,6 +300,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 ### 7.1 Dependencias
 
+**Decisión delegada de T029 (2026-10-26):** tras observar la latencia de la preparación sobre Neon, `--complete` reserva un bloque correlativo de números bajo el bloqueo ya adquirido y envía lotes de 250 ventas con JSON parametrizado a la capa de datos de Ventas. Los lotes pertenecen a una sola transacción y los disparadores existentes siguen validando líneas e importes. El modo estricto y el registro normal no cambian. Motivo: reducir viajes de red durante la preparación de RNF-3. Alternativa descartada: confirmar cada lote, porque una interrupción dejaría una carga parcial. La primera transacción lenta se interrumpió antes del commit y se comprobó que la base conservaba sus 44 ventas y 202 productos.
+
 **Decisión delegada de T021 (2026-10-26):** la carga de comprobación requiere una base sin ventas, exactamente 200 productos vigentes y una cuenta existente (prefiere cajero). En una sola transacción bloquea el contador, impide repetir o ejecutar dos cargas a la vez y genera 6000 ventas repartidas del día 1 a hoy, sin fechas futuras, alternando efectivo y QR y cantidades de 1 a 3. Motivo: reproducir el volumen de RNF-3 sin borrar ni duplicar datos y con importes calculados desde el menú de prueba. Alternativa descartada: añadir ventas a una base con datos previos, porque el volumen y los resultados dejarían de ser reproducibles. No cambia el contrato ni las reglas de ventas reales.
 
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
