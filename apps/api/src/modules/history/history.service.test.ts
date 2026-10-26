@@ -13,6 +13,24 @@ function setup(instant = '2026-10-25T15:00:00.000Z') {
 }
 
 describe('consulta de un día (RF-2, RF-3, RF-5, RF-7)', () => {
+  it('asigna cada venta al día local correcto a ambos lados del salto de 1931 (T031)', async () => {
+    const { service, listSales } = setup();
+    const sales = [
+      '1931-10-15T04:00:00Z',
+      '1931-10-15T04:32:35.999Z',
+      '1931-10-15T04:32:36Z',
+      '1931-10-16T03:32:35.999Z',
+      '1931-10-16T03:32:36Z',
+    ].map((registeredAt, index) => testSale({ registeredAt, number: index + 1 }));
+    listSales.mockImplementation(async (_db, { from, to }: { from: Date; to: Date }) =>
+      sales.filter(
+        (sale) => new Date(sale.registeredAt) >= from && new Date(sale.registeredAt) < to,
+      ),
+    );
+    expect((await service.day('1931-10-14')).sales.map((sale) => sale.number)).toEqual([2, 1]);
+    expect((await service.day('1931-10-15')).sales.map((sale) => sale.number)).toEqual([4, 3]);
+    expect((await service.day('1931-10-16')).sales.map((sale) => sale.number)).toEqual([5]);
+  });
   it('0099 solo lee su día y no incluye una venta registrada en 1950 (T030)', async () => {
     const { service, db, listSales } = setup();
     const sale = testSale({ registeredAt: '1950-01-01T12:00:00Z' });

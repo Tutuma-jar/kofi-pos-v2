@@ -63,6 +63,9 @@ Rama: `feat/005-historial-us1`. Prerrequisitos fusionados: PR #25 y PR #26.
 - [x] **T030 [integración] [US1]** Corregir RF-2/RF-3: conservar los años menores de 100 al sumar días y meses, acotar cada lectura al día pedido y mantener paridad con el calendario simulado. Corregir el extremo técnico del contrato del Historial y la navegación, sin límite de antigüedad de negocio (plan §13). Depende de: T016
   Hecho cuando: las regresiones del contrato, calendario, servicio, cliente simulado, pantalla y E2E cubren 0001, 0099→0100, los bisiestos, el retroceso nulo en el primer día/mes y el rechazo del año cero; una venta ficticia de 1950 no aparece en 0099; todas las comprobaciones automatizadas pasan y se solicita de nuevo la verificación.
 
+- [x] **T031 [integración] [US1]** Corregir RF-2/RF-3: obtener el primer instante real de cada día de Bolivia, incluso cuando un cambio histórico omite o repite horas, y comprobar el filtrado del servicio y la API (plan §14). Depende de: T030
+  Hecho cuando: las regresiones escritas antes del código separan las ventas a ambos lados del salto del 15/10/1931, prueban cuatro zonas del proceso, verifican los inicios de todos los días de 1850–1949 contra Intl y conservan el extremo 0001; todas las comprobaciones automatizadas pasan y se solicita de nuevo la verificación.
+
 ## Fase 4 — US2: ver el detalle de una venta (P2)
 
 Rama: `feat/005-historial-us2`.
@@ -111,8 +114,8 @@ Rama: `feat/005-historial-pulido`.
 | RF | Tareas |
 | --- | --- |
 | RF-1 | T003, T007, T008, T011, T014, T015, T016 |
-| RF-2 | T003, T004, T005, T010, T011, T014, T016, T030 |
-| RF-3 | T002, T009, T010, T013, T014, T015, T016, T030 |
+| RF-2 | T003, T004, T005, T010, T011, T014, T016, T030, T031 |
+| RF-3 | T002, T009, T010, T013, T014, T015, T016, T030, T031 |
 | RF-4 | T003, T009, T013, T016 |
 | RF-5 | T010, T012, T014, T016, T020, T022, T025 |
 | RF-6 | T007, T012, T014, T016, T020, T025 |

@@ -9,32 +9,37 @@ const dateFormat = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
+  era: 'short',
 });
 
-const offsetFormat = new Intl.DateTimeFormat('en-US', {
-  timeZone: BOLIVIA_TIME_ZONE,
-  timeZoneName: 'longOffset',
-});
-
-// 'YYYY-MM-DD' del instante en Bolivia.
-export function boliviaDate(instant: Date): string {
+function localCalendarDate(instant: Date): Date {
   const parts = Object.fromEntries(
     dateFormat.formatToParts(instant).map((part) => [part.type, part.value]),
   );
-  return `${parts.year!.padStart(4, '0')}-${parts.month}-${parts.day}`;
+  const year = parts.era === 'BC' ? 1 - Number(parts.year) : Number(parts.year);
+  return calendarDate(year, Number(parts.month) - 1, Number(parts.day));
 }
 
-// Instante de las 00:00 de esa fecha en Bolivia. El desfase sale de Intl («GMT-04:00») y no se
-// escribe fijo, para no depender de que Bolivia nunca cambie de hora.
+// 'YYYY-MM-DD' del instante en Bolivia.
+export function boliviaDate(instant: Date): string {
+  return localCalendarDate(instant).toISOString().split('T')[0]!;
+}
+
+// Primer instante de esa fecha en Bolivia. No presupone que exista su medianoche ni que el
+// desfase sea constante durante el día (el 15/10/1931 empieza a la 01:00 local).
 export function startOfBoliviaDay(date: string): Date {
-  const zoneName = offsetFormat
-    .formatToParts(new Date(`${date}T12:00:00Z`))
-    .find((part) => part.type === 'timeZoneName')!.value;
-  const offset = zoneName.slice('GMT'.length);
-  const [hours = 0, minutes = 0, seconds = 0] = offset.slice(1).split(':').map(Number);
-  const offsetSeconds = (hours * 3600 + minutes * 60 + seconds) * (offset.startsWith('-') ? -1 : 1);
-  // Los desfases históricos pueden incluir segundos, que Date no acepta en un sufijo ISO.
-  return new Date(new Date(`${date}T00:00:00Z`).getTime() - offsetSeconds * 1000);
+  const target = new Date(`${date}T00:00:00Z`).getTime();
+  const margin = 2 * 24 * 60 * 60 * 1000;
+  let lower = target - margin;
+  let upper = target + margin;
+  // Las fechas locales de Bolivia avanzan en este intervalo; Intl resuelve saltos y repeticiones
+  // de horas. La búsqueda incluye segundos y milisegundos, sin aproximar un desfase al mediodía.
+  while (lower < upper) {
+    const middle = Math.floor((lower + upper) / 2);
+    if (localCalendarDate(new Date(middle)).getTime() < target) lower = middle + 1;
+    else upper = middle;
+  }
+  return new Date(lower);
 }
 
 export interface BoliviaDayRange {

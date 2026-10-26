@@ -26,7 +26,7 @@ El resumen de hoy y del mes en curso, con su venta promedio y sus productos más
 | Concepto | Definición |
 | --- | --- |
 | **Venta registrada** | Una venta cobrada y registrada en Ventas (SPEC-003). Solo las ventas registradas aparecen en el Historial; una venta en preparación no aparece. |
-| **Día** | Un día calendario en hora de Bolivia, de 00:00 a 23:59, como en SPEC-004. Una venta es de un día si su fecha y hora de registro, en hora de Bolivia, caen en ese día. |
+| **Día** | Un día calendario en hora de Bolivia, de 00:00 a 23:59, como en SPEC-004. Si un cambio histórico omite o repite horas, incluye todos los instantes que tienen esa fecha local. Una venta es de un día si su fecha y hora de registro, en hora de Bolivia, caen en ese día. |
 | **Mes** | Un mes calendario en hora de Bolivia, desde las 00:00 del día 1 hasta las 23:59 de su último día. |
 | **Hoy** y **mes en curso** | El día y el mes de la fecha actual del sistema en hora de Bolivia, hasta el momento de la consulta. |
 | **Fecha consultable** | Cualquier día hasta hoy y cualquier mes hasta el mes en curso, sin límite hacia atrás (ver «Aclaraciones», respuesta de la persona). Un día o un mes futuro no se puede consultar. |
@@ -288,3 +288,5 @@ La persona delegó la definición completa de 005-historial («Delego la definic
 ### 2026-10-26 — Corrección de la verificación de US1
 
 - **Decisión delegada:** «Sin límite hacia atrás» significa sin recorte de antigüedad de las ventas; el calendario civil de cuatro cifras admite los años 0001–9999, sin año cero. En 01/01/0001 y enero de 0001, las opciones de retroceso están deshabilitadas. Motivo: ninguna fecha admitida debe navegar fuera del formato del calendario; alternativa descartada: imponer una antigüedad de negocio o navegar a una fecha que luego se rechaza. Aplicado en «Datos de una venta», RF-2 y RF-11.
+
+- **Decisión delegada (T031):** cada día comprende exactamente los instantes con esa fecha local en Bolivia, también ante cambios históricos de hora. Motivo: RF-2/RF-3 no deben perder ni trasladar ventas entre días; alternativa descartada: aplicar a todo el día una misma diferencia horaria o excluir fechas antiguas. Aplicado en «Conceptos» y los casos de medianoche de RF-2/RF-3.

@@ -127,9 +127,15 @@ sales  N.º 3 14:30Z Luis Mamani owner qr 2050 · N.º 2 13:15Z Ana Quispe cashi
 
 ### 5.1 Días y meses de Bolivia (`shared/calendar.ts`; RF-2, RF-11, RF-13; D-4)
 
-Se añaden a las funciones de SPEC-004 (`boliviaDate`, `startOfBoliviaDay`, `boliviaDayRange`, `boliviaMonthRange`), sin cambiarlas:
+Se añaden a las funciones de SPEC-004 (`boliviaDate`, `startOfBoliviaDay`, `boliviaDayRange`, `boliviaMonthRange`), corrigiendo la representación de años y el primer instante local (T030/T031):
 
 ```text
+startOfBoliviaDay(date):                    # primer instante que tiene esa fecha local
+  target ← fecha de calendario en UTC (solo como ordinal)
+  buscar por bisección, entre target − 48 h y target + 48 h, el primer milisegundo
+    cuya fecha local obtenida con Intl sea mayor o igual a target
+  return ese instante                         # puede empezar a la 01:00 si no existió la medianoche
+
 addDays(date, n):                           # 'YYYY-MM-DD' ± n días, aritmética de calendario sin zona
   d ← new Date(0); d.setUTCFullYear(año, mes − 1, día + n);  return d en 'YYYY-MM-DD' (getUTC…)
 
@@ -152,7 +158,7 @@ boliviaMonthBounds(month, now):             # un mes hasta el mes en curso
   return { days, from, to }
 ```
 
-- `to` es exclusivo, como en `listRegisteredSales`: para un día pasado es las 00:00 del día siguiente, y para hoy, `now + 1 ms`, igual que `boliviaDayRange` (SPEC-004 §5.1).
+- `to` es exclusivo, como en `listRegisteredSales`: para un día pasado es el primer instante real del día siguiente, y para hoy, `now + 1 ms`, igual que `boliviaDayRange` (SPEC-004 §5.1).
 - Las fechas `YYYY-MM-DD` se comparan como texto: el orden alfabético es el cronológico.
 - `addDays` y `addMonths` operan sobre fechas de calendario, sin zona horaria: `setUTCFullYear` hace la aritmética conservando los años 0001–0099 (fin de mes, años bisiestos). La zona de Bolivia entra solo en `boliviaDate` y `startOfBoliviaDay`.
 
@@ -513,3 +519,9 @@ El 2026-10-25 la persona respondió las dos dudas de `spec.md` con las decisione
 **Cambio de contrato durante US1:** `history.ts` define `HISTORY_MIN_DATE = 0001-01-01`, `HISTORY_MIN_MONTH = 0001-01`, `historyDateSchema` y `historyMonthSchema`, que conservan el formato de cuatro cifras y rechazan el año cero. Solo el contrato de Historial usa estos esquemas; Dashboard conserva su contrato. `previousDate` y `previousMonth` admiten null si y solo si se consulta el extremo inferior. La interfaz deshabilita el retroceso cuando recibe null y fija el mínimo del campo con las constantes del contrato; no calcula fechas. Los meses de US3 deberán aplicar esta misma regla. Motivo: una prueba real de Chromium confirma que sus campos de fecha no representan el año cero; no es un límite de antigüedad del negocio. Se descarta devolver fechas negativas, saturar la navegación o introducir un recorte de años con ventas.
 
 Regresiones: años 0001–0099, salto 0099→0100, febrero de 0012 y 0100, límites inferiores de día/mes, exclusión de una venta de 1950 al consultar 0099 y paridad del cliente simulado. QA de la aclaración y análisis de consistencia: sin RF huérfanos, sin tareas huérfanas, todas las historias conservan integración/E2E, sin conflictos con los seis principios ni aclaraciones abiertas; el hallazgo del verificador se cubre con T030.
+
+## 14. Primer instante local de cada día (T031)
+
+**Decisión delegada:** sustituir la aproximación de desfase al mediodía de T010 por la búsqueda del primer instante con la fecha local solicitada, usando Intl y bisección a precisión de milisegundos en un margen UTC de 48 horas a cada lado. La comparación usa ordinales de calendario UTC, conserva los años pequeños y considera la era para el límite de 0001. Motivo: Bolivia omitió la medianoche del 15/10/1931; ese día empieza en 1931-10-15T04:32:36Z (01:00 local), no con el desfase observado al mediodía. Se descarta un desfase fijo, extrapolar el del mediodía o restringir las fechas antiguas. Sin dependencias nuevas ni cambio de contrato.
+
+Regresiones: ventas de ambos lados del salto en servicio y API real/PGlite; límites del 14, 15 y 16 de octubre de 1931 en cuatro zonas del proceso; recorrido automatizado de todos los días de 1850–1949 contra Intl, verificando que el milisegundo anterior todavía es del día previo. Se mantiene la precisión de segundos históricos y el extremo de año 0001. Análisis: T031 cubre RF-2/RF-3 y el segundo hallazgo, sin tareas huérfanas, contradicciones, dudas abiertas ni conflictos constitucionales.

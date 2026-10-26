@@ -16,6 +16,47 @@ import {
 
 const ZONES = ['UTC', 'Asia/Tokyo', 'America/New_York', 'Pacific/Kiritimati'];
 
+describe('salto horario de Bolivia de octubre de 1931 (T031, RF-2/RF-3)', () => {
+  it.each(ZONES)(
+    'encuentra el primer instante de cada día, aunque no exista la medianoche, con TZ=%s',
+    (zone) => {
+      vi.stubEnv('TZ', zone);
+      const now = new Date('2026-10-25T15:00:00Z');
+      expect(boliviaDayBounds('1931-10-14', now)).toEqual({
+        from: new Date('1931-10-14T04:32:36Z'),
+        to: new Date('1931-10-15T04:32:36Z'),
+      });
+      expect(boliviaDayBounds('1931-10-15', now)).toEqual({
+        from: new Date('1931-10-15T04:32:36Z'),
+        to: new Date('1931-10-16T03:32:36Z'),
+      });
+      expect(boliviaDate(new Date('1931-10-15T04:32:35.999Z'))).toBe('1931-10-14');
+      expect(boliviaDate(startOfBoliviaDay('1931-10-15'))).toBe('1931-10-15');
+    },
+  );
+  it(
+    'cada inicio entre 1850 y 1949 es el primer milisegundo de su fecha local',
+    { timeout: 60000 },
+    () => {
+      const directFormat = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/La_Paz',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      for (let year = 1850; year < 1950; year++) {
+        for (let month = 1; month <= 12; month++) {
+          for (const date of daysOfMonth(`${year}-${String(month).padStart(2, '0')}`)) {
+            const start = startOfBoliviaDay(date);
+            expect(directFormat.format(start), date).toBe(date);
+            expect(directFormat.format(new Date(start.getTime() - 1)), date).not.toBe(date);
+          }
+        }
+      }
+    },
+  );
+});
+
 describe('años anteriores a 0100 (SPEC-005 T030)', () => {
   it.each(ZONES)('conserva años, bisiestos y rangos en %s', (zone) => {
     vi.stubEnv('TZ', zone);
@@ -27,6 +68,11 @@ describe('años anteriores a 0100 (SPEC-005 T030)', () => {
     expect(daysOfMonth('0012-02')).toHaveLength(29);
     expect(daysOfMonth('0100-02')).toHaveLength(28);
     expect(boliviaDate(new Date('0001-01-01T12:00:00Z'))).toBe('0001-01-01');
+    expect(boliviaDate(new Date('0001-01-01T04:32:35.999Z'))).toBe('0000-12-31');
+    expect(boliviaDayBounds('0001-01-01', new Date('2026-10-25T15:00:00Z'))).toEqual({
+      from: new Date('0001-01-01T04:32:36Z'),
+      to: new Date('0001-01-02T04:32:36Z'),
+    });
     expect(boliviaDayBounds('0099-12-31', new Date('2026-10-25T15:00:00Z'))).toEqual({
       from: new Date('0099-12-31T04:32:36Z'),
       to: new Date('0100-01-01T04:32:36Z'),
