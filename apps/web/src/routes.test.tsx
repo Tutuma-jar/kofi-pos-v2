@@ -7,6 +7,7 @@ import { canView, type AuthClient } from './modules/auth/index.ts';
 import { ApiFetchError } from './shared/http/api-fetch.ts';
 import { MenuClientProvider, httpMenuClient } from './modules/menu/index.ts';
 import { SalesClientProvider, httpSalesClient } from './modules/sales/index.ts';
+import { DashboardClientProvider, httpDashboardClient } from './modules/dashboard/index.ts';
 
 function CurrentPath() {
   return <output aria-label="ruta actual">{useLocation().pathname}</output>;
@@ -44,7 +45,25 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
             quote: async () => ({ menu: [], lines: [], totalCents: 0, notices: [] }),
           }}
         >
-          <AppRoutes client={client} />
+          <DashboardClientProvider
+            client={{
+              ...httpDashboardClient,
+              today: async () => ({
+                date: '2026-10-24',
+                asOf: '2026-10-24T15:00:00.000Z',
+                totalCents: 0,
+                salesCount: 0,
+                averageTicketCents: null,
+                byPaymentMethod: [
+                  { paymentMethod: 'cash', totalCents: 0, salesCount: 0 },
+                  { paymentMethod: 'qr', totalCents: 0, salesCount: 0 },
+                ],
+                topProducts: [],
+              }),
+            }}
+          >
+            <AppRoutes client={client} />
+          </DashboardClientProvider>
         </SalesClientProvider>
       </MenuClientProvider>
       <CurrentPath />

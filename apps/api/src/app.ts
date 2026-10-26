@@ -3,7 +3,8 @@ import cookie from '@fastify/cookie';
 import { registerErrorHandler } from './shared/http/errors.ts';
 import { authPlugin } from './modules/auth/index.ts';
 import { getCurrentMenu, menuPlugin } from './modules/menu/index.ts';
-import { salesPlugin } from './modules/sales/index.ts';
+import { salesPlugin, listRegisteredSales } from './modules/sales/index.ts';
+import { dashboardPlugin } from './modules/dashboard/index.ts';
 import { systemClock, type Clock } from './shared/clock.ts';
 import type { Database } from './shared/database/database.ts';
 
@@ -43,6 +44,12 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
       clock: deps.clock ?? systemClock,
       production: deps.production ?? false,
       currentMenu: getCurrentMenu,
+    });
+    app.register(dashboardPlugin, {
+      db: deps.db,
+      clock: deps.clock ?? systemClock,
+      production: deps.production ?? false,
+      listSales: listRegisteredSales,
     });
   }
 
