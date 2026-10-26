@@ -1,6 +1,6 @@
 import { HISTORY_ROLES, roleSchema, type Role } from '@kofi/contracts';
 import type { ReactNode } from 'react';
-import { Navigate, Route, Routes } from 'react-router';
+import { matchRoutes, Navigate, Route, Routes, useLocation } from 'react-router';
 import {
   HomePage,
   LoginPage,
@@ -83,8 +83,12 @@ export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
 }));
 
 export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) {
+  const location = useLocation();
+  const screenKey =
+    matchRoutes([...publicRoutes, ...protectedRoutes], location)?.at(-1)?.route.path ??
+    location.pathname;
   return (
-    <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft}>
+    <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft} screenKey={screenKey}>
       <Routes>
         {publicRoutes.map(({ path, element }) => (
           <Route key={path} path={path} element={element} />
