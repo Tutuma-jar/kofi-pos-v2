@@ -70,7 +70,7 @@ Rama: `feat/005-historial-us1`. Prerrequisitos fusionados: PR #25 y PR #26.
 
 Rama: `feat/005-historial-us2`.
 
-- [ ] **T017 [api] [P] [US2]** Añadir `findSaleByNumber(db, number)` a `modules/sales/sales.repository.ts`, con el mismo `toSale` que `findSaleByDraftId` (plan §4, §5.3, D-1; RF-7, RF-8, RF-9). Depende de: T001
+- [x] **T017 [api] [P] [US2]** Añadir `findSaleByNumber(db, number)` a `modules/sales/sales.repository.ts`, con el mismo `toSale` que `findSaleByDraftId` (plan §4, §5.3, D-1; RF-7, RF-8, RF-9). Depende de: T001
   Hecho cuando: una prueba de integración con PGlite inserta ventas con `insertSale` y comprueba que `findSaleByNumber` devuelve la del número pedido, con sus líneas en orden y cumpliendo `saleSchema`, y `null` para un número sin venta.
 - [ ] **T018 [api] [P] [US2]** Añadir la venta (`sale`) a `history.service.ts` con `findSale` inyectada, y `GET /api/history/sales/:number` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-1, D-8; RF-7, RF-8, RF-9). Depende de: T011
   Hecho cuando: las pruebas, con una función falsa, comprueban que la respuesta cumple `historySaleResponseSchema` con la venta tal como llega y su `date` de Bolivia (una venta de las 23:59 y otra de las 00:00); que `003` y ` 3 ` buscan el número 3; que `0`, `-3`, `2,5` y `abc` responden `400` «Escribe un número de venta válido»; que un número sin venta responde `404` «No existe la venta N.º 99»; que `2147483648` y un número de 20 cifras responden `404` sin llamar a la función; y que la ruta responde `403` al cajero y `401` sin sesión.

@@ -147,6 +147,12 @@ export async function findSaleByDraftId(db: Queryable, draftId: string): Promise
   return result.rows[0] ? toSale(result.rows[0]) : null;
 }
 
+// Lectura histórica por número (SPEC-005 RF-8/RF-9), con la misma instantánea y orden de líneas.
+export async function findSaleByNumber(db: Queryable, number: number): Promise<Sale | null> {
+  const result = await db.query<SaleRow>(`${SELECT_SALES} WHERE s.number = $1`, [number]);
+  return result.rows[0] ? toSale(result.rows[0]) : null;
+}
+
 // Ventas registradas con registered_at en [from, to), por número (RF-11, plan §6.3). La usarán el
 // Dashboard y el Historial.
 export async function listRegisteredSales(
