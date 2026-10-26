@@ -94,7 +94,7 @@ Rama: `feat/004-dashboard-pulido`.
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas repartidas en los días del mes que cumplen `saleSchema` y suman lo esperado, y otra comprueba que con `NODE_ENV=production` no escribe nada.
 - [ ] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las 6000 ventas con `seed:sales`, y medir RNF-3 y el criterio de 10 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T021, SPEC-002 T034
   Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, el dueño y el cajero ven el total de hoy en menos de 10 segundos desde la pantalla inicial, y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T022
+- [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Excepción autorizada por la persona: hacer T023 antes de T022, dejando explícita la medición pendiente en el README y en el PR; T022 sigue reservada a la persona y sin marcar.
   Hecho cuando: el README describe esos tres puntos.
 
 ## Cobertura de RF

@@ -186,6 +186,23 @@ La venta en preparación conserva sus líneas, cantidades y medio de pago en el 
 
 Para repetirla desde la computadora usada para comprobar el sistema, sigue la preparación de Neon y Render del informe y ejecuta `npm run measure:sales`. Ingresa directamente en Chromium, deja trabajar al medidor y después registra tú la venta de tres productos cuando lo indique la terminal. Se conservan las ventas ficticias; la prueba humana no se automatiza. `npm run test:measure` comprueba los medidores con datos ficticios.
 
+## Dashboard
+
+Dueño y cajero abren **Resumen de ventas** desde la pantalla inicial (`/resumen`). Los dos ven **Hoy**, con la fecha de Bolivia, el total vendido, la cantidad de ventas, la venta promedio, el desglose de **Efectivo** y **QR** y hasta cinco productos más vendidos con sus unidades e importes. El dueño ve después el resumen del **mes en curso** y una tabla con cada día desde el 1 hasta hoy, incluidos los días sin ventas. El cajero no pide ni ve el resumen del mes.
+
+La API calcula las cifras usando las ventas registradas y sus nombres y precios históricos. Las fechas y el momento «Datos al…» se muestran en hora de Bolivia, y los importes, en bolivianos. **Actualizar** vuelve a consultar los resúmenes; no hay actualización automática. Durante la carga o ante un error de conexión o del servidor se conservan las cifras anteriores. Un período sin ventas muestra ceros, «—» como promedio y su aviso.
+
+**T022 pendiente:** todavía falta desplegar y medir RNF-3 y el criterio de 10 segundos en Render y Neon. Las pruebas locales y E2E no acreditan esos tiempos. La persona ejecutará esa tarea; [el PR de pulido](https://github.com/Tutuma-jar/kofi-pos-v2/pull/33) contiene los pasos exactos de preparación, carga y medición. Esta documentación (T023) se entrega antes de T022 por autorización expresa, sin declarar terminada la fase de Pulido.
+
+Para preparar la base de comprobación nueva, después de las migraciones, las cuentas y los 200 productos de `seed:menu`, se dispone de:
+
+```text
+npm run build:contracts
+npm run seed:sales -w @kofi/api
+```
+
+`seed:sales` usa la `DATABASE_URL` local de `apps/api/.env`, exige una base sin ventas y exactamente 200 productos vigentes, y carga 6000 ventas ficticias repartidas desde el primer día del mes hasta hoy. Requiere una cuenta existente, prefiere cajero y alterna Efectivo y QR. Toda la carga es atómica: un error revierte ventas, líneas y contador. Rechaza `NODE_ENV=production` antes de acceder a la base y no elimina datos ni permite repetir una carga. Debe usarse en la base de comprobación; el servicio de Render conserva su configuración de producción. La preparación y la medición deben hacerse dentro del mismo mes de Bolivia.
+
 ## Flujo de trabajo
 
 Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.
