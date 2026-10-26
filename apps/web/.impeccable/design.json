@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "title": "Design System: Kofi POS",
+  "extensions": {
+    "colorMeta": {
+      "brand": { "role": "primary", "displayName": "Azul mostrador", "canonical": "#3e5879", "tonalRamp": ["#050c14", "#14273f", "#2f4664", "#4f6888", "#748ba9", "#9bb0cb", "#c1d3ea", "#e7effa"] },
+      "brand-deep": { "role": "primary", "displayName": "Azul mostrador hondo", "canonical": "#2e4360", "tonalRamp": ["#060b14", "#15273f", "#314663", "#546783", "#798ba3", "#9fafc5", "#c5d2e5", "#e9eff7"] },
+      "brand-tint": { "role": "primary", "displayName": "Azul velado", "canonical": "#e4e9ef", "tonalRamp": ["#0b0b0c", "#252728", "#434547", "#646669", "#86898d", "#aaaeb3", "#cdd1d7", "#eceff2"] },
+      "on-brand": { "role": "primary", "displayName": "Crema sobre azul", "canonical": "#fbf7ef", "tonalRamp": ["#0c0b0a", "#272624", "#464542", "#686662", "#8b8984", "#b0aea8", "#d4d1ca", "#f0eeea"] },
+      "on-brand-muted": { "role": "primary", "displayName": "Crema apagado sobre azul", "canonical": "#ccd5e1", "tonalRamp": ["#0a0b0d", "#24272a", "#41454b", "#61676d", "#838a92", "#a7afb9", "#c9d2de", "#ebeff4"] },
+      "weave-orange": { "role": "secondary", "displayName": "Naranja aguayo", "canonical": "#e07a2e", "tonalRamp": ["#170600", "#471400", "#702f00", "#9d4d05", "#cb6c23", "#f39250", "#ffb980", "#ffe5cc"] },
+      "weave-green": { "role": "secondary", "displayName": "Verde aguayo", "canonical": "#2f7d5b", "tonalRamp": ["#010f07", "#00301b", "#0a5237", "#2a7655", "#569979", "#83bd9f", "#acdfc4", "#dff5e9"] },
+      "weave-magenta": { "role": "secondary", "displayName": "Magenta aguayo", "canonical": "#b0306a", "tonalRamp": ["#1b010b", "#510027", "#7d0c46", "#ac2d67", "#cf5c8a", "#f088af", "#ffb1d2", "#ffe1ef"] },
+      "weave-light": { "role": "secondary", "displayName": "Crema de trama", "canonical": "#fbf7ef", "tonalRamp": ["#0c0b0a", "#272624", "#464542", "#686662", "#8b8984", "#b0aea8", "#d4d1ca", "#f0eeea"] },
+      "cream": { "role": "neutral", "displayName": "Crema ligero", "canonical": "#fbf7ef", "tonalRamp": ["#0c0b0a", "#272624", "#464542", "#686662", "#8b8984", "#b0aea8", "#d4d1ca", "#f0eeea"] },
+      "cream-deep": { "role": "neutral", "displayName": "Crema tostado", "canonical": "#f3ecdf", "tonalRamp": ["#0c0b09", "#282622", "#474540", "#69665f", "#8d8980", "#b3ada3", "#d6d0c5", "#f1eee8"] },
+      "field": { "role": "neutral", "displayName": "Crema de campo", "canonical": "#fffdf8", "tonalRamp": ["#0b0b0a", "#272625", "#464543", "#676664", "#8a8986", "#afaeaa", "#d2d1cd", "#efeeec"] },
+      "line": { "role": "neutral", "displayName": "Línea", "canonical": "#d6cfc2", "tonalRamp": ["#0c0b09", "#282622", "#48453f", "#6a665e", "#8e887f", "#b3ada2", "#d7d0c3", "#f1eee8"] },
+      "line-strong": { "role": "neutral", "displayName": "Línea marcada", "canonical": "#8f8778", "tonalRamp": ["#0c0b08", "#2a261e", "#4a443a", "#6c6559", "#908879", "#b4ad9f", "#d7d0c4", "#f1eee8"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#1f2430", "tonalRamp": ["#090b10", "#212632", "#404551", "#616671", "#858993", "#aaaeb6", "#ced1d8", "#edeef2"] },
+      "ink-muted": { "role": "neutral", "displayName": "Tinta apagada", "canonical": "#565b66", "tonalRamp": ["#0a0b0e", "#23262e", "#41454f", "#616671", "#858993", "#aaaeb7", "#cdd1d9", "#edeef2"] },
+      "error": { "role": "error", "displayName": "Rojo de bloqueo", "canonical": "#b3261e", "tonalRamp": ["#1e0100", "#580000", "#860103", "#b52b22", "#d75d50", "#f88a7c", "#ffb3a5", "#ffe3db"] },
+      "error-tint": { "role": "error", "displayName": "Rojo velado", "canonical": "#f8e6e2", "tonalRamp": ["#0d0b0a", "#2a2524", "#4a4342", "#6d6462", "#928684", "#b8aaa7", "#ddcdc9", "#f5ecea"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Solo «Kofi POS» en el panel de marca del ingreso." },
+      "display-compact": { "displayName": "Display compacto", "purpose": "«Kofi POS» en la franja superior bajo 900 px." },
+      "headline": { "displayName": "Headline", "purpose": "Título de pantalla (h1)." },
+      "feature": { "displayName": "Feature", "purpose": "Solo el acceso a «Nueva venta», la tarea principal del mostrador." },
+      "title": { "displayName": "Title", "purpose": "h2, nombre de quien opera, accesos de módulo; el saludo en 400." },
+      "control": { "displayName": "Control", "purpose": "Botón principal en 800; campos de formulario en 400." },
+      "body": { "displayName": "Body", "purpose": "Texto corrido; etiquetas de campo en 600." },
+      "label": { "displayName": "Label", "purpose": "Rol en la barra y encabezados de tabla; mensajes de campo en 600." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva de todas las transiciones de estado (150 ms en bordes y fondos, 200 ms en el avance de la flecha de un acceso de módulo). Con movimiento reducido, las duraciones se anulan." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "56.25rem", "purpose": "Bajo 900 px el bloque azul pasa a franja superior y la tira tejida a horizontal." }
+    ],
+    "sizes": [
+      { "name": "weave-size", "value": "4rem", "purpose": "Grosor de la tira tejida." },
+      { "name": "control-height", "value": "3.5rem", "purpose": "Alto de campos de formulario y acción principal." }
+    ],
+    "focus": { "value": "outline: 3px solid var(--color-brand-deep); outline-offset: 2px", "onBrand": "outline-color: var(--color-on-brand)" }
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "La acción de un formulario, por ejemplo Ingresar.",
+      "html": "<button class=\"ds-btn-primary\">Ingresar</button>",
+      "css": ".ds-btn-primary { min-height: 3.5rem; padding: 0 1.5rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); font-size: 1.125rem; font-weight: 800; color: #fbf7ef; background: #3e5879; border: 2px solid #3e5879; border-radius: 0.5rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1), border-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #2e4360; border-color: #2e4360; } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 3px solid #2e4360; outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Botón por defecto de toda la app.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary { min-height: 2.75rem; padding: 0 1.5rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); font-size: 1.0625rem; font-weight: 700; color: #3e5879; background: #fffdf8; border: 2px solid #3e5879; border-radius: 0.5rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: #e4e9ef; } .ds-btn-secondary:focus-visible { outline: 3px solid #2e4360; outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón sobre azul",
+      "kind": "button",
+      "refersTo": "button-on-brand",
+      "description": "Cerrar sesión dentro de la barra de sesión.",
+      "html": "<div class=\"ds-on-brand\"><button class=\"ds-btn-on-brand\">Cerrar sesión</button></div>",
+      "css": ".ds-on-brand { padding: 1.5rem; background: #3e5879; } .ds-btn-on-brand { min-height: 2.75rem; padding: 0 1.5rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); font-size: 1.0625rem; font-weight: 700; color: #fbf7ef; background: transparent; border: 2px solid #ccd5e1; border-radius: 0.5rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1), color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-on-brand:hover { color: #2e4360; background: #fbf7ef; border-color: #fbf7ef; } .ds-btn-on-brand:focus-visible { outline: 3px solid #fbf7ef; outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo de formulario",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Etiqueta encima, campo de 56 px, mensaje de error debajo.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-u\">Usuario</label><input class=\"ds-field-input\" id=\"ds-u\" /></div>",
+      "css": ".ds-field { display: grid; gap: 0.5rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); color: #1f2430; } .ds-field-label { font-weight: 600; } .ds-field-input { min-height: 3.5rem; padding: 0 1rem; font: inherit; font-size: 1.125rem; color: #1f2430; background: #fffdf8; border: 2px solid #d6cfc2; border-radius: 0.5rem; transition: border-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-field-input:hover { border-color: #8f8778; } .ds-field-input:focus-visible { border-color: #3e5879; outline: 3px solid #2e4360; outline-offset: 2px; }"
+    },
+    {
+      "name": "Barra de sesión",
+      "kind": "nav",
+      "refersTo": "session-bar",
+      "description": "Navegación persistente: quién opera, su rol y cerrar sesión, con la tira tejida en el borde.",
+      "html": "<div class=\"ds-shell\"><div class=\"ds-shell-bar\"><p class=\"ds-shell-name\">Ana Quispe</p><span class=\"ds-chip\">Dueño</span></div><div class=\"ds-shell-weave\"></div></div>",
+      "css": ".ds-shell { display: flex; height: 14rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); } .ds-shell-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; width: 16rem; padding: 3rem 2rem; color: #fbf7ef; background: #3e5879; } .ds-shell-name { margin: 0; font-size: 1.375rem; font-weight: 800; line-height: 1.2; } .ds-chip { padding: 0.125rem 0.625rem; font-size: 0.875rem; font-weight: 700; color: #2e4360; background: #fbf7ef; border-radius: 999px; } .ds-shell-weave { width: 4rem; background: linear-gradient(90deg, #e07a2e 0 10px, #fbf7ef 10px 14px, #2f7d5b 14px 22px, #b0306a 22px 50px, #2f7d5b 50px 56px, #e07a2e 56px 64px); }"
+    },
+    {
+      "name": "Acceso de módulo",
+      "kind": "list-item",
+      "refersTo": "module-row",
+      "description": "Fila de la lista de la pantalla inicial: rombo tejido en el color del módulo, nombre y flecha.",
+      "html": "<ul class=\"ds-modules\"><li><a class=\"ds-module\" href=\"#\" style=\"--tone:#2f7d5b\"><svg class=\"ds-swatch\" viewBox=\"0 0 28 28\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#2f7d5b\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/></svg><span class=\"ds-label\">Ver menú</span><svg class=\"ds-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a></li><li><a class=\"ds-module ds-module--feature\" href=\"#\" style=\"--tone:#e07a2e\"><svg class=\"ds-swatch\" viewBox=\"0 0 28 28\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#e07a2e\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/></svg><span class=\"ds-label\">Nueva venta</span><svg class=\"ds-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a></li></ul>",
+      "css": ".ds-modules { margin: 0; padding: 0; list-style: none; border-top: 1px solid #d6cfc2; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); } .ds-modules li { border-bottom: 1px solid #d6cfc2; } .ds-module { display: flex; gap: 1rem; align-items: center; min-height: 4.5rem; padding: 1rem; font-size: 1.375rem; font-weight: 700; color: #1f2430; text-decoration: none; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover { background: #f3ecdf; } .ds-module:focus-visible { outline: 3px solid #2e4360; outline-offset: 2px; } .ds-module--feature { min-height: 6rem; font-size: 1.75rem; font-weight: 800; } .ds-swatch { flex: none; width: 2.5rem; height: 2.5rem; background: var(--tone); } .ds-module--feature .ds-swatch { width: 3.5rem; height: 3.5rem; } .ds-label { flex: 1; } .ds-arrow { flex: none; width: 1.5rem; height: 1.5rem; fill: none; stroke: #565b66; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover .ds-arrow { stroke: var(--tone); transform: translateX(0.25rem); }"
+    },
+    {
+      "name": "Avisos",
+      "kind": "custom",
+      "refersTo": "notice",
+      "description": "Aviso informativo azul y aviso de error rojo.",
+      "html": "<div class=\"ds-alerts\"><p class=\"ds-notice\">Tu sesión terminó. Vuelve a iniciar sesión</p><p class=\"ds-alert\">Usuario o contraseña incorrectos</p></div>",
+      "css": ".ds-alerts { display: grid; gap: 1rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); } .ds-notice, .ds-alert { margin: 0; padding: 0.75rem 1rem; font-weight: 600; border-radius: 0.5rem; } .ds-notice { color: #2e4360; background: #e4e9ef; border: 1px solid #3e5879; } .ds-alert { color: #b3261e; background: #f8e6e2; border: 1px solid #b3261e; }"
+    },
+    {
+      "name": "Tira tejida",
+      "kind": "custom",
+      "refersTo": "weave-strip",
+      "description": "Firma de Kofi: tira de aguayo de 64 px en el borde del bloque azul, con rombos escalonados que alternan anillo verde y naranja; decorativa y sin animación.",
+      "html": "<svg class=\"ds-weave\" aria-hidden=\"true\" width=\"64\" height=\"224\" shape-rendering=\"crispEdges\" xmlns=\"http://www.w3.org/2000/svg\"><defs><pattern id=\"ds-pallay\" x=\"18\" y=\"0\" width=\"28\" height=\"56\" patternUnits=\"userSpaceOnUse\"><rect width=\"28\" height=\"56\" fill=\"#b0306a\"/><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#2f7d5b\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 32h4v4h-4zM8 36h12v4H8zM4 40h20v4H4zM8 44h12v4H8zM12 48h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 36h4v4h-4zM8 40h12v4H8zM12 44h4v4h-4z\" fill=\"#e07a2e\"/><path d=\"M12 40h4v4h-4z\" fill=\"#fbf7ef\"/></pattern></defs><rect x=\"0\" width=\"8\" height=\"100%\" fill=\"#e07a2e\"/><rect x=\"8\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"10\" width=\"6\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"16\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"18\" width=\"28\" height=\"100%\" fill=\"url(#ds-pallay)\"/><rect x=\"46\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"48\" width=\"6\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"54\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"56\" width=\"8\" height=\"100%\" fill=\"#e07a2e\"/></svg>",
+      "css": ".ds-weave { display: block; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La puerta tejida del mostrador",
+    "overview": "Kofi POS se presenta como la puerta de un local pequeño: un bloque de azul de mostrador (el color fijado por la persona) que lleva el nombre o la identidad de quien opera, firmado en su borde por una tira tejida de aguayo, y al lado una superficie crema donde ocurre el trabajo. La firma es una sola y es fija: la tira. Todo lo demás es sobrio, plano y legible, porque la pantalla se usa mientras se atiende a la clientela y se vuelve a abrir varias veces al día.\n\nLa densidad es generosa y táctil: controles altos (56 px en formularios y acciones principales), texto base algo mayor que 16 px y una sola familia tipográfica, Figtree, servida desde el proyecto. No hay sombras, degradados ni fotografía; la profundidad sale de bloques de color y bordes finos. El crema ligero reemplaza al blanco en toda la interfaz. El único texto de marca es «Kofi POS»: no hay logo, eslogan ni otros activos.\n\nAlcance actual: el sistema está construido en el ingreso, la barra de sesión y la pantalla inicial. Las pantallas de menú, ventas, resumen e historial todavía no tienen diseño propio; heredan los estilos base (tipografía, controles, tablas, avisos) y la barra de sesión, y tomarán el color de su módulo cuando se diseñen.",
+    "keyCharacteristics": [
+      "Bloque azul a toda altura con la tira de aguayo de 64 px en su borde; crema a la derecha.",
+      "Una sola familia (Figtree 400/600/700/800), títulos en 800.",
+      "Plano: sin sombras; bordes de 1 a 2 px y cambios de tono como estado.",
+      "Esquinas de 8 px en controles y avisos; bloques, filas y muestras rectos.",
+      "Los colores del aguayo solo viven en la tira y en el color de cada módulo.",
+      "Un solo motivo: el rombo escalonado del aguayo, en la tira, el relieve del ingreso y las muestras de módulo."
+    ],
+    "rules": [
+      { "name": "The Aguayo Contenido Rule", "body": "Naranja, verde y magenta solo aparecen en la tira tejida y como color de módulo (muestra de acceso y flecha en hover). Nunca como color de texto, relleno de botón ni fondo de una zona.", "section": "colors" },
+      { "name": "The Crema, Nunca Blanco Rule", "body": "No existe el blanco puro en la interfaz. La superficie más clara es el crema de campo; el fondo es el crema ligero.", "section": "colors" },
+      { "name": "The Rojo Reservado Rule", "body": "El rojo significa error o bloqueo y nada más.", "section": "colors" },
+      { "name": "The Una Sola Voz Rule", "body": "Figtree en sus cuatro pesos cargados y ninguna otra familia; un peso fuera de 400/600/700/800 no se renderiza fiel.", "section": "typography" },
+      { "name": "The Plano Tejido Rule", "body": "Nada flota: si algo necesita separarse, cambia de tono o gana un borde, nunca una sombra.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar los tokens de color, espacio y radio de tokens.css; el azul mostrador y el crema ligero son fijos.",
+      "Do poner la tira tejida en el borde de un bloque azul a toda altura, vertical en escritorio y horizontal bajo 900 px.",
+      "Do asignar el color de cada módulo por destino (Menú verde, Nueva venta naranja, Resumen magenta, Historial azul) y hacer que una pantalla nueva tome el de su módulo.",
+      "Do dar 56 px de alto a los campos y a la acción principal de un formulario, y 44 px como mínimo a cualquier control.",
+      "Do mantener visible el foco: contorno de 3 px azul hondo con 2 px de separación, crema sobre fondo azul.",
+      "Do usar «Kofi POS» como único texto de marca."
+    ],
+    "donts": [
+      "Don't usar blanco puro (#FFFFFF); la superficie más clara es el crema de campo.",
+      "Don't usar naranja, verde o magenta fuera de la tira y del color de módulo.",
+      "Don't usar el rojo para nada que no sea un error o un bloqueo.",
+      "Don't agregar sombras, degradados ni elevación; la profundidad es tono y borde.",
+      "Don't animar la entrada de la tira tejida ni de la pantalla de ingreso, que se repite varias veces al día.",
+      "Don't inventar logo, eslogan ni otro activo de marca.",
+      "Don't cargar otra familia tipográfica ni pesos fuera de 400, 600, 700 y 800."
+    ]
+  }
+}

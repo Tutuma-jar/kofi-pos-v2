@@ -1,0 +1,101 @@
+/* Pantalla inicial: saludo y una lista de accesos, uno por fila, cada uno con el rombo tejido del
+   color de su módulo. «Nueva venta», la tarea del mostrador, va más grande sin cambiar el orden. */
+.home {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+}
+
+.home h1 {
+  font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+  color: var(--color-brand);
+  letter-spacing: -0.02em;
+}
+
+.home__greeting {
+  margin-top: calc(var(--space-1) * -1);
+  font-size: var(--text-large);
+  color: var(--color-ink-muted);
+}
+
+.home__modules {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+
+.home__modules li {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.home__module {
+  --tone: var(--color-brand);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 4.5rem;
+  padding: var(--space-2);
+  font-size: var(--text-large);
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background-color 150ms var(--ease-out);
+}
+
+.home__module:hover {
+  color: var(--color-ink);
+  background: var(--color-cream-deep);
+}
+
+.home__module[href^='/menu'] {
+  --tone: var(--color-weave-green);
+}
+
+.home__module[href='/ventas/nueva'] {
+  --tone: var(--color-weave-orange);
+  min-height: 6rem;
+  font-size: var(--text-feature);
+  font-weight: 800;
+}
+
+.home__module[href='/resumen'] {
+  --tone: var(--color-weave-magenta);
+}
+
+.home__module[href='/ventas'] {
+  --tone: var(--color-brand);
+}
+
+.home__swatch {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--tone);
+}
+
+.home__module[href='/ventas/nueva'] .home__swatch {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.home__label {
+  flex: 1;
+}
+
+.home__arrow {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease-out);
+}
+
+.home__module:hover .home__arrow {
+  stroke: var(--tone);
+  transform: translateX(0.25rem);
+}

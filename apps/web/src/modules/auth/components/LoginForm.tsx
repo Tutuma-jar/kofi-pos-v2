@@ -60,8 +60,8 @@ export function LoginForm({ client, onSuccess }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={submit} noValidate aria-label="Ingreso" aria-busy={submitting}>
-      <div>
+    <form onSubmit={submit} noValidate aria-label="Ingreso" aria-busy={submitting} className="form">
+      <div className="field">
         <label htmlFor={`${id}-username`}>Usuario</label>
         <input
           id={`${id}-username`}
@@ -76,9 +76,13 @@ export function LoginForm({ client, onSuccess }: LoginFormProps) {
           aria-invalid={!!fields.username}
           aria-describedby={fields.username ? `${id}-username-error` : undefined}
         />
-        {fields.username && <p id={`${id}-username-error`}>{fields.username}</p>}
+        {fields.username && (
+          <p id={`${id}-username-error`} className="field__error">
+            {fields.username}
+          </p>
+        )}
       </div>
-      <div>
+      <div className="field">
         <label htmlFor={`${id}-password`}>Contraseña</label>
         <input
           id={`${id}-password`}
@@ -92,10 +96,18 @@ export function LoginForm({ client, onSuccess }: LoginFormProps) {
           aria-invalid={!!fields.password}
           aria-describedby={fields.password ? `${id}-password-error` : undefined}
         />
-        {fields.password && <p id={`${id}-password-error`}>{fields.password}</p>}
+        {fields.password && (
+          <p id={`${id}-password-error`} className="field__error">
+            {fields.password}
+          </p>
+        )}
       </div>
-      {message && <p role="alert">{message}</p>}
-      <button type="submit" disabled={submitting}>
+      {message && (
+        <p role="alert" className="alert">
+          {message}
+        </p>
+      )}
+      <button type="submit" disabled={submitting} className="button-primary">
         {submitting ? 'Ingresando…' : 'Ingresar'}
       </button>
     </form>

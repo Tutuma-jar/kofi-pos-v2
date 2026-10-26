@@ -20,6 +20,10 @@ build/
 .impeccable/config.local.json
 .impeccable/hook.cache.json
 
+# Material de trabajo local de impeccable: bocetos de decisión y capturas de revisión.
+apps/web/.impeccable/mocks/
+apps/web/.impeccable/review/
+
 # Resultados de Playwright
 test-results/
 playwright-report/

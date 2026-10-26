@@ -19,3 +19,7 @@ specs/004-dashboard/evidence/measurement-cashier-repeat.json
 .github/
 .githooks/
 scripts/
+
+# Estado y configuración que escribe la skill impeccable.
+.impeccable/
+apps/web/.impeccable/

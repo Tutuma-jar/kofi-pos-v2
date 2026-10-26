@@ -1,0 +1,241 @@
+/* Estilos base que heredan todas las pantallas: tipografía, controles, foco y superficies del navegador. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  scrollbar-color: var(--color-line-strong) var(--color-cream);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-cream);
+  caret-color: var(--color-brand);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  color: var(--color-on-brand);
+  background: var(--color-brand);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-title);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: var(--text-large);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: var(--text-body);
+  font-weight: 700;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-brand);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 0.08em;
+}
+
+a:hover {
+  color: var(--color-brand-deep);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand-deep);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input:not([type='checkbox'], [type='radio']),
+select,
+textarea {
+  min-height: 2.75rem;
+  padding: 0 var(--space-2);
+  color: var(--color-ink);
+  background: var(--color-field);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius);
+  transition: border-color 150ms var(--ease-out);
+}
+
+textarea {
+  padding-block: var(--space-1);
+}
+
+input:not([type='checkbox'], [type='radio']):hover,
+select:hover,
+textarea:hover {
+  border-color: var(--color-line-strong);
+}
+
+input:not([type='checkbox'], [type='radio']):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--color-brand);
+}
+
+input[aria-invalid='true']:not([type='checkbox'], [type='radio']),
+select[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--color-brand);
+}
+
+button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  font-weight: 700;
+  color: var(--color-brand);
+  background: var(--color-field);
+  border: 2px solid var(--color-brand);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+}
+
+button:hover:not(:disabled) {
+  background: var(--color-brand-tint);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--color-line);
+}
+
+th {
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}
+
+/* Formularios y avisos compartidos. */
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field input:not([type='checkbox'], [type='radio']),
+.field select {
+  min-height: var(--control-height);
+  font-size: 1.125rem;
+}
+
+.field__error {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-error);
+}
+
+.alert,
+.notice {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  padding: 0.75rem var(--space-2);
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+
+.alert {
+  color: var(--color-error);
+  background: var(--color-error-tint);
+  border: 1px solid var(--color-error);
+}
+
+.notice {
+  color: var(--color-brand-deep);
+  background: var(--color-brand-tint);
+  border: 1px solid var(--color-brand);
+}
+
+.button-primary {
+  min-height: var(--control-height);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-on-brand);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--color-brand-deep);
+  border-color: var(--color-brand-deep);
+}
+
+.button-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button-primary:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
