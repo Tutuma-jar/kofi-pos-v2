@@ -48,6 +48,69 @@ describe('rutas del historial (RF-1, RF-2, RF-7)', () => {
     await db?.close();
   });
 
+  it('valida un número de 101 cifras dentro del historial sin truncarlo (T032)', async () => {
+    const number = '1'.repeat(101);
+    const response = await app.inject({
+      url: `/api/history/sales/${number}`,
+      headers: { cookie: cookies.owner! },
+    });
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: { code: 'NOT_FOUND', message: `No existe la venta N.º ${number}` },
+    });
+    expect(findSale).not.toHaveBeenCalled();
+  });
+  it('normaliza más de 100 ceros iniciales antes de consultar el número 3 (T032)', async () => {
+    const response = await app.inject({
+      url: `/api/history/sales/${'0'.repeat(150)}3`,
+      headers: { cookie: cookies.owner! },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(historySaleResponseSchema.parse(response.json()).sale.number).toBe(3);
+    expect(findSale).toHaveBeenCalledExactlyOnceWith(db, 3);
+  });
+  it.each(['1'.repeat(101), '0'.repeat(150) + '3', 'a'.repeat(101)])(
+    'aplica la sesión y el rol antes de validar el parámetro largo %s (T032)',
+    async (number) => {
+      const url = `/api/history/sales/${number}`;
+      expect((await app.inject(url)).statusCode).toBe(401);
+      const response = await app.inject({ url, headers: { cookie: cookies.cashier! } });
+      expect(response.statusCode).toBe(403);
+      expect(response.json()).toEqual({
+        error: { code: 'FORBIDDEN', message: HISTORY_MESSAGES.forbidden },
+      });
+      expect(findSale).not.toHaveBeenCalled();
+    },
+  );
+  it('conserva la validación de caracteres largos y no extiende la ruta a otros segmentos (T032)', async () => {
+    const invalid = await app.inject({
+      url: `/api/history/sales/${'a'.repeat(101)}`,
+      headers: { cookie: cookies.owner! },
+    });
+    expect(invalid.statusCode).toBe(400);
+    expect(invalid.json()).toEqual({
+      error: { code: 'VALIDATION_ERROR', message: HISTORY_MESSAGES.invalidSaleNumber },
+    });
+    const empty = await app.inject({
+      url: '/api/history/sales/',
+      headers: { cookie: cookies.owner! },
+    });
+    expect(empty.statusCode).toBe(400);
+    expect(empty.json()).toEqual({
+      error: { code: 'VALIDATION_ERROR', message: HISTORY_MESSAGES.invalidSaleNumber },
+    });
+    for (const path of ['3/4', '1'.repeat(101) + '/4'])
+      expect(
+        (
+          await app.inject({
+            url: `/api/history/sales/${path}`,
+            headers: { cookie: cookies.owner! },
+          })
+        ).statusCode,
+      ).toBe(404);
+    expect(findSale).not.toHaveBeenCalled();
+  });
+
   it.each(['3', '003', '%203%20'])('devuelve el detalle al dueño para %s', async (number) => {
     const response = await app.inject({
       url: `/api/history/sales/${number}`,

@@ -83,8 +83,11 @@ Rama: `feat/005-historial-us2`.
 - [x] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
-- [ ] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
+- [x] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
   Hecho cuando: pruebas de ruta y E2E cubren más de 100 caracteres, conservan el número completo en el 404, normalizan ceros iniciales para abrir una venta existente y rechazan sesiones sin permiso antes de buscar; todas las comprobaciones automatizadas pasan y se solicita la verificación de US2.
+
+- [ ] **T033 [integración] [US2]** Corregir RF-8/RNF-1: conservar las cuatro cifras del año al mostrar la fecha y hora de ventas antiguas admitidas por el calendario. Depende de: T032
+  Hecho cuando: las regresiones del formateador compartido y del detalle comprueban los años 0001 y 0099 en hora de Bolivia; las fechas actuales conservan su formato y todas las comprobaciones automatizadas pasan.
 
 ## Fase 5 — US3: consultar las cifras de un mes (P3)
 
@@ -116,7 +119,7 @@ Rama: `feat/005-historial-pulido`.
 
 | RF | Tareas |
 | --- | --- |
-| RF-1 | T003, T007, T008, T011, T014, T015, T016 |
+| RF-1 | T003, T007, T008, T011, T014, T015, T016, T032 |
 | RF-2 | T003, T004, T005, T010, T011, T014, T016, T030, T031 |
 | RF-3 | T002, T009, T010, T013, T014, T015, T016, T030, T031 |
 | RF-4 | T003, T009, T013, T016 |
@@ -124,7 +127,7 @@ Rama: `feat/005-historial-pulido`.
 | RF-6 | T007, T012, T014, T016, T020, T025 |
 | RF-7 | T009, T010, T011, T015, T017, T018, T021, T022, T024 |
 | RF-8 | T002, T003, T005, T017, T018, T020, T021, T022 |
-| RF-9 | T003, T017, T018, T019, T020, T022 |
+| RF-9 | T003, T017, T018, T019, T020, T022, T032 |
 | RF-10 | T020, T022 |
 | RF-11 | T003, T004, T005, T024, T025, T026, T030 |
 | RF-12 | T003, T024, T025, T026 |

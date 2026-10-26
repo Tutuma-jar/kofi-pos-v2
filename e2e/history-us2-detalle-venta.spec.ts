@@ -177,4 +177,11 @@ test('US2: buscar, conservar la instantánea, volver al día y abrir su detalle 
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Venta N.º 3', exact: true })).toBeVisible();
   expect(await (await request.get('/api/__test/sales')).json()).toEqual(originalSales);
+  const longNumber = '1'.repeat(101);
+  await search(longNumber);
+  await expect(page.getByRole('alert')).toHaveText(`No existe la venta N.º ${longNumber}`);
+  await expect(page.getByRole('list')).toHaveCount(0);
+  await page.goto(`/ventas/${'0'.repeat(150)}3`);
+  await expect(page.getByRole('heading', { name: 'Venta N.º 3', exact: true })).toBeVisible();
+  await expect(page.getByText('Bs 20,50', { exact: true })).toBeVisible();
 });

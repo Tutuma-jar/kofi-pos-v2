@@ -28,7 +28,16 @@ export const historyPlugin: FastifyPluginAsync<HistoryDeps & { production?: bool
     });
     return dayHistorySchema.parse(await service.day(date));
   });
+  const readSale = async (number: string) =>
+    historySaleResponseSchema.parse(await service.sale(number));
   app.get<{ Params: { number: string } }>('/api/history/sales/:number', async (request) =>
-    historySaleResponseSchema.parse(await service.sale(request.params.number)),
+    readSale(request.params.number),
   );
+  // Respaldo del mismo endpoint: los parámetros de más de 100 caracteres también deben pasar
+  // por sesión, rol y normalización, sin elevar los límites globales de otras rutas.
+  app.get<{ Params: { '*': string } }>('/api/history/sales/*', async (request, reply) => {
+    const number = request.params['*'];
+    if (!number || number.includes('/')) return reply.callNotFound();
+    return readSale(number);
+  });
 };
