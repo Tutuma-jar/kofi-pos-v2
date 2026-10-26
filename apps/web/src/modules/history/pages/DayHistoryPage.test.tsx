@@ -32,6 +32,11 @@ function mount(scenario: HistoryScenarioId = 'withSales', path = '/ventas?fecha=
 }
 
 describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
+  it('ofrece la búsqueda por número al abrir el día (US2 RF-9)', async () => {
+    mount();
+    expect(await screen.findByLabelText('Buscar venta por número')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Buscar' })).toBeVisible();
+  });
   it('muestra el primer día con el mínimo del calendario y retroceso deshabilitado (T030)', async () => {
     mount('withSales', '/ventas?fecha=0001-01-01');
     await screen.findByRole('heading', { name: 'Ventas del 01/01/0001' });
@@ -157,6 +162,10 @@ describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
     const user = userEvent.setup();
     await user.tab();
     expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Buscar' })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('button', { name: 'Día anterior' })).toHaveFocus();
     await user.keyboard('{Enter}');
