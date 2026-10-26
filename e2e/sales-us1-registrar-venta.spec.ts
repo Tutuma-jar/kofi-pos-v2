@@ -2,6 +2,82 @@ import { expect, test } from '@playwright/test';
 import { adminMenuResponseSchema, saleSchema, formatDateTime } from '@kofi/contracts';
 import { TEST_ACCOUNTS } from './fixtures.ts';
 
+test('RF-2: conserva la lista entre cambios y la refresca al recargar o ante RF-5', async ({
+  page,
+  request,
+  browser,
+}) => {
+  await request.post('/api/__test/menu', {
+    data: {
+      categories: [
+        {
+          name: 'Bebidas',
+          products: [
+            { name: 'Café', price: '10' },
+            { name: 'Té', price: '8' },
+          ],
+        },
+      ],
+    },
+  });
+  await page.goto('/ingresar');
+  await page.getByLabel('Usuario', { exact: true }).fill(TEST_ACCOUNTS.cashier.username);
+  await page.getByLabel('Contraseña', { exact: true }).fill(TEST_ACCOUNTS.cashier.password);
+  await page.getByLabel('Contraseña', { exact: true }).press('Enter');
+  await page.getByRole('link', { name: 'Nueva venta', exact: true }).click();
+  await page.getByRole('button', { name: 'Café · Bs 10,00', exact: true }).click();
+  const owner = await browser.newContext({ baseURL: new URL(page.url()).origin });
+  try {
+    expect(
+      (await owner.request.post('/api/auth/login', { data: TEST_ACCOUNTS.owner })).status(),
+    ).toBe(200);
+    const menu = adminMenuResponseSchema.parse(
+      await (await owner.request.get('/api/menu/admin')).json(),
+    );
+    const products = menu.categories.flatMap((category) => category.products);
+    const tea = products.find((product) => product.name === 'Té')!;
+    const coffee = products.find((product) => product.name === 'Café')!;
+    expect(
+      (
+        await owner.request.put(`/api/menu/products/${tea.id}`, {
+          data: { name: 'Té nuevo', categoryId: tea.categoryId, price: '9' },
+        })
+      ).status(),
+    ).toBe(200);
+    await page.getByRole('button', { name: 'Sumar Café', exact: true }).click();
+    await expect(page.getByLabel('Total de la venta')).toHaveText('Bs 20,00');
+    await expect(page.getByRole('button', { name: 'Té · Bs 8,00', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Té nuevo · Bs 9,00', exact: true })).toHaveCount(
+      0,
+    );
+    await page.reload();
+    await expect(
+      page.getByRole('button', { name: 'Té nuevo · Bs 9,00', exact: true }),
+    ).toBeVisible();
+    await expect(page.getByLabel('Total de la venta')).toHaveText('Bs 20,00');
+    expect(
+      (
+        await owner.request.put(`/api/menu/products/${coffee.id}`, {
+          data: { name: coffee.name, categoryId: coffee.categoryId, price: '11' },
+        })
+      ).status(),
+    ).toBe(200);
+    await page.getByRole('button', { name: 'Sumar Café', exact: true }).click();
+    await expect(page.getByText('Cambió el precio de “Café”: ahora cuesta Bs 11,00')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Café · Bs 11,00', exact: true })).toBeVisible();
+    expect((await owner.request.post(`/api/menu/products/${tea.id}/deactivate`)).status()).toBe(
+      200,
+    );
+    await page.getByRole('button', { name: 'Té nuevo · Bs 9,00', exact: true }).click();
+    await expect(page.getByText('“Té nuevo” ya no está en el menú')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Té nuevo · Bs 9,00', exact: true })).toHaveCount(
+      0,
+    );
+  } finally {
+    await owner.close();
+  }
+});
+
 test('RF-6: conserva la confirmación al intentar agregar un producto retirado', async ({
   page,
   request,

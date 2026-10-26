@@ -229,7 +229,7 @@ POST /api/sales { draftId, paymentMethod, lines }:           # cada línea con u
 - **Medio de pago (RF-6, RF-8).** Se guarda el de la petición. Un reintento con el mismo `draftId` devuelve la venta ya registrada con su medio de pago, aunque la petición traiga otro.
 - **Quién (RF-11).** Se guardan `user.id`, `user.displayName` y `user.role` de la sesión; si después la cuenta se elimina, `registered_by_user_id` pasa a `NULL` y el nombre y el rol quedan.
 
-### 5.4 Venta en preparación en la interfaz (RF-3 a RF-9, RF-12 a RF-14)
+### 5.4 Venta en preparación en la interfaz (RF-2 a RF-9, RF-12 a RF-14)
 
 ```text
 estado: { draftId, lines (las del último cálculo), totalCents, notices, menu, paymentMethod (null al empezar),
@@ -237,11 +237,14 @@ estado: { draftId, lines (las del último cálculo), totalCents, notices, menu, 
 
 abrir NewSalePage:    guardada ← draftStore.load(user.id)           # otra cuenta → se descarta (RF-13)
                       draftId ← guardada?.draftId ?? crypto.randomUUID()
-                      calcular(guardada?.lines ?? [])
+                      calcular(guardada?.lines ?? [], refrescarLista = true)
 agregar(producto):    si ya está: su cantidad + 1; si no: al final { productId, productName, quantity: 1 }
 «+» / «−» / «Quitar»: la cantidad ± 1 o sin la línea                  # «−» deshabilitado con cantidad 1
-calcular(deseadas):   busy; r ← client.quote({ lines: deseadas })
-                      ok              → lines, totalCents, notices, menu ← r; draftStore.save(user.id, draftId, r.lines)
+calcular(deseadas, refrescarLista = false): busy; r ← client.quote({ lines: deseadas })
+                      ok              → lines, totalCents, notices ← r; draftStore.save(user.id, draftId, r.lines)
+                                        si refrescarLista o avisos RF-5 o nombre/categoría de una línea cambió:
+                                          menu ← r.menu
+                                        si no: conservar los productos para vender que ya se mostraban (RF-2)
                       VALIDATION_ERROR → mostrar fields.lines; nada cambia                    # RF-3
                       NETWORK_ERROR    → «No hay conexión. Inténtalo de nuevo»; nada cambia   # RF-9
 elegir medio de pago: paymentMethod ← 'cash' | 'qr'; draftStore.save(…)                     # RF-6, RF-12
@@ -255,6 +258,7 @@ descartar:            DiscardSaleDialog → draftStore.clear(); draftId nuevo; l
 ```
 
 - `busy` deshabilita todas las acciones hasta la respuesta, para que cada cambio se muestre calculado antes del siguiente (RF-4). Los avisos se muestran hasta el siguiente cálculo o registro (RF-5).
+- Sincronizar otra pestaña recalcula la preparación sin forzar la actualización de los productos para vender. Abrir/recargar sí la fuerza; el recálculo tras `MENU_CHANGED` también la actualiza (RF-5, RF-7). Los importes y las líneas siempre son los recibidos de la API; conservar la lista presentada no congela sus cálculos.
 - La confirmación vive solo en el estado de la página: desaparece al agregar un producto, al salir o al recargar (RF-6).
 - **Historia 1:** `draftStore` es un almacén en memoria de la página. **Historia 2:** se sustituye por el de `localStorage` (D-8), con la misma interfaz.
 
@@ -373,7 +377,7 @@ POST /api/sales         (el precio del café cambió a Bs 13,00 antes del primer
 
 ## 7. Decisiones técnicas
 
-Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobadas al fusionar el PR de definición.
+Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobadas al fusionar el PR que las contiene.
 
 | # | Decisión | Por qué | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
@@ -394,6 +398,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 **D-14 — Decisión delegada (2026-10-25, preparación de T026):** separar la preparación automatizable como T033, conservando T026 para la ejecución humana y su evidencia. Añadir `npm run measure:sales` con Node y Playwright existentes. La persona ingresa directamente en Chromium, sin pasar credenciales por chat, argumentos o archivos. El medidor exige los 200 productos vigentes de `seed:menu`, excluye un calentamiento por operación y mide 20 aperturas, 20 cambios y 20 registros hasta ver la respuesta en la interfaz. Los límites son estrictos: 19/20 aperturas y registros por debajo de 2000 ms y 19/20 cambios por debajo de 1000 ms. Después cronometra una venta humana de tres productos distintos, una unidad de cada uno, desde abrir Nueva venta hasta su confirmación, en menos de 30000 ms. Guarda muestras, fecha de Bolivia y commit local en un JSON de la carpeta Git, primero sin la prueba humana y después completo. Crea 21 ventas automáticas ficticias (incluido el calentamiento) y una humana; no elimina ventas ni reintenta registros fallidos. La rama y los commits desplegados en ambos servicios y la base de Neon de comprobación se contrastan por la persona antes de medir. Se descartan medir solo HTTP y automatizar también la venta humana, porque no comprueban la percepción completa ni el criterio de uso de 30 segundos. Sin dependencias ni cambios del contrato. La guía de ejecución está en `measurement.md`.
 
 **D-15 — Decisión delegada (2026-10-25, ejecución de T026):** reutilizar la base de comprobación ya configurada por la persona, una vez contrastada su conexión con Render sin divulgar credenciales. Contiene los 200 productos del seed y dos productos adicionales de las pruebas anteriores. Desactivar temporalmente esos dos mediante los servicios de Menú de la API y reactivarlos al terminar, conservando todos los datos y cuentas. El medidor sigue exigiendo exactamente 200 productos vigentes del seed y conserva las ventas ficticias. Se descarta recrear la base o borrar productos: no aporta cobertura y obliga a configurar cuentas y conexiones de nuevo. La conexión y los despliegues pueden comprobarse mediante Chrome autorizado por la persona; el ingreso en Chromium y la venta cronometrada siguen siendo humanos.
+
+**D-16 — Decisión delegada (2026-10-25, corrección T034 del verificador):** mantener en el estado de presentación los productos para vender de RF-2 entre cálculos sin casos de RF-5, aunque la respuesta de la API incluya siempre el menú vigente. Se conservan únicamente esos productos presentados: las líneas, los importes y los avisos se toman íntegros de la nueva respuesta. Abrir/recargar fuerza la lista vigente; sincronizar otra pestaña no la fuerza. Los avisos de la API, un cambio de nombre/categoría de una línea ya presentada o el recálculo tras `MENU_CHANGED` sí la renuevan. Se descarta modificar el contrato o el cálculo de la API: la diferencia detectada es de presentación. T035 repite las mediciones reales sobre el código corregido.
 
 ### 7.1 Dependencias
 

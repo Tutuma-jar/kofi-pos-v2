@@ -18,6 +18,61 @@ function mount(client = createSalesDemoClient('loaded'), userId = DEMO_IDS.cashi
 }
 
 describe('venta en preparación (RF-3 a RF-5, RF-9)', () => {
+  it('conserva los productos sin RF-5 y los actualiza al volver a abrir (RF-2)', async () => {
+    const client = createSalesDemoClient('loaded');
+    const first = mount(client);
+    await waitFor(() => expect(first.result.current.busy).toBe(false));
+    await act(() => first.result.current.addProduct(coffee));
+    const originalMenu = first.result.current.quote!.menu;
+    const changedMenu = structuredClone(originalMenu);
+    Object.assign(changedMenu[0]!.products[1]!, { name: 'Té nuevo', priceCents: 900 });
+    const original = client.quote;
+    vi.spyOn(client, 'quote').mockImplementation(async (request) => ({
+      ...(await original(request)),
+      menu: changedMenu,
+    }));
+    await act(() => first.result.current.increment(coffee.id));
+    expect(first.result.current.quote!.totalCents).toBe(2500);
+    expect(first.result.current.quote!.notices).toEqual([]);
+    expect(first.result.current.quote!.menu).toEqual(originalMenu);
+    act(() => window.dispatchEvent(new StorageEvent('storage', { key: SALE_DRAFT_KEY })));
+    await waitFor(() => expect(first.result.current.busy).toBe(false));
+    expect(first.result.current.quote!.menu).toEqual(originalMenu);
+    first.unmount();
+    const reopened = mount(client);
+    await waitFor(() => expect(reopened.result.current.busy).toBe(false));
+    expect(reopened.result.current.quote!.menu).toEqual(changedMenu);
+  });
+  it.each(['price', 'removed', 'name', 'category'] as const)(
+    'actualiza los productos ante el caso RF-5 %s',
+    async (change) => {
+      const client = createSalesDemoClient('loaded');
+      const { result } = mount(client);
+      await waitFor(() => expect(result.current.busy).toBe(false));
+      await act(() => result.current.addProduct(coffee));
+      const original = client.quote;
+      const changedMenu = structuredClone(result.current.quote!.menu);
+      Object.assign(changedMenu[0]!.products[1]!, { name: 'Té nuevo', priceCents: 900 });
+      vi.spyOn(client, 'quote').mockImplementation(async (request) => {
+        const calculated = await original(request);
+        return {
+          ...calculated,
+          menu: changedMenu,
+          notices: change === 'price' || change === 'removed' ? ['Aviso de la API'] : [],
+          lines:
+            change === 'removed'
+              ? []
+              : calculated.lines.map((line) => ({
+                  ...line,
+                  productName: change === 'name' ? 'Café nuevo' : line.productName,
+                  categoryName: change === 'category' ? 'Otra categoría' : line.categoryName,
+                })),
+        };
+      });
+      await act(() => result.current.increment(coffee.id));
+      expect(result.current.quote!.menu).toEqual(changedMenu);
+    },
+  );
   it('abre vacía y envía las líneas deseadas para agregar, sumar, restar y quitar', async () => {
     const client = createSalesDemoClient('loaded');
     const quote = vi.spyOn(client, 'quote');
