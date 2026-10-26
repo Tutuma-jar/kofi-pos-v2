@@ -1,23 +1,23 @@
 # T026 — Medir Ventas en Render y Neon de comprobación
 
-Estado: **medición real completada el 2026-10-25 a las 21:09:17, hora de Bolivia**. Las muestras originales están en [`measurement-results.json`](measurement-results.json).
+Estado: **medición real repetida tras corregir RF-2 (T035), el 2026-10-25 a las 21:36:30, hora de Bolivia**. Las muestras actuales están en [`measurement-results.json`](measurement-results.json).
 
-## Resultado real de T026
+## Resultado real de T026 y reevaluación T035
 
-Se ejecutó `npm run measure:sales` desde Chromium en la computadora de la persona, contra `https://kofi-web.onrender.com`, con los 200 productos vigentes del seed. La persona ingresó directamente en Chromium y realizó la venta manual; el medidor ejecutó las tres series automáticas. Se excluyó un calentamiento por operación y se conservaron las 22 ventas ficticias.
+Se ejecutó de nuevo `npm run measure:sales` desde Chromium en la computadora de la persona, contra `https://kofi-web.onrender.com`, con los 200 productos vigentes del seed y el código corregido de T034. La persona ingresó directamente en Chromium y realizó la venta manual; el medidor ejecutó las tres series automáticas. Se excluyó un calentamiento por operación y se conservaron las 22 ventas ficticias de esta ejecución.
 
 | Criterio | Resultado | p95 | Veredicto |
 | --- | --- | --- | --- |
-| Abrir Nueva venta < 2000 ms | 19/20 | 1752,622 ms | Cumple |
-| Cambiar la preparación < 1000 ms | 20/20 | 581,210 ms | Cumple |
-| Registrar venta < 2000 ms | 20/20 | 487,666 ms | Cumple |
-| Venta humana de tres productos < 30000 ms | 9807,158 ms | — | Cumple |
+| Abrir Nueva venta < 2000 ms | 20/20 | 1379,913 ms | Cumple |
+| Cambiar la preparación < 1000 ms | 20/20 | 560,007 ms | Cumple |
+| Registrar venta < 2000 ms | 20/20 | 460,790 ms | Cumple |
+| Venta humana de tres productos < 30000 ms | 9218,840 ms | — | Cumple |
 
-Una apertura tardó 2666,518 ms; las otras 19 quedaron bajo el límite, por lo que satisface el 95 % exigido. Los valores completos sin redondear están en el JSON.
+Todas las operaciones medidas quedaron bajo sus límites estrictos. Los valores completos sin redondear están en el JSON. La primera ejecución de T026 (commit `5b5c34a`) había cumplido con 19/20 aperturas y 20/20 cambios y registros, y una venta humana de 9807,158 ms. T035 sustituye la evidencia actual porque T034 cambió código de la interfaz; la primera ejecución permanece en el historial de Git.
 
-Render confirmó **Live** en ambos servicios sobre `ca8e1d21efaa173e93faaf5f8802b05e39021805`, rama `feat/003-ventas-pulido`: [despliegue de la API](https://dashboard.render.com/web/srv-dbe5trbl550s73f9g2l0/deploys/dep-dbfae5m7bikc73cpeebg) y [despliegue web](https://dashboard.render.com/static/srv-dbe5trbl550s73f9g2kg/deploys/dep-dbfae5m7bikc73cpee60). La sincronización del Blueprint fue `exe-dbfae4tg1s2s73f2afl0`. `GET /api/health` a través de la web respondió 200 con `{"status":"ok"}` antes de medir.
+Render confirmó **Live** en ambos servicios sobre `f548356a09bbf74b4dd21715593a51fb62618cdb`, rama `feat/003-ventas-pulido`: [despliegue de la API](https://dashboard.render.com/web/srv-dbe5trbl550s73f9g2l0/deploys/dep-dbfaqus9v7es73d9gmq0) y [despliegue web](https://dashboard.render.com/static/srv-dbe5trbl550s73f9g2kg/deploys/dep-dbfaqus9v7es73d9gmt0). La sincronización inicial del Blueprint fue `exe-dbfae4tg1s2s73f2afl0`; T034 se desplegó automáticamente al publicar la corrección. `GET /api/health` a través de la web respondió 200 con `{"status":"ok"}` antes de medir.
 
-Se contrastó sin divulgar credenciales que Render y el entorno local usan la misma base de Neon ya preparada. Antes de medir había 202 productos activos, incluidos los 200 del seed, y ninguna venta. Se desactivaron temporalmente «comida» y «comida2» mediante los servicios de Menú de la API; al terminar se reactivaron ambos. La base conserva sus cuentas, los 202 productos activos y las 22 ventas ficticias. No se borraron datos ni se cambió la conexión privada. Para repetir, hay que volver a preparar exactamente los 200 productos vigentes del seed (D-15).
+Se contrastó sin divulgar credenciales que Render y el entorno local usan la misma base de Neon ya preparada. Antes de T035 había 202 productos activos, incluidos los 200 del seed, y las 22 ventas de T026. Se desactivaron temporalmente «comida» y «comida2» mediante los servicios de Menú de la API; al terminar se reactivaron ambos. La base conserva sus cuentas, los 202 productos activos y las 44 ventas ficticias de ambas ejecuciones. No se borraron datos ni se cambió la conexión privada. Para repetir, hay que volver a preparar exactamente los 200 productos vigentes del seed (D-15).
 
 ## 1. Actualizar la computadora usada para medir
 
@@ -101,4 +101,4 @@ Incluye también la confirmación de que los dos servicios estaban Live con ese 
 
 Un tiempo igual al límite no cumple. Una salida no exitosa del medidor puede indicar que un criterio no se cumplió; envía el informe y el mensaje de la terminal sin datos privados para revisarlo. No sustituyas la medición real con los resultados de `test:measure`.
 
-Con la evidencia real se completa T026 en el PR de Pulido, se implementa T027 y se delega la verificación. El retorno de Blueprint y servicios a `main`, con la base de producción, se hace al publicar la especificación por el flujo humano del proyecto; esta preparación no fusiona ni publica producción.
+La evidencia real acredita T026 y su reevaluación T035 en el PR de Pulido; T027 documenta el uso del módulo y después se delega la verificación completa. El retorno de Blueprint y servicios a `main`, con la base de producción, se hace al publicar la especificación por el flujo humano del proyecto; esta preparación no fusiona ni publica producción.

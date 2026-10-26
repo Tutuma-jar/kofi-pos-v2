@@ -109,7 +109,7 @@ Rama: `feat/003-ventas-pulido`.
   Hecho cuando: el README describe esos tres puntos.
 - [x] **T034 [web] [integración]** Corregir RF-2 tras la verificación completa: conservar la lista de productos entre cálculos sin casos de RF-5 y al sincronizar otra pestaña; actualizarla al abrir/recargar, ante avisos de RF-5 o cambios de nombre/categoría de una línea. Corregir el plan §5.4, con regresiones de hook y E2E escritas antes del código. Depende de: T027
   Hecho cuando: editar un producto ajeno a la preparación y cambiar una cantidad conserva la lista, sin impedir el cálculo oficial; abrir/recargar y los casos de RF-5 sí la actualizan, y todas las comprobaciones pasan.
-- [ ] **T035 [integración]** Repetir la medición real de RNF-3 y de la venta humana tras T034, desplegando el mismo código corregido en ambos servicios y actualizando la evidencia y el README. Depende de: T034
+- [x] **T035 [integración]** Repetir la medición real de RNF-3 y de la venta humana tras T034, desplegando el mismo código corregido en ambos servicios y actualizando la evidencia y el README. Depende de: T034
   Hecho cuando: se registran las 60 muestras nuevas, los límites de T026 vuelven a cumplirse y la venta humana de tres productos tarda menos de 30 segundos. Después se vuelve a delegar la verificación del mismo PR.
 
 ## Cobertura de RF
