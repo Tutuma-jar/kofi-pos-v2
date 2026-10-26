@@ -77,14 +77,19 @@ Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición 
 
 Rama: `feat/004-dashboard-us2`.
 
-- [ ] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
+- [x] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
-- [ ] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
+- [x] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
   Hecho cuando: las pruebas comprueban que se pide el rango de `boliviaMonthRange`, que la respuesta cumple `monthSummarySchema` con el `month` y los días del 1 a hoy, y que la ruta responde `200` al dueño, `403 FORBIDDEN` con «No tienes permiso para ver el resumen del mes» al cajero sin llamar a la función de ventas, y `401` sin sesión.
-- [ ] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy, solo con los roles de `DASHBOARD_MONTH_ROLES`, y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate`; un `403` del mes muestra su mensaje en lugar de la sección, sin cifras del mes (plan §5.5, D-6, D-7; RF-6, RF-7, RF-9, RF-10). Depende de: T014
+- [x] **T019 [web] [P] [US2]** Pedir el resumen del mes en `useDashboardSummaries` en paralelo con el de hoy, solo con los roles de `DASHBOARD_MONTH_ROLES`, y escribir `MonthSummarySection.tsx` y `DailySalesTable.tsx`: «[Mes] de [año]» con `formatMonth`, «Datos al …», `PeriodSummaryView` con «Todavía no hay ventas este mes» y una fila por día con `formatDate`; un `403` del mes muestra su mensaje en lugar de la sección, sin cifras del mes (plan §5.5, D-6, D-7; RF-6, RF-7, RF-9, RF-10). Depende de: T014
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran «Octubre de 2026» con sus cifras y sus días tal como llegan («01/10/2026 · Bs 8,00 · 1 venta», «02/10/2026 · Bs 0,00 · 0 ventas»), el mes vacío con su aviso, la sección del mes después de la de hoy, que con una sesión de cajero no se pide el mes ni aparece su sección, que el escenario sin permiso muestra «No tienes permiso para ver el resumen del mes» con el resumen de hoy visible, y que «Actualizar» y sin conexión se aplican a los dos resúmenes.
-- [ ] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
+- [x] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
+
+**Corrección de integración tras el squash merge de US1:**
+
+- [x] **T034 [integración] [US2]** Integrar `origin/develop` mediante merge en la rama de US2 y resolver las adiciones duplicadas de US1, conservando las ampliaciones del mes y las pruebas de ambas historias (RF-1 a RF-10). Depende de: T020
+  Hecho cuando: no quedan conflictos ni cambios funcionales respecto a la implementación verificada de US2, pasan las comprobaciones existentes y el PR se publica actualizado hacia `develop`.
 
 ## Fase 5 — Pulido
 
