@@ -531,3 +531,9 @@ Regresiones: ventas de ambos lados del salto en servicio y API real/PGlite; lím
 **Decisión delegada:** conservar la ruta nominal del detalle y añadir en el mismo endpoint un respaldo del enrutador para parámetros que superen el límite predeterminado de 100 caracteres. Ambos pasan por los mismos hooks de sesión/rol y por `service.sale`; el respaldo no admite segmentos vacíos ni rutas con varios segmentos. Motivo: un diagnóstico automatizado de Fastify devuelve 414 con 101 caracteres antes de validar o normalizar, contradiciendo RF-9 incluso para muchos ceros seguidos de un número existente. Se descarta truncar el número, imponer una longitud de negocio o aumentar globalmente los límites del enrutador. El contrato público no cambia.
 
 Regresiones: 101 cifras sin venta conservadas en el mensaje, ceros iniciales largos normalizados, 401/403 previos a la lectura, rechazo de rutas ajenas al endpoint y E2E real de búsqueda y URL directa. Análisis: la corrección traza a RF-1/RF-9, sin dependencias nuevas, conflictos con la constitución ni aclaraciones abiertas.
+
+## 16. Año del detalle con cuatro cifras (T033)
+
+**Decisión delegada:** rellenar a cuatro cifras el año de `formatDateTime` en el formateador compartido. Motivo: RF-8 y el calendario admitido requieren conservar el formato de la fecha también para 0001 y 0099; Intl devuelve esos años sin ceros iniciales. Se descarta corregirlo solo en la pantalla o restringir las fechas antiguas. Sin dependencias nuevas ni cambios de esquema; las fechas actuales mantienen su presentación.
+
+Regresiones escritas antes del código: fechas y horas históricas de Bolivia con años 0001 y 0099 en el contrato y en el detalle. Análisis: T033 cubre RF-8/RNF-1, sin tareas huérfanas, contradicciones constitucionales ni aclaraciones abiertas.

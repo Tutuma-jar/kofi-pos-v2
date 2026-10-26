@@ -86,7 +86,7 @@ Rama: `feat/005-historial-us2`.
 - [x] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
   Hecho cuando: pruebas de ruta y E2E cubren más de 100 caracteres, conservan el número completo en el 404, normalizan ceros iniciales para abrir una venta existente y rechazan sesiones sin permiso antes de buscar; todas las comprobaciones automatizadas pasan y se solicita la verificación de US2.
 
-- [ ] **T033 [integración] [US2]** Corregir RF-8/RNF-1: conservar las cuatro cifras del año al mostrar la fecha y hora de ventas antiguas admitidas por el calendario. Depende de: T032
+- [x] **T033 [integración] [US2]** Corregir RF-8/RNF-1: conservar las cuatro cifras del año al mostrar la fecha y hora de ventas antiguas admitidas por el calendario. Depende de: T032
   Hecho cuando: las regresiones del formateador compartido y del detalle comprueban los años 0001 y 0099 en hora de Bolivia; las fechas actuales conservan su formato y todas las comprobaciones automatizadas pasan.
 
 ## Fase 5 — US3: consultar las cifras de un mes (P3)
@@ -126,13 +126,13 @@ Rama: `feat/005-historial-pulido`.
 | RF-5 | T010, T012, T014, T016, T020, T022, T025 |
 | RF-6 | T007, T012, T014, T016, T020, T025 |
 | RF-7 | T009, T010, T011, T015, T017, T018, T021, T022, T024 |
-| RF-8 | T002, T003, T005, T017, T018, T020, T021, T022 |
+| RF-8 | T002, T003, T005, T017, T018, T020, T021, T022, T033 |
 | RF-9 | T003, T017, T018, T019, T020, T022, T032 |
 | RF-10 | T020, T022 |
 | RF-11 | T003, T004, T005, T024, T025, T026, T030 |
 | RF-12 | T003, T024, T025, T026 |
 | RF-13 | T003, T004, T023, T024, T025, T026 |
-| RNF-1 | T013, T014, T016, T020, T025 (textos en español comparados tal como los define `spec.md`) |
+| RNF-1 | T013, T014, T016, T020, T025, T033 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T009, T023 |
 | RNF-3 | T027, T028, T028-H |
 | RNF-4 | T014, T016, T019, T020, T022, T025, T026 |

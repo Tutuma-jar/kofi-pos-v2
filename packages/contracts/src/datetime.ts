@@ -17,7 +17,7 @@ const dateTimeFormat = new Intl.DateTimeFormat('es-BO', {
 // navegador (plan §5.6).
 export function formatDateTime(iso: string): string {
   const parts = dateTimeParts(iso);
-  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+  return `${parts.day}/${parts.month}/${parts.year!.padStart(4, '0')} ${parts.hour}:${parts.minute}`;
 }
 
 function dateTimeParts(iso: string): Record<string, string> {

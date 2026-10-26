@@ -4,6 +4,14 @@ import { DEMO_SALES } from '../dev/fixtures.ts';
 import { SaleDetailView } from './SaleDetailView.tsx';
 
 describe('instantánea de la venta (RF-7, RF-8)', () => {
+  it.each([
+    ['0001-01-01T04:32:36.000Z', '01/01/0001 00:00'],
+    ['0099-12-31T12:00:00.000Z', '31/12/0099 07:27'],
+  ])('conserva las cuatro cifras del año de %s (T033)', (registeredAt, text) => {
+    render(<SaleDetailView sale={{ ...DEMO_SALES['3']!.sale, registeredAt }} />);
+    expect(screen.getByText(text, { exact: true })).toBeVisible();
+  });
+
   it('muestra fecha, persona, pago, líneas en orden y total recibido sin recalcular', () => {
     render(<SaleDetailView sale={{ ...DEMO_SALES['3']!.sale, totalCents: 9999 }} />);
     for (const text of [
