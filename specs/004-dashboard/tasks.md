@@ -70,7 +70,7 @@ Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición 
   Hecho cuando: las pruebas de componente, con el cliente simulado, cubren cada escenario de `dev/`, «Actualizar» deshabilitado mientras carga, «Actualizar» con Tab e Intro, y que la página no hace cuentas (muestra los valores de los fixtures tal cual).
 - [x] **T015 [integración] [US1]** Registrar `dashboardPlugin` en `app.ts` con `listRegisteredSales` de `modules/sales/index.ts` y la sesión de SPEC-001, y comprobar que la aplicación usa el cliente real del dashboard sin `?escenarios=dashboard` (plan D-1; RF-1, RF-2, RF-8). Depende de: T011, T014, SPEC-003 T015, SPEC-003 T020, SPEC-002 T018
   Hecho cuando: una prueba de integración con `buildApp` registra dos ventas con `POST /api/sales` en días distintos (reloj falso) y `GET /api/dashboard/today` cuenta solo la de hoy, sin modificar ninguna venta; la interfaz en `vite preview` muestra el resumen de hoy contra la API de E2E; la pantalla inicial muestra «Resumen de ventas» al dueño y al cajero; y `npm test` sigue pasando.
-- [ ] **T016 [integración] [US1]** Escribir `e2e/dashboard-us1-resumen-hoy.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-8, RNF-4). Depende de: T015, SPEC-002 T023
+- [x] **T016 [integración] [US1]** Escribir `e2e/dashboard-us1-resumen-hoy.spec.ts` con los 6 pasos de §8.2 del plan (RF-1 a RF-8, RNF-4). Depende de: T015, SPEC-002 T023
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
 ## Fase 4 — US2: ver el resumen del mes en curso (P2)
