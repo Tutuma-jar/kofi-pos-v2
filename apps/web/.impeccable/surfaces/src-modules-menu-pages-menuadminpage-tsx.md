@@ -47,8 +47,10 @@ Las mediciones guardadas en `.impeccable/review/menu-measurements.json` abarcan 
 
 La revisión independiente informó render sin hallazgos materiales y disposición `fix` únicamente por la persistencia del gate hero. La adjudicación visual considera el aviso de tamaño móvil orientativo: el título local de 32 px sigue legible. Las columnas y etiquetas que el comparador clasifica como `missing` están presentes en las capturas completas; sus cajas cambiaron de posición respecto de la composición.
 
-## Limitación pendiente de autorización
+## Autorización de cierre y limitación del validador
 
 El informe `.impeccable/review/diff/final/report.json` conserva veredicto `drift`, puntuación global 75,74 % y estructura 88,13 %. `.impeccable/review/diff/hero/report.json` y `.impeccable/build/spec.json` conservan la comparación regional. `.impeccable/build/state.json` permanece en fase `hero`, estado `open`, con `gate.ok: false` y sin cierre final.
 
-La documentación y la revisión del render quedan registradas, pero el cierre automático no está aprobado. Las diferencias regionales entre la imagen generada y el brief confirmado no se han ocultado ni se ha forzado el gate. Falta autorización expresa de la persona para rebajar la autoridad exacta de la composición frente al brief y al sistema existente; hasta entonces no se declara completado el flujo de build.
+La persona respondió «autorizo» a la pregunta «¿Autorizas cerrar la revisión haciendo prevalecer el brief aprobado y el sistema visual existente sobre la reproducción exacta del boceto?». Con esa autorización, el brief y el sistema existente prevalecen sobre la copia exacta de la composición generada. No queda pendiente una decisión de la persona sobre esta excepción.
+
+Se intentó registrar la excepción mediante `build-phase advance --force --reason`, citando la autorización y su contexto. El validador rechazó el cierre y mantuvo la fase abierta; también rechazó `build-phase finish --disposition ship` por las fases sin cerrar. No se alteró manualmente el estado ni se presenta el resultado automático como aprobado. Las diferencias y los informes siguen conservados como evidencia. La revisión del render no encontró defectos materiales; el flujo automático de build permanece incompleto por esta limitación del validador, pese a la autorización explícita registrada.
