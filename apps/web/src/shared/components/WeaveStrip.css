@@ -1,0 +1,14 @@
+.weave {
+  display: block;
+  flex: none;
+}
+
+.weave--vertical {
+  width: var(--weave-size);
+  height: 100%;
+}
+
+.weave--horizontal {
+  width: 100%;
+  height: var(--weave-size);
+}

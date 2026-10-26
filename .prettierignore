@@ -15,3 +15,7 @@ test-results/
 .github/
 .githooks/
 scripts/
+
+# Estado y configuración que escribe la skill impeccable.
+.impeccable/
+apps/web/.impeccable/

@@ -1,0 +1,48 @@
+/* Tokens del sistema visual de Kofi POS (DESIGN.md). Azul y crema fijados por la persona; el aguayo
+   solo vive en la tira tejida y en los colores de los módulos. */
+:root {
+  --color-brand: #3e5879;
+  --color-brand-deep: #2e4360;
+  --color-brand-tint: #e4e9ef;
+  --color-on-brand: #fbf7ef;
+  --color-on-brand-muted: #ccd5e1;
+
+  --color-cream: #fbf7ef;
+  --color-cream-deep: #f3ecdf;
+  --color-field: #fffdf8;
+  --color-line: #d6cfc2;
+  --color-line-strong: #8f8778;
+
+  --color-ink: #1f2430;
+  --color-ink-muted: #565b66;
+
+  --color-error: #b3261e;
+  --color-error-tint: #f8e6e2;
+
+  --color-weave-orange: #e07a2e;
+  --color-weave-green: #2f7d5b;
+  --color-weave-magenta: #b0306a;
+  --color-weave-light: #fbf7ef;
+
+  --font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-small: 0.875rem;
+  --text-body: 1.0625rem;
+  --text-large: 1.375rem;
+  --text-title: 2.5rem;
+  --text-display: clamp(3.5rem, 6.5vw, 6rem);
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+  --space-12: 6rem;
+
+  --radius: 0.5rem;
+  --control-height: 3.5rem;
+  --weave-size: 4rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
