@@ -24,8 +24,10 @@
       "error-tint": { "role": "error", "displayName": "Rojo velado", "canonical": "#f8e6e2", "tonalRamp": ["#0d0b0a", "#2a2524", "#4a4342", "#6d6462", "#928684", "#b8aaa7", "#ddcdc9", "#f5ecea"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Solo «Kofi POS» en el panel de marca del ingreso; 3rem bajo 900 px." },
+      "display": { "displayName": "Display", "purpose": "Solo «Kofi POS» en el panel de marca del ingreso." },
+      "display-compact": { "displayName": "Display compacto", "purpose": "«Kofi POS» en la franja superior bajo 900 px." },
       "headline": { "displayName": "Headline", "purpose": "Título de pantalla (h1)." },
+      "feature": { "displayName": "Feature", "purpose": "Solo el acceso a «Nueva venta», la tarea principal del mostrador." },
       "title": { "displayName": "Title", "purpose": "h2, nombre de quien opera, accesos de módulo; el saludo en 400." },
       "control": { "displayName": "Control", "purpose": "Botón principal en 800; campos de formulario en 400." },
       "body": { "displayName": "Body", "purpose": "Texto corrido; etiquetas de campo en 600." },
@@ -33,7 +35,7 @@
     },
     "shadows": [],
     "motion": [
-      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva de todas las transiciones de estado (150 ms en bordes y fondos, 300 ms en el giro del rombo de módulo). Con movimiento reducido, las duraciones se anulan." }
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva de todas las transiciones de estado (150 ms en bordes y fondos, 200 ms en el avance de la flecha de un acceso de módulo). Con movimiento reducido, las duraciones se anulan." }
     ],
     "breakpoints": [
       { "name": "stack", "value": "56.25rem", "purpose": "Bajo 900 px el bloque azul pasa a franja superior y la tira tejida a horizontal." }
@@ -87,11 +89,11 @@
     },
     {
       "name": "Acceso de módulo",
-      "kind": "card",
-      "refersTo": "module-tile",
-      "description": "Acceso de la pantalla inicial con muestra de rombo en el color del módulo.",
-      "html": "<a class=\"ds-module\" href=\"#\"><span class=\"ds-module-swatch\"></span>Nueva venta</a>",
-      "css": ".ds-module { --tone: #e07a2e; display: flex; gap: 1rem; align-items: center; min-height: 5.5rem; padding: 1rem 1.5rem; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); font-size: 1.375rem; font-weight: 700; color: #1f2430; text-decoration: none; background: #fffdf8; border: 1px solid #d6cfc2; border-radius: 0.5rem; transition: border-color 150ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover { background: #f3ecdf; border-color: var(--tone); } .ds-module:focus-visible { outline: 3px solid #2e4360; outline-offset: 2px; } .ds-module-swatch { position: relative; flex: none; width: 2.5rem; height: 2.5rem; background: var(--tone); border-radius: 0.25rem; } .ds-module-swatch::after { position: absolute; inset: 0.625rem; content: ''; background: #fbf7ef; transform: rotate(45deg); transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover .ds-module-swatch::after { transform: rotate(135deg); }"
+      "kind": "list-item",
+      "refersTo": "module-row",
+      "description": "Fila de la lista de la pantalla inicial: rombo tejido en el color del módulo, nombre y flecha.",
+      "html": "<ul class=\"ds-modules\"><li><a class=\"ds-module\" href=\"#\" style=\"--tone:#2f7d5b\"><svg class=\"ds-swatch\" viewBox=\"0 0 28 28\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#2f7d5b\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/></svg><span class=\"ds-label\">Ver menú</span><svg class=\"ds-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a></li><li><a class=\"ds-module ds-module--feature\" href=\"#\" style=\"--tone:#e07a2e\"><svg class=\"ds-swatch\" viewBox=\"0 0 28 28\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#e07a2e\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/></svg><span class=\"ds-label\">Nueva venta</span><svg class=\"ds-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a></li></ul>",
+      "css": ".ds-modules { margin: 0; padding: 0; list-style: none; border-top: 1px solid #d6cfc2; font-family: var(--font-sans, 'Figtree', system-ui, sans-serif); } .ds-modules li { border-bottom: 1px solid #d6cfc2; } .ds-module { display: flex; gap: 1rem; align-items: center; min-height: 4.5rem; padding: 1rem; font-size: 1.375rem; font-weight: 700; color: #1f2430; text-decoration: none; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover { background: #f3ecdf; } .ds-module:focus-visible { outline: 3px solid #2e4360; outline-offset: 2px; } .ds-module--feature { min-height: 6rem; font-size: 1.75rem; font-weight: 800; } .ds-swatch { flex: none; width: 2.5rem; height: 2.5rem; background: var(--tone); } .ds-module--feature .ds-swatch { width: 3.5rem; height: 3.5rem; } .ds-label { flex: 1; } .ds-arrow { flex: none; width: 1.5rem; height: 1.5rem; fill: none; stroke: #565b66; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-module:hover .ds-arrow { stroke: var(--tone); transform: translateX(0.25rem); }"
     },
     {
       "name": "Avisos",
@@ -105,8 +107,8 @@
       "name": "Tira tejida",
       "kind": "custom",
       "refersTo": "weave-strip",
-      "description": "Firma de Kofi: tira de aguayo de 64 px en el borde del bloque azul; decorativa y sin animación.",
-      "html": "<svg class=\"ds-weave\" aria-hidden=\"true\" width=\"64\" height=\"224\" xmlns=\"http://www.w3.org/2000/svg\"><defs><pattern id=\"ds-pallay\" x=\"22\" y=\"0\" width=\"28\" height=\"28\" patternUnits=\"userSpaceOnUse\"><rect width=\"28\" height=\"28\" fill=\"#b0306a\"/><path d=\"M14 3 25 14 14 25 3 14z\" fill=\"#fbf7ef\"/><path d=\"M14 9 19 14 14 19 9 14z\" fill=\"#2f7d5b\"/></pattern></defs><rect x=\"0\" width=\"10\" height=\"100%\" fill=\"#e07a2e\"/><rect x=\"10\" width=\"4\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"14\" width=\"8\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"22\" width=\"28\" height=\"100%\" fill=\"url(#ds-pallay)\"/><rect x=\"50\" width=\"6\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"56\" width=\"8\" height=\"100%\" fill=\"#e07a2e\"/></svg>",
+      "description": "Firma de Kofi: tira de aguayo de 64 px en el borde del bloque azul, con rombos escalonados que alternan anillo verde y naranja; decorativa y sin animación.",
+      "html": "<svg class=\"ds-weave\" aria-hidden=\"true\" width=\"64\" height=\"224\" shape-rendering=\"crispEdges\" xmlns=\"http://www.w3.org/2000/svg\"><defs><pattern id=\"ds-pallay\" x=\"18\" y=\"0\" width=\"28\" height=\"56\" patternUnits=\"userSpaceOnUse\"><rect width=\"28\" height=\"56\" fill=\"#b0306a\"/><path d=\"M12 4h4v4h-4zM8 8h12v4H8zM4 12h20v4H4zM8 16h12v4H8zM12 20h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 8h4v4h-4zM8 12h12v4H8zM12 16h4v4h-4z\" fill=\"#2f7d5b\"/><path d=\"M12 12h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 32h4v4h-4zM8 36h12v4H8zM4 40h20v4H4zM8 44h12v4H8zM12 48h4v4h-4z\" fill=\"#fbf7ef\"/><path d=\"M12 36h4v4h-4zM8 40h12v4H8zM12 44h4v4h-4z\" fill=\"#e07a2e\"/><path d=\"M12 40h4v4h-4z\" fill=\"#fbf7ef\"/></pattern></defs><rect x=\"0\" width=\"8\" height=\"100%\" fill=\"#e07a2e\"/><rect x=\"8\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"10\" width=\"6\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"16\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"18\" width=\"28\" height=\"100%\" fill=\"url(#ds-pallay)\"/><rect x=\"46\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"48\" width=\"6\" height=\"100%\" fill=\"#2f7d5b\"/><rect x=\"54\" width=\"2\" height=\"100%\" fill=\"#fbf7ef\"/><rect x=\"56\" width=\"8\" height=\"100%\" fill=\"#e07a2e\"/></svg>",
       "css": ".ds-weave { display: block; }"
     }
   ],
@@ -117,11 +119,12 @@
       "Bloque azul a toda altura con la tira de aguayo de 64 px en su borde; crema a la derecha.",
       "Una sola familia (Figtree 400/600/700/800), títulos en 800.",
       "Plano: sin sombras; bordes de 1 a 2 px y cambios de tono como estado.",
-      "Esquinas de 8 px en todo control y contenedor.",
-      "Los colores del aguayo solo viven en la tira y en el color de cada módulo."
+      "Esquinas de 8 px en controles y avisos; bloques, filas y muestras rectos.",
+      "Los colores del aguayo solo viven en la tira y en el color de cada módulo.",
+      "Un solo motivo: el rombo escalonado del aguayo, en la tira, el relieve del ingreso y las muestras de módulo."
     ],
     "rules": [
-      { "name": "The Aguayo Contenido Rule", "body": "Naranja, verde y magenta solo aparecen en la tira tejida y como color de módulo (franja de acceso, borde en hover). Nunca como color de texto, relleno de botón ni fondo de una zona.", "section": "colors" },
+      { "name": "The Aguayo Contenido Rule", "body": "Naranja, verde y magenta solo aparecen en la tira tejida y como color de módulo (muestra de acceso y flecha en hover). Nunca como color de texto, relleno de botón ni fondo de una zona.", "section": "colors" },
       { "name": "The Crema, Nunca Blanco Rule", "body": "No existe el blanco puro en la interfaz. La superficie más clara es el crema de campo; el fondo es el crema ligero.", "section": "colors" },
       { "name": "The Rojo Reservado Rule", "body": "El rojo significa error o bloqueo y nada más.", "section": "colors" },
       { "name": "The Una Sola Voz Rule", "body": "Figtree en sus cuatro pesos cargados y ninguna otra familia; un peso fuera de 400/600/700/800 no se renderiza fiel.", "section": "typography" },

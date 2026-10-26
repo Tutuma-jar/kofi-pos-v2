@@ -27,12 +27,23 @@ typography:
     fontWeight: 800
     lineHeight: 1
     letterSpacing: "-0.02em"
+  display-compact:
+    fontFamily: "Figtree, system-ui, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "3rem"
+    fontWeight: 800
+    lineHeight: 1
+    letterSpacing: "-0.02em"
   headline:
     fontFamily: "Figtree, system-ui, -apple-system, 'Segoe UI', sans-serif"
     fontSize: "2.5rem"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.01em"
+  feature:
+    fontFamily: "Figtree, system-ui, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 800
+    lineHeight: 1.15
   title:
     fontFamily: "Figtree, system-ui, -apple-system, 'Segoe UI', sans-serif"
     fontSize: "1.375rem"
@@ -102,16 +113,19 @@ components:
     typography: "{typography.label}"
     rounded: "{rounded.pill}"
     padding: "0.125rem 0.625rem"
-  module-tile:
-    backgroundColor: "{colors.field}"
+  module-row:
     textColor: "{colors.ink}"
     typography: "{typography.title}"
-    rounded: "{rounded.md}"
-    padding: "1rem 1.5rem"
-    height: "5.5rem"
-  module-tile-hover:
+    padding: "1rem"
+    height: "4.5rem"
+  module-row-hover:
     backgroundColor: "{colors.cream-deep}"
     textColor: "{colors.ink}"
+  module-row-feature:
+    textColor: "{colors.ink}"
+    typography: "{typography.feature}"
+    padding: "1rem"
+    height: "6rem"
   notice:
     backgroundColor: "{colors.brand-tint}"
     textColor: "{colors.brand-deep}"
@@ -145,8 +159,9 @@ Alcance actual: el sistema está construido en el ingreso, la barra de sesión y
 - Bloque azul a toda altura con la tira de aguayo de 64 px en su borde; crema a la derecha.
 - Una sola familia (Figtree 400/600/700/800), títulos en 800.
 - Plano: sin sombras; bordes de 1 a 2 px y cambios de tono como estado.
-- Esquinas de 8 px en todo control y contenedor.
+- Esquinas de 8 px en controles y avisos; bloques, filas y muestras rectos.
 - Los colores del aguayo solo viven en la tira y en el color de cada módulo.
+- Un solo motivo: el rombo escalonado del aguayo, en la tira, el relieve del ingreso y las muestras de módulo.
 
 ## Colors
 
@@ -174,7 +189,7 @@ Un azul grisáceo de mostrador sobre crema cálido, con la paleta del aguayo con
 - **Rojo de bloqueo** (error) sobre **rojo velado** (error-tint): avisos de error y bloqueo, mensajes de campo y borde de campo inválido.
 
 ### Named Rules
-**The Aguayo Contenido Rule.** Naranja, verde y magenta solo aparecen en la tira tejida y como color de módulo (franja de acceso, borde en hover). Nunca como color de texto, relleno de botón ni fondo de una zona.
+**The Aguayo Contenido Rule.** Naranja, verde y magenta solo aparecen en la tira tejida y como color de módulo (muestra de acceso y flecha en hover). Nunca como color de texto, relleno de botón ni fondo de una zona.
 
 **The Crema, Nunca Blanco Rule.** No existe el blanco puro en la interfaz. La superficie más clara es el crema de campo; el fondo es el crema ligero.
 
@@ -188,8 +203,10 @@ Un azul grisáceo de mostrador sobre crema cálido, con la paleta del aguayo con
 **Character:** Una sans geométrica y amable, firme en 800 para nombres y títulos y tranquila en 400 para el texto; una sola voz de pies a cabeza, cargada localmente desde @fontsource (subconjunto latin, pesos 400, 600, 700 y 800).
 
 ### Hierarchy
-- **Display** (800, clamp 3.5–6rem, 1, -0.02em): solo «Kofi POS» en el panel de marca del ingreso; baja a 3rem bajo 900 px.
+- **Display** (800, clamp 3.5–6rem, 1, -0.02em): solo «Kofi POS» en el panel de marca del ingreso.
+- **Display compacto** (800, 3rem, 1, -0.02em): el mismo «Kofi POS» bajo 900 px, en la franja superior.
 - **Headline** (800, 2.5rem, 1.15, -0.01em): título de pantalla (h1), por ejemplo «Ingresar».
+- **Feature** (800, 1.75rem, 1.15): solo el acceso a la tarea principal del mostrador, «Nueva venta».
 - **Title** (700, 1.375rem, 1.15): h2, nombre de quien opera en la barra, texto de los accesos de módulo; el saludo usa este tamaño en 400 y tinta apagada.
 - **Control** (800, 1.125rem): texto del botón principal; los campos de formulario usan este tamaño en 400.
 - **Body** (400, 1.0625rem, 1.5): texto corrido; etiquetas de campo en 600.
@@ -204,7 +221,9 @@ El modelo espacial es una cuadrícula de tres columnas a toda altura: bloque azu
 
 Bajo 900 px (56.25rem) todo se apila: el bloque azul pasa a franja superior, la tira tejida a horizontal debajo de ella y el contenido sigue en una columna; la barra de sesión se vuelve una fila con nombre, rol y cerrar sesión.
 
-El ritmo usa la escala de 8 px (0.5, 1, 1.5, 2, 3, 4 y 6 rem). Los formularios separan campos con 24 px y etiqueta de campo con 8 px. Los accesos de módulo forman una cuadrícula de relleno automático con mínimo de 288 px (18rem) y 16 px de separación, dentro de un ancho máximo de 960 px (60rem).
+El ritmo usa la escala de 8 px (0.5, 1, 1.5, 2, 3, 4 y 6 rem). Los formularios separan campos con 24 px y etiqueta de campo con 8 px. Los accesos de módulo son una lista de una sola columna, una fila por acceso separada por filetes de 1 px, dentro de un ancho máximo de 704 px (44rem): nunca quedan accesos sueltos, sea cual sea el rol.
+
+En el ingreso de escritorio, bajo el nombre, el panel azul lleva en relieve un gran rombo escalonado en azul hondo que sangra por la esquina inferior derecha; se oculta bajo 900 px, donde la franja es baja.
 
 ## Elevation & Depth
 
@@ -215,7 +234,7 @@ Sistema plano: no hay sombras en ningún elemento. La profundidad se transmite c
 
 ## Shapes
 
-Esquinas suavemente redondeadas de 8 px en campos, botones, avisos y accesos de módulo. La única excepción es la píldora del rol, totalmente redondeada. Los paneles de marca y la barra de sesión son bloques rectos a sangre, sin esquinas. La geometría recurrente es el rombo del aguayo: en la banda de pallay de la tira y en la muestra de cada acceso de módulo, un rombo crema sobre un cuadrado del color del módulo.
+Esquinas suavemente redondeadas de 8 px en campos, botones y avisos. La única excepción es la píldora del rol, totalmente redondeada. Los paneles de marca, la barra de sesión, las filas de acceso y las muestras de módulo son rectos, sin esquinas. La geometría recurrente es el rombo escalonado del aguayo, dibujado sobre una retícula de 4 px en una celda de 28 × 28 (contorno, anillo y ojo; componente `SteppedDiamond`): en la banda de pallay de la tira, en el relieve del panel de ingreso y en la muestra de cada acceso de módulo, como rombo crema sobre un cuadrado del color del módulo.
 
 ## Components
 
@@ -232,11 +251,7 @@ Firmes y altos, sin adornos.
 - **State:** solo informativa; no es interactiva.
 
 ### Cards / Containers
-- **Corner Style:** 8 px.
-- **Background:** crema de campo sobre el fondo crema.
-- **Shadow Strategy:** ninguna (ver Elevation & Depth).
-- **Border:** 1 px de línea; en hover toma el color del módulo.
-- **Internal Padding:** 16 px por 24 px.
+No hay tarjetas. Los accesos de módulo son filas de una lista: sin fondo propio, separadas por filetes de 1 px de línea, con 16 px de relleno; en hover la fila toma el crema tostado. Ninguna sombra (ver Elevation & Depth).
 
 ### Inputs / Fields
 - **Style:** crema de campo, borde de 2 px de línea, 8 px de esquina, 44 px de alto por defecto y 56 px dentro de un campo de formulario (texto a 1.125rem). Etiqueta encima en 600.
@@ -248,10 +263,10 @@ Firmes y altos, sin adornos.
 - **Error:** rojo velado con texto rojo y borde rojo de 1 px, 600. Ambos con 12 por 16 px de relleno y 8 px de esquina.
 
 ### Navigation
-La barra de sesión es la navegación persistente de toda pantalla interna: bloque azul a la izquierda con el nombre de quien opera (Title, 800), su rol en píldora y «Cerrar sesión» al pie, seguido de la tira tejida. Bajo 900 px se convierte en una fila superior con la tira horizontal debajo. En la pantalla inicial, cada módulo es un acceso de 88 px de alto con muestra de rombo y nombre en Title; el color del módulo se asigna por destino, no por orden, y su rombo gira 90° en hover.
+La barra de sesión es la navegación persistente de toda pantalla interna: bloque azul a la izquierda con el nombre de quien opera (Title, 800), su rol en píldora y «Cerrar sesión» al pie, seguido de la tira tejida. Bajo 900 px se convierte en una fila superior con la tira horizontal debajo. En la pantalla inicial, cada módulo es una fila de 72 px de alto con la muestra de rombo tejido, el nombre en Title y una flecha que avanza 4 px y toma el color del módulo en hover. El color del módulo se asigna por destino, no por orden. «Nueva venta», la tarea del mostrador, es la única fila destacada (96 px, Feature y muestra de 56 px) sin cambiar el orden de los enlaces, que sigue el de las rutas.
 
 ### La tira tejida (Signature Component)
-La firma de Kofi: una tira de aguayo dibujada en SVG, de 64 px de grosor, con franjas simétricas naranja, crema y verde a los lados y una banda central de 28 px de rombos crema y verde sobre magenta. Va siempre en el borde del bloque azul: vertical en escritorio, horizontal bajo 900 px. Es decorativa (oculta para lectores de pantalla, sin foco) y aparece completa desde el primer fotograma, sin animación de entrada.
+La firma de Kofi: una tira de aguayo dibujada en SVG, de 64 px de grosor. A cada lado, franjas simétricas naranja y verde separadas por filetes crema de 2 px; al centro, una banda de pallay de 28 px sobre magenta con rombos escalonados crema que alternan anillo verde y anillo naranja, como se tejen. Va siempre en el borde del bloque azul: vertical en escritorio, horizontal bajo 900 px. Es decorativa (oculta para lectores de pantalla, sin foco) y aparece completa desde el primer fotograma, sin animación de entrada.
 
 ## Do's and Don'ts
 

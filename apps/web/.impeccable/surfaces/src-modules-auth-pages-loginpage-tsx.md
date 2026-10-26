@@ -40,3 +40,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - Color de cada módulo en la pantalla inicial: por destino, no por orden, para que no cambie si se agrega un enlace o si el rol oculta alguno. Menú (`/menu`, `/menu/administrar`) verde, Nueva venta (`/ventas/nueva`) naranja, Resumen (`/resumen`) magenta e Historial (`/ventas`) azul. Una pantalla futura toma el color de su módulo.
 - La tira se ve completa desde el primer fotograma: sin animación de entrada, porque el ingreso se repite varias veces al día.
+- Pallay tejido: rombos escalonados sobre retícula de 4 px que alternan anillo verde y naranja, con filetes crema de 2 px a cada lado (mejora de la revisión final).
+- Bajo el nombre, el panel de ingreso lleva un gran rombo escalonado en relieve, azul hondo sobre azul, que sangra por la esquina inferior derecha; se oculta bajo 900 px.
+- La pantalla inicial es una lista de una columna, una fila por acceso, para que no queden accesos sueltos con ningún rol; «Nueva venta» es la fila destacada sin cambiar el orden de los enlaces.
