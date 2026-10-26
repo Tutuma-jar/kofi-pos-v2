@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { dayHistorySchema, HISTORY_MESSAGES } from '@kofi/contracts';
+import { dayHistorySchema, historySaleResponseSchema, HISTORY_MESSAGES } from '@kofi/contracts';
 import { createFakeClock } from '../../shared/clock.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { testSale } from '../../../test/test-sales.ts';
@@ -9,8 +9,76 @@ function setup(instant = '2026-10-25T15:00:00.000Z') {
   const clock = createFakeClock(new Date(instant));
   const db = {} as Database;
   const listSales = vi.fn().mockResolvedValue([testSale()]);
-  return { clock, db, listSales, service: createHistoryService({ clock, db, listSales }) };
+  const findSale = vi.fn().mockResolvedValue(testSale({ number: 3 }));
+  return {
+    clock,
+    db,
+    listSales,
+    findSale,
+    service: createHistoryService({ clock, db, listSales, findSale }),
+  };
 }
+
+describe('detalle histórico por número (RF-7, RF-8, RF-9)', () => {
+  it.each([
+    ['2026-10-25T03:59:00Z', '2026-10-24'],
+    ['2026-10-25T04:00:00Z', '2026-10-25'],
+  ])(
+    'conserva la instantánea y obtiene la fecha de Bolivia para %s',
+    async (registeredAt, date) => {
+      const { service, db, findSale } = setup();
+      const sale = testSale({ number: 3, registeredAt });
+      findSale.mockResolvedValue(sale);
+      const before = structuredClone(sale);
+      const response = historySaleResponseSchema.parse(await service.sale('3'));
+      expect(response).toEqual({ sale, date });
+      expect(findSale).toHaveBeenCalledExactlyOnceWith(db, 3);
+      expect(sale).toEqual(before);
+    },
+  );
+  it.each(['003', ' 3 ', '00000000000000000000003'])(
+    'normaliza %s antes de buscar',
+    async (number) => {
+      const { service, db, findSale } = setup();
+      await service.sale(number);
+      expect(findSale).toHaveBeenCalledExactlyOnceWith(db, 3);
+    },
+  );
+  it.each(['', '0', '-3', '2,5', 'abc', '1e3'])('rechaza %s sin consultar', async (number) => {
+    const { service, findSale } = setup();
+    await expect(service.sale(number)).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'VALIDATION_ERROR',
+      message: HISTORY_MESSAGES.invalidSaleNumber,
+    });
+    expect(findSale).not.toHaveBeenCalled();
+  });
+  it.each(['2147483648', '12345678901234567890'])(
+    'responde 404 a %s sin perder cifras ni consultar',
+    async (number) => {
+      const { service, findSale } = setup();
+      await expect(service.sale(number)).rejects.toMatchObject({
+        statusCode: 404,
+        code: 'NOT_FOUND',
+        message: `No existe la venta N.º ${number}`,
+      });
+      expect(findSale).not.toHaveBeenCalled();
+    },
+  );
+  it('consulta el máximo representable y devuelve 404 si el repositorio no encuentra la venta', async () => {
+    const { service, db, findSale } = setup();
+    findSale.mockResolvedValue(null);
+    await expect(service.sale('2147483647')).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'No existe la venta N.º 2147483647',
+    });
+    expect(findSale).toHaveBeenCalledWith(db, 2147483647);
+    await expect(service.sale('99')).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'No existe la venta N.º 99',
+    });
+  });
+});
 
 describe('consulta de un día (RF-2, RF-3, RF-5, RF-7)', () => {
   it('asigna cada venta al día local correcto a ambos lados del salto de 1931 (T031)', async () => {

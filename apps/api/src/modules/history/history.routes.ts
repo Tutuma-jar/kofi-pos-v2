@@ -1,6 +1,7 @@
 import {
   dayHistorySchema,
   historyDayQuerySchema,
+  historySaleResponseSchema,
   HISTORY_MESSAGES,
   HISTORY_ROLES,
 } from '@kofi/contracts';
@@ -27,4 +28,7 @@ export const historyPlugin: FastifyPluginAsync<HistoryDeps & { production?: bool
     });
     return dayHistorySchema.parse(await service.day(date));
   });
+  app.get<{ Params: { number: string } }>('/api/history/sales/:number', async (request) =>
+    historySaleResponseSchema.parse(await service.sale(request.params.number)),
+  );
 };
