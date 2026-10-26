@@ -13,7 +13,7 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | --- | --- | --- |
 | Acceso | `specs/001-acceso/` | Implementado; pulido en revisión |
 | Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
-| Ventas | `specs/003-ventas/` | Pendiente |
+| Ventas | `specs/003-ventas/` | US1 y US2 implementadas; medición de T026 cumplida, pulido en revisión |
 | Dashboard | `specs/004-dashboard/` | Pendiente |
 | Historial y reportes | `specs/005-historial/` | Pendiente |
 
@@ -159,7 +159,7 @@ npm run seed:menu -w @kofi/api
 
 El script aplica las migraciones pendientes y carga 200 productos ficticios mediante los servicios de Menú, en una transacción. Se niega a cargar si ya hay productos, incluidos los inactivos; no elimina datos. Un error revierte toda la carga. Estos datos son solo para comprobación, no el menú real del local. Prepara las cuentas con `npm run accounts -w @kofi/api -- create`, introduciendo la contraseña oculta en la terminal.
 
-**T035 medida el 2026-10-25:** las tres series cumplieron 20/20 operaciones menores de 2 segundos y la creación humana tardó 11,946 segundos. La [evidencia del despliegue](specs/002-menu/evidence/deployment.md) y las [60 muestras originales](specs/002-menu/evidence/menu-performance.json) registran los resultados. Para repetirla, el Blueprint y ambos servicios deben apuntar a `feat/002-menu-pulido`, usar la base de comprobación y tener el proxy de `/api` funcionando. `render.yaml` apunta a esa rama para los dos servicios; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir.
+**T035 medida el 2026-10-25:** las tres series cumplieron 20/20 operaciones menores de 2 segundos y la creación humana tardó 11,946 segundos. La [evidencia del despliegue](specs/002-menu/evidence/deployment.md) y las [60 muestras originales](specs/002-menu/evidence/menu-performance.json) registran los resultados. Para repetir aquella medición, configura el Blueprint y ambos servicios con `feat/002-menu-pulido`, la base de comprobación y el proxy de `/api` funcionando. El `render.yaml` de aquella rama contiene esa configuración; comprueba en Render que tanto la web como la API desplieguen el commit que se va a medir. La rama actual de Pulido de Ventas apunta a `feat/003-ventas-pulido`.
 
 Para automatizar las series y el cronómetro desde la computadora usada para comprobar el sistema:
 
@@ -173,6 +173,18 @@ Chromium se abre en la web de comprobación. Ingresa tú con una cuenta de dueñ
 El JSON sin credenciales se guarda en la ruta que muestra `git rev-parse --git-path menu-performance.json`. Incluye todas las duraciones, los límites, la hora de Bolivia y el commit local para contrastarlo con los desplegados en Render. La creación automatizada de un producto no sustituye la prueba humana. `npm run test:measure` verifica los medidores con datos ficticios y `npm run test:measure:menu` comprueba solo el de Menú.
 
 Con los servicios ya reactivados y los 200 productos cargados, mide desde la computadora del local 20 aperturas de la administración, 20 de la consulta y 20 guardados de productos existentes. Cronometra desde la acción hasta ver la lista o la confirmación actualizada: al menos 19 de cada serie deben tardar menos de 2 segundos. Excluye la primera operación tras la suspensión del servicio. Después, cronometra crear un producto en una categoría existente desde que se abre la administración: debe tardar menos de 30 segundos. Anota las duraciones, la fecha en hora de Bolivia, las URLs y el commit desplegado en el PR de pulido. La ejecución de las pruebas locales no sustituye esta medición; consulta [el plan de Menú, §8.3](specs/002-menu/plan.md#83-requisitos-no-funcionales).
+
+## Ventas
+
+Dueño y cajero abren **Nueva venta** desde la pantalla inicial (`/ventas/nueva`). Eligen productos del menú vigente y ajustan sus cantidades con **+**, **−** o **Quitar**. La API calcula los subtotales y el total con los precios vigentes, en bolivianos. Si el menú cambió, la preparación se actualiza y muestra los avisos para revisarla antes de registrar.
+
+Elige **Efectivo** o **QR**, sin opción seleccionada de antemano, y pulsa **Registrar venta**. La confirmación muestra el número, total, medio de pago y fecha en hora de Bolivia; la preparación queda vacía para la siguiente venta. La venta registrada conserva los nombres, categorías, precios y cantidades del momento, además de quién la registró. Un doble clic o un reintento tras perder la respuesta no duplica la venta.
+
+La venta en preparación conserva sus líneas, cantidades y medio de pago en el mismo navegador al navegar, recargar, cerrar una pestaña o vencer la sesión. Al recuperarla, la API vuelve a calcularla con el menú vigente. Las pestañas comparten la preparación y reflejan su registro o descarte. **Cerrar sesión**, la terminación de la sesión por cambios de la cuenta o abrir Nueva venta con otra cuenta descartan la preparación anterior; una cuenta no recibe la de otra. **Descartar venta** pide confirmación: **Volver** conserva lo preparado y **Descartar** lo vacía sin registrar una venta.
+
+**T026 medida el 2026-10-25:** con 200 productos vigentes de prueba, cumplieron 19/20 aperturas y 20/20 registros por debajo de 2 segundos, y 20/20 cambios por debajo de 1 segundo. La persona registró una venta de tres productos distintos en **9,807 segundos**. El [informe de Render y Neon](specs/003-ventas/measurement.md) y las [60 muestras originales y el tiempo humano](specs/003-ventas/measurement-results.json) documentan la ejecución real.
+
+Para repetirla desde la computadora usada para comprobar el sistema, sigue la preparación de Neon y Render del informe y ejecuta `npm run measure:sales`. Ingresa directamente en Chromium, deja trabajar al medidor y después registra tú la venta de tres productos cuando lo indique la terminal. Se conservan las ventas ficticias; la prueba humana no se automatiza. `npm run test:measure` comprueba los medidores con datos ficticios.
 
 ## Flujo de trabajo
 
