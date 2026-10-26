@@ -70,18 +70,24 @@ Rama: `feat/005-historial-us1`. Prerrequisitos fusionados: PR #25 y PR #26.
 
 Rama: `feat/005-historial-us2`.
 
-- [ ] **T017 [api] [P] [US2]** Añadir `findSaleByNumber(db, number)` a `modules/sales/sales.repository.ts`, con el mismo `toSale` que `findSaleByDraftId` (plan §4, §5.3, D-1; RF-7, RF-8, RF-9). Depende de: T001
+- [x] **T017 [api] [P] [US2]** Añadir `findSaleByNumber(db, number)` a `modules/sales/sales.repository.ts`, con el mismo `toSale` que `findSaleByDraftId` (plan §4, §5.3, D-1; RF-7, RF-8, RF-9). Depende de: T001
   Hecho cuando: una prueba de integración con PGlite inserta ventas con `insertSale` y comprueba que `findSaleByNumber` devuelve la del número pedido, con sus líneas en orden y cumpliendo `saleSchema`, y `null` para un número sin venta.
-- [ ] **T018 [api] [P] [US2]** Añadir la venta (`sale`) a `history.service.ts` con `findSale` inyectada, y `GET /api/history/sales/:number` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-1, D-8; RF-7, RF-8, RF-9). Depende de: T011
+- [x] **T018 [api] [P] [US2]** Añadir la venta (`sale`) a `history.service.ts` con `findSale` inyectada, y `GET /api/history/sales/:number` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-1, D-8; RF-7, RF-8, RF-9). Depende de: T011
   Hecho cuando: las pruebas, con una función falsa, comprueban que la respuesta cumple `historySaleResponseSchema` con la venta tal como llega y su `date` de Bolivia (una venta de las 23:59 y otra de las 00:00); que `003` y ` 3 ` buscan el número 3; que `0`, `-3`, `2,5` y `abc` responden `400` «Escribe un número de venta válido»; que un número sin venta responde `404` «No existe la venta N.º 99»; que `2147483648` y un número de 20 cifras responden `404` sin llamar a la función; y que la ruta responde `403` al cajero y `401` sin sesión.
-- [ ] **T019 [web] [P] [US2]** Escribir `components/SaleSearch.tsx` («Buscar venta por número» y «Buscar», con `parseSaleNumber`) y añadirlo a `DayHistoryPage` (plan §5.5, D-8; RF-9, RNF-4). Depende de: T014
+- [x] **T019 [web] [P] [US2]** Escribir `components/SaleSearch.tsx` («Buscar venta por número» y «Buscar», con `parseSaleNumber`) y añadirlo a `DayHistoryPage` (plan §5.5, D-8; RF-9, RNF-4). Depende de: T014
   Hecho cuando: las pruebas de componente comprueban que « 007 » lleva a `/ventas/7`; que vacío, «0», «-3», «2,5» y «abc» muestran «Escribe un número de venta válido» sin navegar; que «Buscar» se elige con Intro desde el campo; y que la búsqueda aparece en las ventas de un día.
-- [ ] **T020 [web] [P] [US2]** Escribir `SaleDetailView.tsx` y `SaleDetailPage.tsx`: «Venta N.º [número]», fecha y hora con `formatDateTime`, «Registrada por [nombre] · [rol]», «Medio de pago: [medio]», las líneas en orden «[producto] · [categoría] · [precio] × [cantidad] · [subtotal]», el total, «Volver» a `/ventas?fecha=date`, `SaleSearch`, `QueryStatus` sin «Datos al …» y el `404` con su mensaje; y hacer que cada fila de `SalesList` enlace a `/ventas/[número]` (plan §5.5; RF-5, RF-6, RF-8, RF-9, RF-10, RNF-4). Depende de: T019
+- [x] **T020 [web] [P] [US2]** Escribir `SaleDetailView.tsx` y `SaleDetailPage.tsx`: «Venta N.º [número]», fecha y hora con `formatDateTime`, «Registrada por [nombre] · [rol]», «Medio de pago: [medio]», las líneas en orden «[producto] · [categoría] · [precio] × [cantidad] · [subtotal]», el total, «Volver» a `/ventas?fecha=date`, `SaleSearch`, `QueryStatus` sin «Datos al …» y el `404` con su mensaje; y hacer que cada fila de `SalesList` enlace a `/ventas/[número]` (plan §5.5; RF-5, RF-6, RF-8, RF-9, RF-10, RNF-4). Depende de: T019
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran tal cual el detalle de los fixtures con sus líneas en orden; «Volver» lleva al día de la venta; un número sin venta muestra «No existe la venta N.º 99»; los escenarios «Sin conexión», «Con error», «Sin permiso» y «Lento» se ven como en el día; una fila de la lista abre su detalle; y todo se alcanza con Tab y se elige con Intro.
-- [ ] **T021 [integración] [US2]** Exportar `findSaleByNumber` desde `modules/sales/index.ts` y pasarlo a `historyPlugin` en `app.ts` (plan D-1; RF-7, RF-8). Depende de: T015, T017, T018, T020
+- [x] **T021 [integración] [US2]** Exportar `findSaleByNumber` desde `modules/sales/index.ts` y pasarlo a `historyPlugin` en `app.ts` (plan D-1; RF-7, RF-8). Depende de: T015, T017, T018, T020
   Hecho cuando: una prueba de integración con `buildApp` registra una venta con `POST /api/sales`, cambia el precio de un producto y elimina la cuenta que la registró, y `GET /api/history/sales/:number` devuelve la venta con los precios, el nombre y el rol del registro; y `npm test` sigue pasando.
-- [ ] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
+- [x] **T022 [integración] [US2]** Escribir `e2e/history-us2-detalle-venta.spec.ts` con los 6 pasos de §8.2 del plan (RF-5, RF-7 a RF-10, RNF-4). Depende de: T016, T021
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
+
+- [x] **T032 [integración] [US2]** Corregir RF-1/RF-9: evitar que el límite predeterminado del parámetro de ruta rechace números largos o con muchos ceros iniciales antes de aplicar el contrato y los permisos. Depende de: T022
+  Hecho cuando: pruebas de ruta y E2E cubren más de 100 caracteres, conservan el número completo en el 404, normalizan ceros iniciales para abrir una venta existente y rechazan sesiones sin permiso antes de buscar; todas las comprobaciones automatizadas pasan y se solicita la verificación de US2.
+
+- [x] **T033 [integración] [US2]** Corregir RF-8/RNF-1: conservar las cuatro cifras del año al mostrar la fecha y hora de ventas antiguas admitidas por el calendario. Depende de: T032
+  Hecho cuando: las regresiones del formateador compartido y del detalle comprueban los años 0001 y 0099 en hora de Bolivia; las fechas actuales conservan su formato y todas las comprobaciones automatizadas pasan.
 
 ## Fase 5 — US3: consultar las cifras de un mes (P3)
 
@@ -113,20 +119,20 @@ Rama: `feat/005-historial-pulido`.
 
 | RF | Tareas |
 | --- | --- |
-| RF-1 | T003, T007, T008, T011, T014, T015, T016 |
+| RF-1 | T003, T007, T008, T011, T014, T015, T016, T032 |
 | RF-2 | T003, T004, T005, T010, T011, T014, T016, T030, T031 |
 | RF-3 | T002, T009, T010, T013, T014, T015, T016, T030, T031 |
 | RF-4 | T003, T009, T013, T016 |
 | RF-5 | T010, T012, T014, T016, T020, T022, T025 |
 | RF-6 | T007, T012, T014, T016, T020, T025 |
 | RF-7 | T009, T010, T011, T015, T017, T018, T021, T022, T024 |
-| RF-8 | T002, T003, T005, T017, T018, T020, T021, T022 |
-| RF-9 | T003, T017, T018, T019, T020, T022 |
+| RF-8 | T002, T003, T005, T017, T018, T020, T021, T022, T033 |
+| RF-9 | T003, T017, T018, T019, T020, T022, T032 |
 | RF-10 | T020, T022 |
 | RF-11 | T003, T004, T005, T024, T025, T026, T030 |
 | RF-12 | T003, T024, T025, T026 |
 | RF-13 | T003, T004, T023, T024, T025, T026 |
-| RNF-1 | T013, T014, T016, T020, T025 (textos en español comparados tal como los define `spec.md`) |
+| RNF-1 | T013, T014, T016, T020, T025, T033 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T009, T023 |
 | RNF-3 | T027, T028, T028-H |
 | RNF-4 | T014, T016, T019, T020, T022, T025, T026 |

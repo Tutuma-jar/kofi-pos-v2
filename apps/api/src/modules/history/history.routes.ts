@@ -1,6 +1,7 @@
 import {
   dayHistorySchema,
   historyDayQuerySchema,
+  historySaleResponseSchema,
   HISTORY_MESSAGES,
   HISTORY_ROLES,
 } from '@kofi/contracts';
@@ -26,5 +27,17 @@ export const historyPlugin: FastifyPluginAsync<HistoryDeps & { production?: bool
       date: Array.isArray(query.date) ? query.date[0] : query.date,
     });
     return dayHistorySchema.parse(await service.day(date));
+  });
+  const readSale = async (number: string) =>
+    historySaleResponseSchema.parse(await service.sale(number));
+  app.get<{ Params: { number: string } }>('/api/history/sales/:number', async (request) =>
+    readSale(request.params.number),
+  );
+  // Respaldo del mismo endpoint: los parámetros de más de 100 caracteres también deben pasar
+  // por sesión, rol y normalización, sin elevar los límites globales de otras rutas.
+  app.get<{ Params: { '*': string } }>('/api/history/sales/*', async (request, reply) => {
+    const number = request.params['*'];
+    if (!number || number.includes('/')) return reply.callNotFound();
+    return readSale(number);
   });
 };

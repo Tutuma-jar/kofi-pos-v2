@@ -66,6 +66,27 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
             <HistoryClientProvider
               client={{
                 ...httpHistoryClient,
+                sale: async () => ({
+                  date: '2026-10-25',
+                  sale: {
+                    id: 'd1e2f3a4-0000-4000-8000-000000000007',
+                    number: 7,
+                    registeredAt: '2026-10-25T15:00:00Z',
+                    registeredBy: { userId: null, displayName: 'Ana Quispe', role: 'owner' },
+                    paymentMethod: 'cash',
+                    totalCents: 1250,
+                    lines: [
+                      {
+                        productId: 'c4e1a2b3-0000-4000-8000-000000000007',
+                        productName: 'Café',
+                        categoryName: 'Bebidas',
+                        quantity: 1,
+                        unitPriceCents: 1250,
+                        subtotalCents: 1250,
+                      },
+                    ],
+                  },
+                }),
                 day: async () => ({
                   date: '2026-10-25',
                   today: '2026-10-25',
@@ -168,7 +189,7 @@ describe('routes', () => {
   it.each([
     ['/ventas', 'Ventas del 25/10/2026'],
     ['/ventas/mes', 'Ventas por mes'],
-    ['/ventas/7', 'Detalle de una venta'],
+    ['/ventas/7', 'Venta N.º 7'],
   ])('%s muestra su página del historial con una sesión de dueño', async (path, heading) => {
     await renderAt(path);
 

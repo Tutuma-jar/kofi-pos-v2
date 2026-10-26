@@ -4,6 +4,7 @@ import { createTestDatabase } from '../../../test/test-database.ts';
 import type { Database } from '../../shared/database/database.ts';
 import {
   findSaleByDraftId,
+  findSaleByNumber,
   insertSale,
   listRegisteredSales,
   nextSaleNumber,
@@ -82,6 +83,22 @@ function newSale(
     paymentMethod,
   };
 }
+
+describe('findSaleByNumber (SPEC-005 RF-7, RF-8, RF-9)', () => {
+  it('devuelve la venta pedida, sus líneas en orden y null si no existe', async () => {
+    const first = await db.transaction((tx) =>
+      insertSale(tx, newSale(1, DRAFT_1, '2026-10-24T18:05:12Z')),
+    );
+    const second = await db.transaction((tx) =>
+      insertSale(tx, newSale(2, DRAFT_2, '2026-10-25T13:15:00Z', 'qr')),
+    );
+    expect(saleSchema.parse(await findSaleByNumber(db, 2))).toEqual(second);
+    expect((await findSaleByNumber(db, 2))?.lines).toEqual([empanada, americano]);
+    expect(await findSaleByNumber(db, 1)).toEqual(first);
+    expect(await findSaleByNumber(db, 99)).toBeNull();
+    expect(await listRegisteredSales(db)).toEqual([first, second]);
+  });
+});
 
 describe('nextSaleNumber (RF-6, RF-10)', () => {
   it('da 1, 2 y 3', async () => {

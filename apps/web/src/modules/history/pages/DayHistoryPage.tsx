@@ -6,6 +6,7 @@ import { useHistoryQuery } from '../state/useHistoryQuery.ts';
 import { PeriodTotals } from '../components/PeriodTotals.tsx';
 import { SalesList } from '../components/SalesList.tsx';
 import { QueryStatus } from '../components/QueryStatus.tsx';
+import { SaleSearch } from '../components/SaleSearch.tsx';
 
 export function DayHistoryPage() {
   const client = useHistoryClient();
@@ -38,6 +39,7 @@ export function DayHistoryPage() {
       <p>
         <Link to="/">Volver al inicio</Link>
       </p>
+      <SaleSearch />
       {data && (
         <>
           <nav aria-label="Cambiar el día">
