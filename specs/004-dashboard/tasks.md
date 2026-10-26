@@ -77,7 +77,7 @@ Rama: `feat/004-dashboard-us1`. Empieza cuando se fusionen el PR de definición 
 
 Rama: `feat/004-dashboard-us2`.
 
-- [ ] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
+- [x] **T017 [api] [P] [US2]** Escribir en `dashboard.summary.ts` `salesByDay` (plan §5.3; RF-10, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
 - [ ] **T018 [api] [P] [US2]** Añadir el resumen del mes (`month`) a `dashboard.service.ts` y `GET /api/dashboard/month` a `dashboard.routes.ts` con la comprobación de `DASHBOARD_MONTH_ROLES` (plan §5.4, §6.2, D-6; RF-9, RF-10). Depende de: T011, T017, T025
   Hecho cuando: las pruebas comprueban que se pide el rango de `boliviaMonthRange`, que la respuesta cumple `monthSummarySchema` con el `month` y los días del 1 a hoy, y que la ruta responde `200` al dueño, `403 FORBIDDEN` con «No tienes permiso para ver el resumen del mes» al cajero sin llamar a la función de ventas, y `401` sin sesión.

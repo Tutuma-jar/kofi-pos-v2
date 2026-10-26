@@ -4,7 +4,9 @@ import {
   type Sale,
   type PeriodSummary,
   type TopProduct,
+  type DayTotal,
 } from '@kofi/contracts';
+import { boliviaDate } from '../../shared/calendar.ts';
 
 // Las ventas ya contienen los importes históricos; el resumen nunca consulta el menú actual.
 export function summarizeSales(sales: Sale[]): Omit<PeriodSummary, 'asOf'> {
@@ -59,4 +61,16 @@ export function summarizeSales(sales: Sale[]): Omit<PeriodSummary, 'asOf'> {
     byPaymentMethod,
     topProducts,
   };
+}
+
+export function salesByDay(sales: Sale[], days: string[]): DayTotal[] {
+  const totals = new Map(days.map((date) => [date, { date, totalCents: 0, salesCount: 0 }]));
+  for (const sale of sales) {
+    const day = totals.get(boliviaDate(new Date(sale.registeredAt)));
+    if (day) {
+      day.totalCents += sale.totalCents;
+      day.salesCount++;
+    }
+  }
+  return days.map((date) => totals.get(date)!);
 }

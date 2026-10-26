@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compareMenuNames } from '@kofi/contracts';
 import { testSale, testLine } from '../../../test/test-sales.ts';
-import { summarizeSales } from './dashboard.summary.ts';
+import { summarizeSales, salesByDay } from './dashboard.summary.ts';
 
 describe('resumen de ventas (RF-3, RF-4, RF-5, RF-8, RNF-2)', () => {
   it('resume el ejemplo sin alterar las ventas', () => {
@@ -106,5 +106,32 @@ describe('resumen de ventas (RF-3, RF-4, RF-5, RF-8, RNF-2)', () => {
     const result = summarizeSales(sales);
     expect(result.totalCents).toBe(1782000000000);
     expect(result.byPaymentMethod.map((p) => p.totalCents)).toEqual([891000000000, 891000000000]);
+  });
+});
+
+describe('ventas por día (RF-10, RNF-2)', () => {
+  it('separa medianoche de Bolivia, rellena ceros y conserva sumas y orden', () => {
+    const sales = [
+      testSale({ registeredAt: '2026-10-25T03:59:59.999Z' }),
+      testSale({
+        number: 2,
+        registeredAt: '2026-10-25T04:00:00.000Z',
+        paymentMethod: 'qr',
+        lines: [testLine({ unitPriceCents: 800 })],
+      }),
+    ];
+    const days = ['2026-10-23', '2026-10-24', '2026-10-25'];
+    const result = salesByDay(sales, days);
+    expect(result).toEqual([
+      { date: days[0], totalCents: 0, salesCount: 0 },
+      { date: days[1], totalCents: 1250, salesCount: 1 },
+      { date: days[2], totalCents: 800, salesCount: 1 },
+    ]);
+    const summary = summarizeSales(sales);
+    expect(result.reduce((sum, day) => sum + day.totalCents, 0)).toBe(summary.totalCents);
+    expect(result.reduce((sum, day) => sum + day.salesCount, 0)).toBe(summary.salesCount);
+    expect(salesByDay([], days)).toEqual(
+      days.map((date) => ({ date, totalCents: 0, salesCount: 0 })),
+    );
   });
 });
