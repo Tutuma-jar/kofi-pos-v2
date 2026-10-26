@@ -105,6 +105,9 @@ Rama: `feat/004-dashboard-pulido`.
 - [x] **T029 [api]** Enviar la carga `--complete` en lotes con parámetros, reservando los números en la misma transacción, para evitar un viaje de red por campo o línea al cargar Neon (RNF-3; plan §7.1). Depende de: T028
   Hecho cuando: las pruebas de integración comprueban ventas válidas, números correlativos y reversión de ventas, líneas y contador; el modo estricto conserva su comportamiento y las ventas anteriores siguen intactas.
 
+- [x] **T030 [integración]** Preparar `measure:dashboard` con tests del medidor y salida de muestras sin secretos, para ejecutar las series de T022 y cronometrar los dos recorridos manuales desde la computadora del local (RNF-3, criterio de 10 segundos; plan §7.1). Depende de: T029
+  Hecho cuando: los tests rechazan volúmenes y tiempos inválidos, aplican 19/20 y límites estrictos de 2 s y 10 s, excluyen un calentamiento por operación, preservan las muestras y comprueban que los recorridos humanos y las credenciales no son automatizados; el comando queda disponible en Windows para ambas herramientas.
+
 ## Cobertura de RF
 
 

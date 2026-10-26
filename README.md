@@ -205,6 +205,8 @@ npm run seed:sales -w @kofi/api
 
 Por instrucción expresa de la persona, también puede prepararse la base existente con `npm run seed:sales -w @kofi/api -- --complete`. Este modo exige al menos 200 productos vigentes y añade solo las ventas que faltan para llegar a 6000 en el mes hasta el momento de la carga. Conserva todos los productos y ventas previos; con 6000 no añade nada y con más de 6000 rechaza la operación. La evidencia de T022 debe indicar el volumen real del menú y de ventas; sigue pendiente la medición del despliegue.
 
+Para medir desde la computadora del local, ejecutar `npm run build:contracts` y `npm run measure:dashboard` en una terminal interactiva, sin argumentos ni depuración. El medidor abre Chromium: ingresa primero como dueño y, cuando se abra la segunda ventana, como cajero, con la contraseña solo en el navegador. Por cada rol excluye un calentamiento y mide veinte aperturas y veinte actualizaciones; no uses la ventana durante las series. Después aparecen controles del medidor: desde la pantalla inicial pulsa **Comenzar**, abre tú **Resumen de ventas**, identifica el total de hoy y pulsa **Ya identifiqué el total de hoy**. El programa no hace ese recorrido ni confirma la lectura por ti. Cada serie exige al menos 19/20 muestras bajo 2 segundos y cada recorrido humano debe durar menos de 10 segundos. El informe, sin credenciales, se guarda en la ruta de `git rev-parse --git-path dashboard-performance.json`. Los SHA desplegados de web y API se acreditan aparte del SHA local del medidor; las pruebas con datos ficticios están en `npm run test:measure`.
+
 ## Flujo de trabajo
 
 Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.
