@@ -34,7 +34,7 @@ export function CategoryForm({ category, onSave, onCancel, onFailure }: Props) {
     }
   }
   return (
-    <form aria-labelledby={`${id}-heading`} onSubmit={submit} noValidate>
+    <form className="menu-form" aria-labelledby={`${id}-heading`} onSubmit={submit} noValidate>
       <h2 id={`${id}-heading`}>{category ? 'Renombrar categoría' : 'Crear categoría'}</h2>
       <label htmlFor={id}>Nombre de la categoría</label>
       <input
@@ -52,12 +52,14 @@ export function CategoryForm({ category, onSave, onCancel, onFailure }: Props) {
         </p>
       )}
       {error && <p role="alert">{error}</p>}
-      <button type="submit" disabled={saving}>
-        {saving ? 'Guardando…' : 'Guardar categoría'}
-      </button>
-      <button type="button" disabled={saving} onClick={onCancel}>
-        Cancelar
-      </button>
+      <div className="menu-form__actions">
+        <button className="button-primary" type="submit" disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar categoría'}
+        </button>
+        <button type="button" disabled={saving} onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
     </form>
   );
 }
