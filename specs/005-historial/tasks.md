@@ -60,6 +60,9 @@ Rama: `feat/005-historial-us1`. Prerrequisitos fusionados: PR #25 y PR #26.
 - [x] **T016 [integración] [US1]** Escribir `e2e/history-us1-ventas-dia.spec.ts` con los 9 pasos de §8.2 del plan (RF-1 a RF-7, RNF-4). Depende de: T015
   Hecho cuando: `npm run test:e2e` pasa con la prueba de US1 contra la API real de E2E.
 
+- [x] **T030 [integración] [US1]** Corregir RF-2/RF-3: conservar los años menores de 100 al sumar días y meses, acotar cada lectura al día pedido y mantener paridad con el calendario simulado. Corregir el extremo técnico del contrato del Historial y la navegación, sin límite de antigüedad de negocio (plan §13). Depende de: T016
+  Hecho cuando: las regresiones del contrato, calendario, servicio, cliente simulado, pantalla y E2E cubren 0001, 0099→0100, los bisiestos, el retroceso nulo en el primer día/mes y el rechazo del año cero; una venta ficticia de 1950 no aparece en 0099; todas las comprobaciones automatizadas pasan y se solicita de nuevo la verificación.
+
 ## Fase 4 — US2: ver el detalle de una venta (P2)
 
 Rama: `feat/005-historial-us2`.
@@ -84,8 +87,8 @@ Rama: `feat/005-historial-us3`.
 - [ ] **T023 [api] [P] [US3]** Escribir en `history.report.ts` `salesByDay` (plan §5.2; RF-13, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
 - [ ] **T024 [api] [P] [US3]** Añadir el mes (`month`) a `history.service.ts` y `GET /api/history/month` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-4, D-10; RF-7, RF-11, RF-12, RF-13). Depende de: T010, T011, T023
-  Hecho cuando: las pruebas comprueban que sin mes se consulta el mes en curso; que se pide el rango de `boliviaMonthBounds`; que la respuesta cumple `monthHistorySchema` con `currentMonth`, `previousMonth`, `nextMonth` (nulo en el mes en curso), `asOf` y los días (todo el mes pasado, del 1 a hoy el en curso); que una venta del último día del mes anterior a las 23:59 no cuenta; que un mes futuro responde `400` «No se pueden consultar meses futuros» y uno inválido («2026-13», «octubre») `400` «El mes no es válido», sin llamar a la función de ventas; y que la ruta responde `403` al cajero y `401` sin sesión.
-- [ ] **T025 [web] [P] [US3]** Escribir `MonthDaysTable.tsx` y `MonthHistoryPage.tsx`: «[Mes] de [año]» con `formatMonth`, «Mes anterior», «Mes siguiente» (deshabilitado si `nextMonth` es nulo), campo de mes con `max = currentMonth`, el mes en `?mes=`, `PeriodTotals`, «No hay ventas registradas este mes» si no tiene ventas, una fila por día (también en un mes sin ventas) «[fecha] · [total] · [ventas]» que enlaza a `/ventas?fecha=`, «Ver por día», `SaleSearch` y `QueryStatus`; y añadir «Ver por mes» a `DayHistoryPage` (plan §5.5, D-7; RF-5, RF-6, RF-11, RF-12, RF-13, RNF-4). Depende de: T020
+  Hecho cuando: las pruebas comprueban que sin mes se consulta el mes en curso; que se pide el rango de `boliviaMonthBounds`; que la respuesta cumple `monthHistorySchema` con `currentMonth`, `previousMonth` (nulo en enero de 0001), `nextMonth` (nulo en el mes en curso), `asOf` y los días (todo el mes pasado, del 1 a hoy el en curso); que una venta del último día del mes anterior a las 23:59 no cuenta; que un mes futuro responde `400` «No se pueden consultar meses futuros» y uno inválido («2026-13», «octubre») `400` «El mes no es válido», sin llamar a la función de ventas; y que la ruta responde `403` al cajero y `401` sin sesión.
+- [ ] **T025 [web] [P] [US3]** Escribir `MonthDaysTable.tsx` y `MonthHistoryPage.tsx`: «[Mes] de [año]» con `formatMonth`, «Mes anterior», «Mes siguiente» (deshabilitado si `nextMonth` es nulo), campo de mes con `min = HISTORY_MIN_MONTH` y `max = currentMonth`, el mes en `?mes=`, `PeriodTotals`, «No hay ventas registradas este mes» si no tiene ventas, una fila por día (también en un mes sin ventas) «[fecha] · [total] · [ventas]» que enlaza a `/ventas?fecha=`, «Ver por día», `SaleSearch` y `QueryStatus`; y añadir «Ver por mes» a `DayHistoryPage` (plan §5.5, D-7; RF-5, RF-6, RF-11, RF-12, RF-13, RNF-4). Usar previousMonth nulo en HISTORY_MIN_MONTH y min = HISTORY_MIN_MONTH en el campo. Depende de: T020
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran tal cual «Octubre de 2026» con sus cifras y sus días («24/10/2026 · Bs 45,50 · 2 ventas», «01/10/2026 · Bs 0,00 · 0 ventas»); el mes vacío con su aviso y sus filas en cero; la navegación por `?mes=`; una fila que lleva a su día; «Ver por mes» y «Ver por día»; un mes futuro en la URL con su mensaje y sin cifras; los escenarios sin conexión, con error, sin permiso y lento; y todo con Tab e Intro.
 - [ ] **T026 [integración] [US3]** Escribir `e2e/history-us3-cifras-mes.spec.ts` con los 7 pasos de §8.2 del plan, contra la API real de E2E (RF-11, RF-12, RF-13, RNF-4). Depende de: T022, T024, T025
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1, US2 y US3.
@@ -108,8 +111,8 @@ Rama: `feat/005-historial-pulido`.
 | RF | Tareas |
 | --- | --- |
 | RF-1 | T003, T007, T008, T011, T014, T015, T016 |
-| RF-2 | T003, T004, T005, T010, T011, T014, T016 |
-| RF-3 | T002, T009, T010, T013, T014, T015, T016 |
+| RF-2 | T003, T004, T005, T010, T011, T014, T016, T030 |
+| RF-3 | T002, T009, T010, T013, T014, T015, T016, T030 |
 | RF-4 | T003, T009, T013, T016 |
 | RF-5 | T010, T012, T014, T016, T020, T022, T025 |
 | RF-6 | T007, T012, T014, T016, T020, T025 |
@@ -117,10 +120,10 @@ Rama: `feat/005-historial-pulido`.
 | RF-8 | T002, T003, T005, T017, T018, T020, T021, T022 |
 | RF-9 | T003, T017, T018, T019, T020, T022 |
 | RF-10 | T020, T022 |
-| RF-11 | T003, T004, T005, T024, T025, T026 |
+| RF-11 | T003, T004, T005, T024, T025, T026, T030 |
 | RF-12 | T003, T024, T025, T026 |
 | RF-13 | T003, T004, T023, T024, T025, T026 |
 | RNF-1 | T013, T014, T016, T020, T025 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T009, T023 |
-| RNF-3 | T027, T028 |
+| RNF-3 | T027, T028, T028-H |
 | RNF-4 | T014, T016, T019, T020, T022, T025, T026 |

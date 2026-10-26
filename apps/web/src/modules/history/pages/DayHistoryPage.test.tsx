@@ -32,6 +32,15 @@ function mount(scenario: HistoryScenarioId = 'withSales', path = '/ventas?fecha=
 }
 
 describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
+  it('muestra el primer día con el mínimo del calendario y retroceso deshabilitado (T030)', async () => {
+    mount('withSales', '/ventas?fecha=0001-01-01');
+    await screen.findByRole('heading', { name: 'Ventas del 01/01/0001' });
+    expect(screen.getByRole('button', { name: 'Día anterior' })).toBeDisabled();
+    expect(screen.getByLabelText('Fecha')).toHaveAttribute('min', '0001-01-01');
+    expect(screen.getByLabelText('Fecha')).toHaveValue('0001-01-01');
+    await userEvent.click(screen.getByRole('button', { name: 'Día siguiente' }));
+    expect(await screen.findByRole('heading', { name: 'Ventas del 02/01/0001' })).toBeVisible();
+  });
   it('muestra el día, sus ventas y cifras recibidas sin hacer cuentas', async () => {
     const client = mount();
     await screen.findByRole('heading', { name: 'Ventas del 24/10/2026' });

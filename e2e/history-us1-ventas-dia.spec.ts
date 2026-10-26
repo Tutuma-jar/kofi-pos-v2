@@ -189,4 +189,14 @@ test('US1: ventas del día, navegación, permisos, conexión, medianoche y tecla
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Ventas del 27/10/2026' })).toBeVisible();
   expect(await (await request.get('/api/__test/sales')).json()).toEqual(originalSales);
+  await page.goto('/ventas?fecha=0099-12-31');
+  await expect(page.getByRole('heading', { name: 'Ventas del 31/12/0099' })).toBeVisible();
+  await expect(page.getByText('0 ventas', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Día siguiente' }).click();
+  await expect(page.getByRole('heading', { name: 'Ventas del 01/01/0100' })).toBeVisible();
+  await page.goto('/ventas?fecha=0001-01-01');
+  await expect(page.getByRole('button', { name: 'Día anterior' })).toBeDisabled();
+  await expect(page.getByLabel('Fecha', { exact: true })).toHaveValue('0001-01-01');
+  await page.goto('/ventas?fecha=0000-01-01');
+  await expect(page.getByRole('alert')).toHaveText('La fecha no es válida');
 });

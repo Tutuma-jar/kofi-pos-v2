@@ -21,7 +21,7 @@ export function boliviaDate(instant: Date): string {
   const parts = Object.fromEntries(
     dateFormat.formatToParts(instant).map((part) => [part.type, part.value]),
   );
-  return `${parts.year}-${parts.month}-${parts.day}`;
+  return `${parts.year!.padStart(4, '0')}-${parts.month}-${parts.day}`;
 }
 
 // Instante de las 00:00 de esa fecha en Bolivia. El desfase sale de Intl («GMT-04:00») y no se
@@ -73,20 +73,26 @@ export function boliviaMonthRange(now: Date): BoliviaMonthRange {
 }
 
 // Días y meses cualesquiera, para el Historial (SPEC-005 plan §5.1, D-4). Las fechas se suman como
-// fechas de calendario, sin zona horaria: Date.UTC solo resuelve los fines de mes y los bisiestos.
+// fechas de calendario, sin zona horaria, conservando también los años anteriores a 0100.
 
 const isoDate = (instant: Date) => instant.toISOString().slice(0, 'YYYY-MM-DD'.length);
+
+function calendarDate(year: number, monthIndex: number, day: number): Date {
+  const instant = new Date(0);
+  instant.setUTCFullYear(year, monthIndex, day);
+  return instant;
+}
 
 // 'YYYY-MM-DD' ± n días.
 export function addDays(date: string, days: number): string {
   const [year, month, day] = date.split('-').map(Number);
-  return isoDate(new Date(Date.UTC(year!, month! - 1, day! + days)));
+  return isoDate(calendarDate(year!, month! - 1, day! + days));
 }
 
 // 'YYYY-MM' ± n meses.
 export function addMonths(month: string, months: number): string {
   const [year, number] = month.split('-').map(Number);
-  return isoDate(new Date(Date.UTC(year!, number! - 1 + months, 1))).slice(0, 'YYYY-MM'.length);
+  return isoDate(calendarDate(year!, number! - 1 + months, 1)).slice(0, 'YYYY-MM'.length);
 }
 
 // Todas las fechas del mes, del día 1 al último.

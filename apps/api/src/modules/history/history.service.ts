@@ -1,4 +1,10 @@
-import { boliviaDateSchema, HISTORY_MESSAGES, type DayHistory, type Sale } from '@kofi/contracts';
+import {
+  historyDateSchema,
+  HISTORY_MIN_DATE,
+  HISTORY_MESSAGES,
+  type DayHistory,
+  type Sale,
+} from '@kofi/contracts';
 import { addDays, boliviaDate, boliviaDayBounds } from '../../shared/calendar.ts';
 import type { Clock } from '../../shared/clock.ts';
 import type { Database } from '../../shared/database/database.ts';
@@ -17,7 +23,7 @@ export function createHistoryService({ db, clock, listSales }: HistoryDeps) {
       const now = clock.now();
       const today = boliviaDate(now);
       const date = dateParam ?? today;
-      if (!boliviaDateSchema.safeParse(date).success) {
+      if (!historyDateSchema.safeParse(date).success) {
         throw new AppError(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.invalidDate);
       }
       if (date > today) throw new AppError(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.futureDate);
@@ -25,7 +31,7 @@ export function createHistoryService({ db, clock, listSales }: HistoryDeps) {
       return {
         date,
         today,
-        previousDate: addDays(date, -1),
+        previousDate: date === HISTORY_MIN_DATE ? null : addDays(date, -1),
         nextDate: date < today ? addDays(date, 1) : null,
         asOf: now.toISOString(),
         ...periodTotals(sales),

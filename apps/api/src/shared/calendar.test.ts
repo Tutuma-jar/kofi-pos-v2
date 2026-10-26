@@ -16,6 +16,27 @@ import {
 
 const ZONES = ['UTC', 'Asia/Tokyo', 'America/New_York', 'Pacific/Kiritimati'];
 
+describe('años anteriores a 0100 (SPEC-005 T030)', () => {
+  it.each(ZONES)('conserva años, bisiestos y rangos en %s', (zone) => {
+    vi.stubEnv('TZ', zone);
+    expect(addDays('0001-01-02', -1)).toBe('0001-01-01');
+    expect(addDays('0099-12-31', 1)).toBe('0100-01-01');
+    expect(addDays('0100-01-01', -1)).toBe('0099-12-31');
+    expect(addMonths('0099-12', 1)).toBe('0100-01');
+    expect(addMonths('0100-01', -1)).toBe('0099-12');
+    expect(daysOfMonth('0012-02')).toHaveLength(29);
+    expect(daysOfMonth('0100-02')).toHaveLength(28);
+    expect(boliviaDate(new Date('0001-01-01T12:00:00Z'))).toBe('0001-01-01');
+    expect(boliviaDayBounds('0099-12-31', new Date('2026-10-25T15:00:00Z'))).toEqual({
+      from: new Date('0099-12-31T04:32:36Z'),
+      to: new Date('0100-01-01T04:32:36Z'),
+    });
+    expect(boliviaMonthBounds('0099-12', new Date('2026-10-25T15:00:00Z')).to).toEqual(
+      new Date('0100-01-01T04:32:36Z'),
+    );
+  });
+});
+
 afterEach(() => {
   vi.unstubAllEnvs();
 });

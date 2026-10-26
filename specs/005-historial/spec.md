@@ -54,6 +54,7 @@ Son los de «Datos de una venta registrada» de SPEC-003, tal como se registraro
 | Momento de los datos | La fecha y la hora en que el sistema obtuvo las cifras. |
 
 - Los importes se muestran en el formato de precios de SPEC-002 («Bs 12,50»); las fechas y horas, en el de SPEC-003 («24/10/2026 14:05»); una fecha sin hora, «24/10/2026», y un mes, «Octubre de 2026», como en SPEC-004.
+- El calendario admite años de cuatro cifras del 0001 al 9999, sin año cero. No se limita la antigüedad de las ventas dentro de ese formato. En el primer día o mes representable, no se puede retroceder más.
 - Las cantidades se escriben en singular o en plural: «1 venta», «2 ventas».
 
 ## 3. Historias de usuario, priorizadas
@@ -97,6 +98,8 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 - Si se pide un día futuro por otra vía (por ejemplo, escribiéndolo en la dirección), entonces el sistema deberá rechazarlo con el mensaje «No se pueden consultar fechas futuras» y no mostrar ninguna venta de ese día.
 - Si se pide una fecha que no existe en el calendario o no se puede leer como fecha, entonces el sistema deberá rechazarla con el mensaje «La fecha no es válida».
 - El sistema deberá decidir qué día es hoy con su propia fecha y hora en hora de Bolivia, no con la de la computadora desde la que se consulta.
+
+- Mientras se muestre el 01/01/0001, el sistema deberá no permitir elegir «Día anterior»; un año cero se rechaza como fecha no válida.
 
 **RF-3. Ventas de un día** (HU-1)
 
@@ -157,6 +160,8 @@ Como **dueño**, quiero **elegir un mes y ver cuánto se vendió, cuánto en efe
 - Mientras se muestre el mes que era el mes en curso cuando el sistema obtuvo los datos, el sistema deberá no permitir elegir «Mes siguiente» (como «Día siguiente» en RF-2).
 - Donde estén las ventas de un día (HU-1), el sistema deberá ofrecer en las cifras de un mes la opción «Ver por día», que muestra las ventas de hoy.
 - El sistema deberá decidir cuál es el mes en curso con su propia fecha y hora en hora de Bolivia (como en RF-2).
+
+- Mientras se muestre enero de 0001, el sistema deberá no permitir elegir «Mes anterior»; un año cero se rechaza como mes no válido.
 
 **RF-12. Cifras de un mes** (HU-3)
 
@@ -279,3 +284,7 @@ La persona delegó la definición completa de 005-historial («Delego la definic
 
 - **P:** ¿El cajero puede usar el Historial y, si puede, qué ventas ve? → **R:** No: solo el dueño usa el Historial. El cajero no ve la opción «Historial de ventas» y, si intenta consultar sus datos por otra vía, recibe «No tienes permiso para ver el historial de ventas». (Aplicado en «Usuarios» y «Dudas abiertas»; RF-1 ya lo decía.)
 - **P:** ¿Hasta qué fecha hacia atrás debe poder consultarse el Historial? → **R:** Sin límite: se puede consultar cualquier día y cualquier mes hasta hoy. (Aplicado en «Fecha consultable» y «Dudas abiertas».)
+
+### 2026-10-26 — Corrección de la verificación de US1
+
+- **Decisión delegada:** «Sin límite hacia atrás» significa sin recorte de antigüedad de las ventas; el calendario civil de cuatro cifras admite los años 0001–9999, sin año cero. En 01/01/0001 y enero de 0001, las opciones de retroceso están deshabilitadas. Motivo: ninguna fecha admitida debe navegar fuera del formato del calendario; alternativa descartada: imponer una antigüedad de negocio o navegar a una fecha que luego se rechaza. Aplicado en «Datos de una venta», RF-2 y RF-11.

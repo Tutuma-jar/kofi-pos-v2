@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { formatDate, HISTORY_MESSAGES } from '@kofi/contracts';
+import { formatDate, HISTORY_MIN_DATE, HISTORY_MESSAGES } from '@kofi/contracts';
 import { useHistoryClient } from '../api/HistoryClientProvider.tsx';
 import { useHistoryQuery } from '../state/useHistoryQuery.ts';
 import { PeriodTotals } from '../components/PeriodTotals.tsx';
@@ -41,7 +41,13 @@ export function DayHistoryPage() {
       {data && (
         <>
           <nav aria-label="Cambiar el día">
-            <button type="button" onClick={() => chooseDate(data.previousDate)}>
+            <button
+              type="button"
+              disabled={data.previousDate === null}
+              onClick={() => {
+                if (data.previousDate) chooseDate(data.previousDate);
+              }}
+            >
               Día anterior
             </button>
             <button
@@ -58,6 +64,7 @@ export function DayHistoryPage() {
             Fecha{' '}
             <input
               type="date"
+              min={HISTORY_MIN_DATE}
               value={data.date}
               max={data.today}
               onChange={(event) => {

@@ -13,6 +13,39 @@ function setup(instant = '2026-10-25T15:00:00.000Z') {
 }
 
 describe('consulta de un día (RF-2, RF-3, RF-5, RF-7)', () => {
+  it('0099 solo lee su día y no incluye una venta registrada en 1950 (T030)', async () => {
+    const { service, db, listSales } = setup();
+    const sale = testSale({ registeredAt: '1950-01-01T12:00:00Z' });
+    listSales.mockImplementation(async (_db, { from, to }: { from: Date; to: Date }) =>
+      new Date(sale.registeredAt) >= from && new Date(sale.registeredAt) < to ? [sale] : [],
+    );
+    expect(dayHistorySchema.parse(await service.day('0099-12-31'))).toMatchObject({
+      date: '0099-12-31',
+      previousDate: '0099-12-30',
+      nextDate: '0100-01-01',
+      salesCount: 0,
+      sales: [],
+    });
+    expect(listSales).toHaveBeenCalledWith(db, {
+      from: new Date('0099-12-31T04:32:36Z'),
+      to: new Date('0100-01-01T04:32:36Z'),
+    });
+  });
+  it('el primer día representable no retrocede y el año cero se rechaza sin leer (T030)', async () => {
+    const { service, listSales } = setup();
+    listSales.mockResolvedValue([]);
+    expect(dayHistorySchema.parse(await service.day('0001-01-01'))).toMatchObject({
+      date: '0001-01-01',
+      previousDate: null,
+      nextDate: '0001-01-02',
+    });
+    listSales.mockClear();
+    await expect(service.day('0000-12-31')).rejects.toMatchObject({
+      statusCode: 400,
+      message: HISTORY_MESSAGES.invalidDate,
+    });
+    expect(listSales).not.toHaveBeenCalled();
+  });
   it('consulta hoy en Bolivia hasta now + 1 ms y devuelve navegación y momento', async () => {
     const { service, db, listSales } = setup();
     const result = dayHistorySchema.parse(await service.day());

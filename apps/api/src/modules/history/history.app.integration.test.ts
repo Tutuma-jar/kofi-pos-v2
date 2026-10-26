@@ -71,6 +71,15 @@ describe('historial integrado con ventas reales (RF-1, RF-3, RF-7)', () => {
       }
       const today = await app.inject({ url: '/api/history/day', headers });
       expect(dayHistorySchema.parse(today.json()).date).toBe('2026-10-25');
+      for (const date of ['0001-01-01', '0099-12-31', '0100-01-01']) {
+        const response = await app.inject({ url: `/api/history/day?date=${date}`, headers });
+        expect(response.statusCode).toBe(200);
+        expect(dayHistorySchema.parse(response.json())).toMatchObject({
+          date,
+          salesCount: 0,
+          sales: [],
+        });
+      }
       expect(await listRegisteredSales(db)).toEqual(before);
     } finally {
       await app.close();

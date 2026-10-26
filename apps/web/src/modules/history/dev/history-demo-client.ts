@@ -1,6 +1,8 @@
 import {
-  boliviaDateSchema,
-  boliviaMonthSchema,
+  historyDateSchema,
+  historyMonthSchema,
+  HISTORY_MIN_DATE,
+  HISTORY_MIN_MONTH,
   dayHistorySchema,
   HISTORY_MESSAGES,
   historySaleResponseSchema,
@@ -61,7 +63,7 @@ function emptyDay(date: string): DayHistory {
   return {
     date,
     today: DEMO_TODAY,
-    previousDate: shiftDate(date, -1),
+    previousDate: date === HISTORY_MIN_DATE ? null : shiftDate(date, -1),
     nextDate: date === DEMO_TODAY ? null : shiftDate(date, 1),
     asOf: '',
     totalCents: 0,
@@ -75,7 +77,7 @@ function emptyMonth(month: string): MonthHistory {
   return {
     month,
     currentMonth: DEMO_CURRENT_MONTH,
-    previousMonth: shiftMonth(month, -1),
+    previousMonth: month === HISTORY_MIN_MONTH ? null : shiftMonth(month, -1),
     nextMonth: month === DEMO_CURRENT_MONTH ? null : shiftMonth(month, 1),
     asOf: '',
     totalCents: 0,
@@ -117,7 +119,7 @@ export function createHistoryDemoClient(initial: HistoryScenarioId): HistoryDemo
     },
     day: (date = DEMO_TODAY) =>
       respond(() => {
-        if (!boliviaDateSchema.safeParse(date).success) {
+        if (!historyDateSchema.safeParse(date).success) {
           throw rejected(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.invalidDate);
         }
         if (date > DEMO_TODAY) {
@@ -137,7 +139,7 @@ export function createHistoryDemoClient(initial: HistoryScenarioId): HistoryDemo
       }, historySaleResponseSchema),
     month: (month = DEMO_CURRENT_MONTH) =>
       respond(() => {
-        if (!boliviaMonthSchema.safeParse(month).success) {
+        if (!historyMonthSchema.safeParse(month).success) {
           throw rejected(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.invalidMonth);
         }
         if (month > DEMO_CURRENT_MONTH) {
