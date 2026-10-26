@@ -1,6 +1,23 @@
 # T026 — Medir Ventas en Render y Neon de comprobación
 
-Estado: preparación automatizada T033; **medición real pendiente**. T026 no se marca con los tests locales. T027 y la verificación de Pulido se hacen después de recibir la evidencia real.
+Estado: **medición real completada el 2026-10-25 a las 21:09:17, hora de Bolivia**. Las muestras originales están en [`measurement-results.json`](measurement-results.json).
+
+## Resultado real de T026
+
+Se ejecutó `npm run measure:sales` desde Chromium en la computadora de la persona, contra `https://kofi-web.onrender.com`, con los 200 productos vigentes del seed. La persona ingresó directamente en Chromium y realizó la venta manual; el medidor ejecutó las tres series automáticas. Se excluyó un calentamiento por operación y se conservaron las 22 ventas ficticias.
+
+| Criterio | Resultado | p95 | Veredicto |
+| --- | --- | --- | --- |
+| Abrir Nueva venta < 2000 ms | 19/20 | 1752,622 ms | Cumple |
+| Cambiar la preparación < 1000 ms | 20/20 | 581,210 ms | Cumple |
+| Registrar venta < 2000 ms | 20/20 | 487,666 ms | Cumple |
+| Venta humana de tres productos < 30000 ms | 9807,158 ms | — | Cumple |
+
+Una apertura tardó 2666,518 ms; las otras 19 quedaron bajo el límite, por lo que satisface el 95 % exigido. Los valores completos sin redondear están en el JSON.
+
+Render confirmó **Live** en ambos servicios sobre `ca8e1d21efaa173e93faaf5f8802b05e39021805`, rama `feat/003-ventas-pulido`: [despliegue de la API](https://dashboard.render.com/web/srv-dbe5trbl550s73f9g2l0/deploys/dep-dbfae5m7bikc73cpeebg) y [despliegue web](https://dashboard.render.com/static/srv-dbe5trbl550s73f9g2kg/deploys/dep-dbfae5m7bikc73cpee60). La sincronización del Blueprint fue `exe-dbfae4tg1s2s73f2afl0`. `GET /api/health` a través de la web respondió 200 con `{"status":"ok"}` antes de medir.
+
+Se contrastó sin divulgar credenciales que Render y el entorno local usan la misma base de Neon ya preparada. Antes de medir había 202 productos activos, incluidos los 200 del seed, y ninguna venta. Se desactivaron temporalmente «comida» y «comida2» mediante los servicios de Menú de la API; al terminar se reactivaron ambos. La base conserva sus cuentas, los 202 productos activos y las 22 ventas ficticias. No se borraron datos ni se cambió la conexión privada. Para repetir, hay que volver a preparar exactamente los 200 productos vigentes del seed (D-15).
 
 ## 1. Actualizar la computadora usada para medir
 
@@ -17,7 +34,9 @@ git rev-parse HEAD
 
 Conserva el SHA que devuelve el último comando: debe coincidir con ambos despliegues de Render antes de medir. No hagas cambios en el menú ni en el código durante la medición.
 
-## 2. Preparar una base vacía de comprobación en Neon
+## 2. Preparar la base de comprobación en Neon
+
+Si la persona ya preparó una base de comprobación con los 200 productos del seed y sus cuentas, se puede reutilizar tras contrastar la conexión local con Render sin mostrar sus credenciales. No vuelvas a ejecutar el seed sobre esa base. Si las pruebas anteriores dejaron productos adicionales, desactívalos temporalmente mediante Menú y reactívalos al terminar: deben quedar exactamente los 200 productos vigentes del seed durante toda la medición (D-15). Conserva todos los datos y las ventas ficticias. Los pasos siguientes son para preparar una base nueva cuando no existe una adecuada.
 
 1. En tu proyecto de Neon, selecciona una **rama de comprobación**, separada de producción, en el selector superior. Abre **Postgres database → Databases → Add database**; escribe un nombre nuevo, por ejemplo `kofi_ventas_comprobacion`, selecciona su propietario y pulsa **Create**. Neon permite varias bases por rama. También sirve un proyecto nuevo con su base vacía. [Crear bases en Neon](https://neon.com/docs/manage/databases).
 2. En **Connect**, selecciona esa rama, **esa base** y el rol que la posee. Copia su cadena PostgreSQL privada con TLS. La cadena se usará únicamente en `apps/api/.env` y en `DATABASE_URL` de Render. [Conectar una aplicación a Neon](https://neon.com/docs/connect/connect-from-any-app).
@@ -35,7 +54,7 @@ npm run accounts -w @kofi/api -- create
 
 El seed debe indicar **«Menú de prueba cargado: 200 productos»**. Crea una cuenta de comprobación con rol `cashier` u `owner`; la CLI pide la contraseña sin eco. Si la cuenta ya existe en una base preparada, puedes reutilizarla.
 
-El seed crea `Producto de prueba 001` a `Producto de prueba 200`, activos a Bs 10,00. Rechaza una base que ya tenga productos y no elimina nada. La medición anterior de Menú pudo dejar un producto adicional: no uses esa base si no tienes exactamente los 200 productos vigentes del seed. Un error del seed se resuelve comprobando la base seleccionada, sin ejecutar borrados.
+El seed crea `Producto de prueba 001` a `Producto de prueba 200`, activos a Bs 10,00. Rechaza una base que ya tenga productos y no elimina nada. Una base reutilizada debe tener exactamente esos 200 productos vigentes antes de medir. Un error del seed se resuelve comprobando la base seleccionada, sin ejecutar borrados.
 
 ## 3. Desplegar el mismo commit en los dos servicios de Render
 
