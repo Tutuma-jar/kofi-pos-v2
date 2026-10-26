@@ -7,7 +7,9 @@ import { createFakeClock } from '../../shared/clock.ts';
 import { boliviaDate, boliviaMonthRange } from '../../shared/calendar.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { seedSales } from './sales-seed.cli.ts';
-import { listRegisteredSales } from './sales.repository.ts';
+import { listRegisteredSales, insertSale, nextSaleNumber } from './sales.repository.ts';
+import { getCurrentMenu, saveProduct } from '../menu/index.ts';
+import { randomUUID } from 'node:crypto';
 
 afterEach(() => vi.unstubAllEnvs());
 const clock = createFakeClock(new Date('2026-10-24T15:00:00.000Z'));
@@ -23,6 +25,106 @@ async function fixture() {
   return db;
 }
 describe('carga de ventas ficticias (T021, RNF-3)', () => {
+  it('completa el mes conservando productos y ventas previas; repetir no escribe (T028)', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
+    const db = await fixture();
+    try {
+      const menu = await getCurrentMenu(db);
+      await saveProduct(db, {
+        categoryId: menu[0]!.id,
+        name: 'Producto adicional 201',
+        price: '12,00',
+      });
+      await saveProduct(db, {
+        categoryId: menu[0]!.id,
+        name: 'Producto adicional 202',
+        price: '15,00',
+      });
+      await seedSales(db, clock, { complete: true });
+      const base = await listRegisteredSales(db);
+      // Las ventas de octubre no cuentan en el nuevo mes; se preservan igualmente.
+      const november = createFakeClock(new Date('2026-11-02T15:00:00Z'));
+      const account = (await createAccountsService(db).list())[0]!;
+      const product = menu[0]!.products[0]!;
+      await db.transaction(async (tx) =>
+        insertSale(tx, {
+          number: await nextSaleNumber(tx),
+          draftId: randomUUID(),
+          registeredAt: new Date('2026-11-01T15:00:00Z'),
+          registeredBy: {
+            userId: account.id,
+            displayName: account.displayName,
+            role: account.role,
+          },
+          paymentMethod: 'cash',
+          totalCents: 1000,
+          lines: [
+            {
+              productId: product.id,
+              productName: product.name,
+              categoryName: menu[0]!.name,
+              unitPriceCents: 1000,
+              quantity: 1,
+              subtotalCents: 1000,
+            },
+          ],
+        }),
+      );
+      const before = await listRegisteredSales(db);
+      const productsBefore = await getCurrentMenu(db);
+      const result = await seedSales(db, november, { complete: true });
+      expect(result.salesCount).toBe(5999);
+      const after = await listRegisteredSales(db);
+      expect(after).toHaveLength(12000);
+      expect(after.slice(0, before.length)).toEqual(before);
+      expect(after.slice(0, base.length)).toEqual(base);
+      expect(after.map((sale) => sale.number)).toEqual(
+        Array.from({ length: 12000 }, (_, index) => index + 1),
+      );
+      expect(
+        after.filter((sale) => boliviaDate(new Date(sale.registeredAt)).startsWith('2026-11')),
+      ).toHaveLength(6000);
+      expect(await getCurrentMenu(db)).toEqual(productsBefore);
+      expect(productsBefore.flatMap((category) => category.products)).toHaveLength(202);
+      expect(await seedSales(db, november, { complete: true })).toEqual({
+        salesCount: 0,
+        totalCents: 0,
+      });
+      expect(await listRegisteredSales(db)).toEqual(after);
+      await expect(seedSales(db, november)).rejects.toThrow('La base ya tiene ventas');
+      const future = createFakeClock(new Date('2026-10-31T15:00:00Z'));
+      // Una venta adicional en el mes con 6000 impide la carga sin tocar los datos.
+      await db.transaction(async (tx) =>
+        insertSale(tx, {
+          number: await nextSaleNumber(tx),
+          draftId: randomUUID(),
+          registeredAt: clock.now(),
+          registeredBy: {
+            userId: account.id,
+            displayName: account.displayName,
+            role: account.role,
+          },
+          paymentMethod: 'qr',
+          totalCents: 1000,
+          lines: [
+            {
+              productId: product.id,
+              productName: product.name,
+              categoryName: menu[0]!.name,
+              unitPriceCents: 1000,
+              quantity: 1,
+              subtotalCents: 1000,
+            },
+          ],
+        }),
+      );
+      await expect(seedSales(db, future, { complete: true })).rejects.toThrow(
+        'El mes ya supera las 6000 ventas',
+      );
+    } finally {
+      await db.close();
+    }
+  }, 120000);
   it('carga 6000 ventas válidas, por todos los días hasta hoy, con números y sumas exactas; impide duplicar', async () => {
     vi.stubEnv('NODE_ENV', 'test');
     const db = await fixture();
@@ -56,6 +158,9 @@ describe('carga de ventas ficticias (T021, RNF-3)', () => {
       const transaction = vi.spyOn(db, 'transaction');
       const query = vi.spyOn(db, 'query');
       await expect(seedSales(db, clock)).rejects.toThrow(
+        'No se cargan ventas de prueba en producción',
+      );
+      await expect(seedSales(db, clock, { complete: true })).rejects.toThrow(
         'No se cargan ventas de prueba en producción',
       );
       expect(transaction).not.toHaveBeenCalled();

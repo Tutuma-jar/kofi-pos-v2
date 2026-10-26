@@ -203,6 +203,8 @@ npm run seed:sales -w @kofi/api
 
 `seed:sales` usa la `DATABASE_URL` local de `apps/api/.env`, exige una base sin ventas y exactamente 200 productos vigentes, y carga 6000 ventas ficticias repartidas desde el primer día del mes hasta hoy. Requiere una cuenta existente, prefiere cajero y alterna Efectivo y QR. Toda la carga es atómica: un error revierte ventas, líneas y contador. Rechaza `NODE_ENV=production` antes de acceder a la base y no elimina datos ni permite repetir una carga. Debe usarse en la base de comprobación; el servicio de Render conserva su configuración de producción. La preparación y la medición deben hacerse dentro del mismo mes de Bolivia.
 
+Por instrucción expresa de la persona, también puede prepararse la base existente con `npm run seed:sales -w @kofi/api -- --complete`. Este modo exige al menos 200 productos vigentes y añade solo las ventas que faltan para llegar a 6000 en el mes hasta el momento de la carga. Conserva todos los productos y ventas previos; con 6000 no añade nada y con más de 6000 rechaza la operación. La evidencia de T022 debe indicar el volumen real del menú y de ventas; sigue pendiente la medición del despliegue.
+
 ## Flujo de trabajo
 
 Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.

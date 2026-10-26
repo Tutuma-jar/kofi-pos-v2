@@ -304,6 +304,8 @@ Todas son **decisiones delegadas** (modo delegado, `AGENTS.md`): quedan aprobada
 
 Ninguna nueva. Se usan las de [`specs/001-acceso/plan.md`](../001-acceso/plan.md#71-dependencias-por-paquete) §7.1.
 
+**Corrección delegada para T022 (T028, 2026-10-26):** la persona indica «hazlo sobre esa misma» después de comprobar 202 productos vigentes y 44 ventas en su base configurada. Se conserva el modo inicial estricto y se añade `seed:sales -- --complete`: requiere al menos 200 productos vigentes, cuenta las ventas del mes hasta el momento de la carga y añade solo las necesarias para llegar a 6000. No modifica ni elimina productos, ventas ni cuentas existentes; con 6000 no escribe y con más de 6000 rechaza la carga. Usa el mismo bloqueo del contador y la misma transacción que el modo estricto. Motivo: preparar el volumen de RNF-3 en la base indicada expresamente por la persona. Alternativa descartada: borrar los datos o reducir el menú a 200, porque no hace falta para medir el Dashboard y perdería datos existentes. La evidencia de T022 registrará el volumen real de productos (202 en la inspección), sin afirmar que son exactamente 200. No cambia el contrato ni la lógica de las ventas reales.
+
 ## 8. Estrategia de tests
 
 ### 8.1 Niveles

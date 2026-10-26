@@ -97,6 +97,11 @@ Rama: `feat/004-dashboard-pulido`.
 - [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Excepción autorizada por la persona: hacer T023 antes de T022, dejando explícita la medición pendiente en el README y en el PR; T022 sigue reservada a la persona y sin marcar.
   Hecho cuando: el README describe esos tres puntos.
 
+**Corrección de Pulido autorizada para usar la base existente:**
+
+- [x] **T028 [api]** Añadir a `seed:sales` el modo explícito `--complete` para completar 6000 ventas del mes sin modificar datos existentes, con al menos 200 productos vigentes; conservar el modo estricto y el rechazo en producción (plan §7.1; RNF-3). Depende de: T021
+  Hecho cuando: las pruebas comprueban que conserva las ventas y los productos previos, añade solo las ventas que faltan, no vuelve a escribir al alcanzar 6000, rechaza más de 6000 y sigue bloqueado en producción; los números son correlativos y la carga sigue siendo atómica. T022 usa este modo por instrucción expresa de la persona y registra los volúmenes reales.
+
 ## Cobertura de RF
 
 | RF | Tareas |
