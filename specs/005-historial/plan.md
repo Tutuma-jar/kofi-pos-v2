@@ -537,3 +537,7 @@ Regresiones: 101 cifras sin venta conservadas en el mensaje, ceros iniciales lar
 **Decisión delegada:** rellenar a cuatro cifras el año de `formatDateTime` en el formateador compartido. Motivo: RF-8 y el calendario admitido requieren conservar el formato de la fecha también para 0001 y 0099; Intl devuelve esos años sin ceros iniciales. Se descarta corregirlo solo en la pantalla o restringir las fechas antiguas. Sin dependencias nuevas ni cambios de esquema; las fechas actuales mantienen su presentación.
 
 Regresiones escritas antes del código: fechas y horas históricas de Bolivia con años 0001 y 0099 en el contrato y en el detalle. Análisis: T033 cubre RF-8/RNF-1, sin tareas huérfanas, contradicciones constitucionales ni aclaraciones abiertas.
+
+## 17. Mes inicial conservado en la URL (T025)
+
+**Decisión delegada:** fijar en `?mes=` el mes inicial devuelto por la API con reemplazo de la entrada actual y conservar los demás parámetros, como se hace con el día. Motivo: RF-5 exige conservar la consulta al recargar y volver atrás, incluso después de cambiar de mes; se descarta pedir de nuevo el mes en curso al actualizar una consulta ya abierta. La navegación y los límites siguen llegando de la API; la interfaz solo presenta los importes y los días recibidos. Sin cambios de contrato ni dependencias nuevas.

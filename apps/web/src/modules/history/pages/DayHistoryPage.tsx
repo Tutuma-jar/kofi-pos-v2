@@ -40,6 +40,9 @@ export function DayHistoryPage() {
         <Link to="/">Volver al inicio</Link>
       </p>
       <SaleSearch />
+      <p>
+        <Link to="/ventas/mes">Ver por mes</Link>
+      </p>
       {data && (
         <>
           <nav aria-label="Cambiar el día">

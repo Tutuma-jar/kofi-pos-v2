@@ -32,6 +32,13 @@ function mount(scenario: HistoryScenarioId = 'withSales', path = '/ventas?fecha=
 }
 
 describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
+  it('ofrece Ver por mes desde el día (T025, RF-11)', async () => {
+    mount();
+    expect(await screen.findByRole('link', { name: 'Ver por mes' })).toHaveAttribute(
+      'href',
+      '/ventas/mes',
+    );
+  });
   it('ofrece la búsqueda por número al abrir el día (US2 RF-9)', async () => {
     mount();
     expect(await screen.findByLabelText('Buscar venta por número')).toBeVisible();
@@ -166,6 +173,8 @@ describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
     expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('button', { name: 'Buscar' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('link', { name: 'Ver por mes' })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('button', { name: 'Día anterior' })).toHaveFocus();
     await user.keyboard('{Enter}');

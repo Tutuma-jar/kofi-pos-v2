@@ -66,6 +66,20 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
             <HistoryClientProvider
               client={{
                 ...httpHistoryClient,
+                month: async () => ({
+                  month: '2026-10',
+                  currentMonth: '2026-10',
+                  previousMonth: '2026-09',
+                  nextMonth: null,
+                  asOf: '2026-10-25T15:00:00Z',
+                  totalCents: 0,
+                  salesCount: 0,
+                  days: [{ date: '2026-10-01', totalCents: 0, salesCount: 0 }],
+                  byPaymentMethod: [
+                    { paymentMethod: 'cash', totalCents: 0, salesCount: 0 },
+                    { paymentMethod: 'qr', totalCents: 0, salesCount: 0 },
+                  ],
+                }),
                 sale: async () => ({
                   date: '2026-10-25',
                   sale: {
@@ -188,7 +202,7 @@ describe('routes', () => {
   // SPEC-005 Historial (plan §3, D-6, D-7; RF-1): solo los roles de HISTORY_ROLES.
   it.each([
     ['/ventas', 'Ventas del 25/10/2026'],
-    ['/ventas/mes', 'Ventas por mes'],
+    ['/ventas/mes', 'Octubre de 2026'],
     ['/ventas/7', 'Venta N.º 7'],
   ])('%s muestra su página del historial con una sesión de dueño', async (path, heading) => {
     await renderAt(path);
