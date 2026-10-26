@@ -38,7 +38,7 @@ Toda funcionalidad sigue este ciclo. La persona aprueba cada paso antes del sigu
 - **Historias priorizadas:** `tasks.md` se organiza en fases verticales (Preparación, Base común, una fase por historia en orden P1, P2…, Pulido). Cada historia se integra y se prueba completa.
 - **Contrato primero:** `plan.md` define el contrato y la fase «Base común» lo escribe en `packages/contracts`. Dentro de cada historia, la interfaz (`[web]`, contra un cliente simulado del contrato en `dev/`) y la API (`[api]`) avanzan en paralelo (`[P]`), sin esperarse; la tarea `[integración]` cierra la historia.
 - No implementes con hallazgos bloqueantes del análisis ni con `[NECESITA ACLARACIÓN]` abiertos que afecten a la historia.
-- No escribas código sin `spec.md` y `plan.md` aprobados. En modo delegado, solo las tareas de Preparación y Base común se implementan antes de que se apruebe la definición, en su mismo PR, y se aprueban junto con ella al fusionarlo.
+- No escribas código sin `spec.md` y `plan.md` aprobados, salvo en los cambios de presentación (ver «Cambios de presentación»). En modo delegado, solo las tareas de Preparación y Base común se implementan antes de que se apruebe la definición, en su mismo PR, y se aprueban junto con ella al fusionarlo.
 - Implementa **una tarea a la vez**: primero sus tests y después el código. Al terminarla, márcala en `tasks.md`, haz su commit y detente, salvo que la persona pida continuar o estés en modo delegado.
 - Si algo del código no encaja con la especificación, detente y propón corregir una de las dos; en modo delegado, aplica «Bloqueos y correcciones».
 
@@ -51,6 +51,17 @@ La persona puede delegar sus decisiones con un pedido explícito, por ejemplo «
 - Todo lo decidido queda aprobado al fusionar el PR que lo contiene (constitución, principio 2). Ninguna historia empieza antes de que se fusione el PR de definición, y el merge siempre lo hace una persona.
 - Detente igualmente en los casos que indica «Bloqueos y correcciones».
 
+### Cambios de presentación
+
+Los cambios de estilos, maquetación, tipografía, color e iconos de la interfaz no siguen el ciclo de especificaciones si no cambian comportamiento, rutas, contrato, reglas de negocio ni textos fijados en una especificación (constitución, principio 2).
+
+- **Rama:** `style/<descripcion>`, por ejemplo `style/disenio-acceso`, con su PR en borrador hacia `develop`.
+- **Diseño:** usa la skill `impeccable` tal como está diseñada, sin pasos previos del ciclo. Revisa cada pantalla con sus escenarios de desarrollo (`?escenarios=<módulo>`).
+- **Commits:** `style(<scope>): <resumen>`, sin `Refs`, uno por pantalla o ajuste común.
+- **Al terminar:** ejecuta las comprobaciones de «Comandos» con los tests existentes en verde, publica la rama y actualiza el PR. No se delega en el `verificador`.
+- **PR:** en «Relacionado», las especificaciones de las pantallas que cambian; en «Observaciones», la justificación de cada dependencia nueva (fuentes, bibliotecas).
+- Si el cambio necesita otro texto, otro comportamiento o una ruta nueva, deja de ser de presentación: va al ciclo normal, en la especificación de esa funcionalidad.
+
 ### Idioma
 
 Ramas, commits, títulos y descripciones de PR en español. Solo quedan en inglés los tipos de Conventional Commits (`feat`, `fix`…) y los scopes, que usan el nombre del módulo en el código.
@@ -59,7 +70,7 @@ Ramas, commits, títulos y descripciones de PR en español. Solo quedan en ingl�
 
 - **Ramas de cada especificación:** `feat/NNN-<nombre>-definicion` (spec, plan, tareas, análisis y contrato), una por historia `feat/NNN-<nombre>-usN` y `feat/NNN-<nombre>-pulido`. Por ejemplo, `feat/001-acceso-us1`. Haz solo tareas de la fase de la rama en la que estás.
 - En la rama de una historia trabajan las dos personas, cada una en su frente. Antes de publicar, integra lo de la otra con `git pull` (merge, nunca rebase).
-- Trabajo fuera de una especificación (configuración, documentación general): `<tipo>/<descripcion>`, por ejemplo `chore/configurar-ci`. `feat` y `fix` siempre llevan número.
+- Trabajo fuera de una especificación (configuración, documentación general, cambios de presentación): `<tipo>/<descripcion>`, por ejemplo `chore/configurar-ci` o `style/disenio-acceso`. `feat` y `fix` siempre llevan número.
 - Tipos: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`, `style`. Descripción en kebab-case, sin tildes ni `ñ`, de 1 a 5 palabras; máximo 60 caracteres.
 - Crea la rama desde donde estés con `git switch -c <rama>`: el hook `post-checkout` la coloca sobre `origin/develop` actualizado. Si la rama ya existe en GitHub (por ejemplo, la historia que empezó la otra persona), únete con `git fetch` y `git switch <rama>`, sin `-c`.
 - Nunca trabajes ni hagas commits en `develop` o `main`.
@@ -132,6 +143,7 @@ En modo delegado resuelves solo los fallos técnicos (tests, CI, lint, tipos, bu
 | `docs/business-rules.md` | Qué es Kofi, módulos y reglas que aplican a todo el producto |
 | `docs/architecture.md` | Stack, estructura y decisiones técnicas globales |
 | `specs/NNN-<nombre>/` | `spec.md`, `plan.md`, `tasks.md` y, si existe, `quickstart.md` de cada funcionalidad |
+| `PRODUCT.md` y `DESIGN.md` | Contexto de producto y sistema visual de la interfaz, cuando los escribe `impeccable` |
 
 Consulta solo lo pertinente a la tarea.
 
