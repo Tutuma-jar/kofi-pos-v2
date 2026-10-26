@@ -86,6 +86,11 @@ Rama: `feat/004-dashboard-us2`.
 - [x] **T020 [integración] [US2]** Escribir `e2e/dashboard-us2-resumen-mes.spec.ts` con los 4 pasos de §8.2 del plan, contra la API real de E2E (RF-9, RF-10). Depende de: T016, T018, T019
   Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1 y US2.
 
+**Corrección de integración tras el squash merge de US1:**
+
+- [x] **T034 [integración] [US2]** Integrar `origin/develop` mediante merge en la rama de US2 y resolver las adiciones duplicadas de US1, conservando las ampliaciones del mes y las pruebas de ambas historias (RF-1 a RF-10). Depende de: T020
+  Hecho cuando: no quedan conflictos ni cambios funcionales respecto a la implementación verificada de US2, pasan las comprobaciones existentes y el PR se publica actualizado hacia `develop`.
+
 ## Fase 5 — Pulido
 
 Rama: `feat/004-dashboard-pulido`.
