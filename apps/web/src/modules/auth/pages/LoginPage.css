@@ -6,12 +6,23 @@
 }
 
 .login__brand {
+  position: relative;
+  overflow: hidden;
   padding: var(--space-12) var(--space-8);
   color: var(--color-on-brand);
   background: var(--color-brand);
 }
 
+/* Relieve: un rombo escalonado del aguayo, azul sobre azul, que asienta el panel bajo el nombre. */
+.login__relief {
+  position: absolute;
+  right: -16%;
+  bottom: -14%;
+  width: 84%;
+}
+
 .login__name {
+  position: relative;
   font-size: var(--text-display);
   font-weight: 800;
   line-height: 1;
@@ -55,7 +66,11 @@
   }
 
   .login__name {
-    font-size: 3rem;
+    font-size: var(--text-display-compact);
+  }
+
+  .login__relief {
+    display: none;
   }
 
   .login .weave--vertical {

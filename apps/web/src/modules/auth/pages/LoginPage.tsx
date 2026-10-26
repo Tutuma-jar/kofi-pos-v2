@@ -3,6 +3,7 @@ import { LoginForm } from '../components/LoginForm.tsx';
 import { useSession } from '../components/useSession.ts';
 import type { Role } from '@kofi/contracts';
 import { returnTo } from '../api/return-to.ts';
+import { SteppedDiamond } from '../../../shared/components/SteppedDiamond.tsx';
 import { WeaveStrip } from '../../../shared/components/WeaveStrip.tsx';
 import './LoginPage.css';
 
@@ -20,6 +21,12 @@ export function LoginPage({
     <div className="login">
       <div className="login__brand">
         <p className="login__name">Kofi POS</p>
+        <SteppedDiamond
+          className="login__relief"
+          outline="var(--color-brand-deep)"
+          ring="var(--color-brand-deep)"
+          eye="var(--color-brand)"
+        />
       </div>
       <WeaveStrip orientation="vertical" />
       <WeaveStrip orientation="horizontal" />
