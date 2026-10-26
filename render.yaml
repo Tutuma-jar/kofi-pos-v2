@@ -1,7 +1,7 @@
 # Despliegue en Render (D-12, docs/architecture.md §6.5). Secretos: solo se declaran (sync: false) y
 # se cargan en Render.
 #
-# Comprobación de T026 de Ventas: el Blueprint apunta a la rama de pulido
+# Comprobación de T022 de Dashboard: el Blueprint apunta a la rama de pulido
 # y usa una base de Neon de comprobación. Al publicar la especificación, branch pasa a main y DATABASE_URL a la
 # base de producción.
 services:
@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: free
     region: virginia
-    branch: feat/003-ventas-pulido
+    branch: feat/004-dashboard-pulido
     # TypeScript y las herramientas de build son dependencias de desarrollo (D-12).
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/api
     startCommand: npm run start -w @kofi/api
@@ -28,7 +28,7 @@ services:
   - type: web
     name: kofi-web
     runtime: static
-    branch: feat/003-ventas-pulido
+    branch: feat/004-dashboard-pulido
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/web
     staticPublishPath: apps/web/dist
     routes:

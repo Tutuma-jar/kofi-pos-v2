@@ -37,10 +37,31 @@ export async function measureCycles(driver) {
   }
   return samples;
 }
+export async function verifyDeployedFrontend(target = TARGET, request = fetch) {
+  try {
+    const response = await request(target, { signal: AbortSignal.timeout(55000) });
+    if (!response.ok) throw new MeasurementError('No se pudo comprobar la web desplegada.');
+    const html = await response.text();
+    const entry = html.match(/<script\b[^>]+src=["']([^"']+\.js)["']/i)?.[1];
+    if (!entry) throw new MeasurementError('La web desplegada no tiene el bundle esperado.');
+    const asset = new URL(entry,target);
+    if (asset.origin !== new URL(target).origin) throw new MeasurementError('El bundle debe pertenecer al mismo origen que la web.');
+    const bundle = await request(asset.href, { signal: AbortSignal.timeout(55000) });
+    if (!bundle.ok) throw new MeasurementError('No se pudo leer el bundle de la web desplegada.');
+    const code = await bundle.text();
+    if (!code.includes('today-title') || !code.includes('month-title'))
+      throw new MeasurementError('La web desplegada todavía no incluye el Dashboard actual. Despliega la rama de Pulido en kofi-web antes de volver a medir.');
+    return true;
+  } catch (error) {
+    if (error instanceof MeasurementError) throw error;
+    throw new MeasurementError('No se pudo comprobar la web desplegada. Revisa su disponibilidad antes de medir.');
+  }
+}
 export async function createBrowserDriver(role, options = {}) {
+  const target = options.target ?? TARGET;
+  await verifyDeployedFrontend(target, options.fetch ?? fetch);
   const chromium = options.chromium ?? (await import('@playwright/test')).chromium;
   const browser = await chromium.launch({ headless: options.headless ?? false });
-  const target = options.target ?? TARGET;
   try {
     const context = await browser.newContext({ baseURL: target });
     const page = await context.newPage();
@@ -160,8 +181,8 @@ export async function runMeasurement({ io, args, env, createDriver, saveReport, 
     const input = {};
     let inspected;
     for (const role of ROLES) {
-      io.write(`Ingresa como ${role === 'owner' ? 'Dueño' : 'Cajero'} en Chromium. Escribe la contraseña solo en el navegador.`);
       driver = await createDriver(role);
+      io.write(`Ingresa como ${role === 'owner' ? 'Dueño' : 'Cajero'} en Chromium. Escribe la contraseña solo en el navegador.`);
       await driver.login();
       const size = await driver.inspect();
       if (role === 'owner') {

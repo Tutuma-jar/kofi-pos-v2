@@ -1,9 +1,19 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildReport, measureCycles, runMeasurement } from './measure-dashboard.mjs';
+import { buildReport, measureCycles, runMeasurement, verifyDeployedFrontend, createBrowserDriver } from './measure-dashboard.mjs';
 
 const samples = () => ({ openMs: Array(20).fill(200), refreshMs: Array(20).fill(150) });
 const metadata = { productCount: 202, monthlySalesCount: 6000, month: '2026-10', localCommit: 'ficticio' };
+const fakeFrontend = bundle => async url => ({ ok: true, text: async () => String(url).endsWith('.js') ? bundle : '<script type="module" src="/assets/index-test.js"></script>' });
+test('rechaza una web anterior al Dashboard antes de pedir el ingreso', async () => {
+  let opened = false;
+  await assert.rejects(createBrowserDriver('owner', { fetch: fakeFrontend('cliente sin secciones'), chromium: { async launch() { opened=true; } } }), /web desplegada/);
+  assert.equal(opened,false);
+});
+test('acepta la web actual y rechaza scripts de otro origen sin leer sesión', async () => {
+  assert.equal(await verifyDeployedFrontend('https://ejemplo.invalid',fakeFrontend('today-title month-title')),true);
+  await assert.rejects(verifyDeployedFrontend('https://ejemplo.invalid',async()=>({ok:true,text:async()=>'<script type="module" src="https://otro.invalid/index.js"></script>'})),/mismo origen/);
+});
 test('exige el volumen y veinte tiempos finitos no negativos', () => {
   for (const bad of [199, 0, NaN]) assert.throws(() => buildReport({}, { ...metadata, productCount: bad }));
   assert.throws(() => buildReport({}, { ...metadata, monthlySalesCount: 5999 }));

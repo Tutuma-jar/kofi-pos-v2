@@ -108,6 +108,9 @@ Rama: `feat/004-dashboard-pulido`.
 - [x] **T030 [integración]** Preparar `measure:dashboard` con tests del medidor y salida de muestras sin secretos, para ejecutar las series de T022 y cronometrar los dos recorridos manuales desde la computadora del local (RNF-3, criterio de 10 segundos; plan §7.1). Depende de: T029
   Hecho cuando: los tests rechazan volúmenes y tiempos inválidos, aplican 19/20 y límites estrictos de 2 s y 10 s, excluyen un calentamiento por operación, preservan las muestras y comprueban que los recorridos humanos y las credenciales no son automatizados; el comando queda disponible en Windows para ambas herramientas.
 
+- [x] **T031 [integración]** Corregir las ramas del Blueprint de comprobación y detectar una web anterior al Dashboard antes de abrir Chromium en el medidor (RNF-3; plan §7.1). Depende de: T030
+  Hecho cuando: el medidor rechaza bundles sin las dos secciones antes de abrir el navegador, acepta el bundle actual sin leer credenciales y rechaza recursos de otro origen; ambos servicios del Blueprint apuntan a la rama de Pulido de Dashboard. El despliegue real y sus mediciones continúan en T022.
+
 ## Cobertura de RF
 
 
