@@ -95,14 +95,35 @@ Rama: `feat/004-dashboard-us2`.
 
 Rama: `feat/004-dashboard-pulido`.
 
-- [ ] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
+- [x] **T021 [api]** Escribir `modules/sales/sales-seed.cli.ts` (`npm run seed:sales -w @kofi/api`): carga en la base de `DATABASE_URL` las ventas de prueba del mes en curso con `nextSaleNumber` e `insertSale`, y se niega a correr con `NODE_ENV=production` (plan D-11; RNF-3). Depende de: T020
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas repartidas en los días del mes que cumplen `saleSchema` y suman lo esperado, y otra comprueba que con `NODE_ENV=production` no escribe nada.
-- [ ] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las 6000 ventas con `seed:sales`, y medir RNF-3 y el criterio de 10 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T021, SPEC-002 T034
-  Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, el dueño y el cajero ven el total de hoy en menos de 10 segundos desde la pantalla inicial, y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T022
+- [x] **T022 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y la base indicada por la persona (`docs/architecture.md` §6.5), usar su menú de comprobación de al menos 200 productos vigentes, completar 6000 ventas del mes con `seed:sales -- --complete` (T028, T029) y documentar los volúmenes reales. Medir RNF-3 y los recorridos humanos según plan §8.3 y spec §8. Requiere el ingreso y los recorridos manuales de la persona. Depende de: T021, T032, SPEC-002 T034
+  Hecho cuando: al menos 19 de cada 20 aperturas de «Resumen de ventas» y 19 de cada 20 «Actualizar» muestran los resúmenes en menos de 2 segundos, los recorridos manuales del dueño y cajero quedan cronometrados con objetivo de 10 segundos o con su exceso aceptado expresamente según spec §8, y los resultados reales y la aceptación quedan anotados en la descripción del PR de pulido. La persona aceptó el exceso manual el 2026-10-26; RNF-3 sigue exigido sin cambios.
+- [x] **T023 [integración]** Actualizar `README.md` con el estado del módulo Dashboard: quién ve el resumen de ventas, cómo llegar a él y qué muestra de hoy y del mes (RF-1 a RF-10). Depende de: T021. Antecedente: la persona autorizó hacer T023 antes de T022, documentando entonces la medición pendiente en el README y en el PR. T022 se cerró posteriormente con su evidencia real y la aceptación expresa del exceso manual.
   Hecho cuando: el README describe esos tres puntos.
 
+**Corrección de Pulido autorizada para usar la base existente:**
+
+- [x] **T028 [api]** Añadir a `seed:sales` el modo explícito `--complete` para completar 6000 ventas del mes sin modificar datos existentes, con al menos 200 productos vigentes; conservar el modo estricto y el rechazo en producción (plan §7.1; RNF-3). Depende de: T021
+  Hecho cuando: las pruebas comprueban que conserva las ventas y los productos previos, añade solo las ventas que faltan, no vuelve a escribir al alcanzar 6000, rechaza más de 6000 y sigue bloqueado en producción; los números son correlativos y la carga sigue siendo atómica. T022 usa este modo por instrucción expresa de la persona y registra los volúmenes reales.
+
+- [x] **T029 [api]** Enviar la carga `--complete` en lotes con parámetros, reservando los números en la misma transacción, para evitar un viaje de red por campo o línea al cargar Neon (RNF-3; plan §7.1). Depende de: T028
+  Hecho cuando: las pruebas de integración comprueban ventas válidas, números correlativos y reversión de ventas, líneas y contador; el modo estricto conserva su comportamiento y las ventas anteriores siguen intactas.
+
+- [x] **T030 [integración]** Preparar `measure:dashboard` con tests del medidor y salida de muestras sin secretos, para ejecutar las series de T022 y cronometrar los dos recorridos manuales desde la computadora del local (RNF-3, criterio de 10 segundos; plan §7.1). Depende de: T029
+  Hecho cuando: los tests rechazan volúmenes y tiempos inválidos, aplican 19/20 y límites estrictos de 2 s y 10 s, excluyen un calentamiento por operación, preservan las muestras y comprueban que los recorridos humanos y las credenciales no son automatizados; el comando queda disponible en Windows para ambas herramientas.
+
+- [x] **T031 [integración]** Corregir las ramas del Blueprint de comprobación y detectar una web anterior al Dashboard antes de abrir Chromium en el medidor (RNF-3; plan §7.1). Depende de: T030
+  Hecho cuando: el medidor rechaza bundles sin las dos secciones antes de abrir el navegador, acepta el bundle actual sin leer credenciales y rechaza recursos de otro origen; ambos servicios del Blueprint apuntan a la rama de Pulido de Dashboard. El despliegue real y sus mediciones continúan en T022.
+
+- [x] **T032 [integración]** Conservar la primera medición, documentar la aceptación expresa del exceso manual y controlar foco/visibilidad en el medidor antes de repetir solo las series del cajero (RNF-3; spec §8; plan §7.1). Depende de: T031
+  Hecho cuando: los tests rechazan muestras con la página oculta o sin foco, incluso si lo recupera después; el navegador se trae al frente antes del cronómetro, se conservan los informes originales y la aceptación humana no cambia la evaluación automática ni las duraciones.
+
+- [x] **T033 [integración]** Corregir las referencias documentales desactualizadas a T022 que señaló el verificador: actualizar el cierre en README y conservar la excepción de T023 como antecedente histórico, sin afirmar que T022 sigue pendiente (RF-1 a RF-10, coherencia del handoff). Depende de: T022
+  Hecho cuando: README y tasks.md coinciden con el informe real y con la casilla marcada de T022; no se modifican mediciones, criterios ni código funcional y las comprobaciones existentes siguen en verde.
+
 ## Cobertura de RF
+
 
 | RF | Tareas |
 | --- | --- |

@@ -1,0 +1,81 @@
+{
+  "kind": "cashier-automated-series-repeat",
+  "target": "https://kofi-web.onrender.com",
+  "measuredAtBolivia": "2026-10-26 02:22:47",
+  "localCommit": "0b9a214942cba4047136c630aedb141ff32f3b2b",
+  "productCount": 202,
+  "monthlySalesCount": 6000,
+  "month": "2026-10",
+  "browserVersion": "156.0.8078.4",
+  "platform": "win32",
+  "nodeVersion": "24.19.0",
+  "originalReportSha256": "258632aa8d6e40eb844a40d10bd52c1975950b6a332aa01682a848ed2cef410b",
+  "applicationTrees": {
+    "apps/api": "64c66d3775f8e59d85fecc211adb8584baa59b3d",
+    "apps/web": "c4a7d21308325a5e143d50223e9c85915678d110",
+    "packages/contracts": "b1773ee61420eac697b2c16ba533d7eaa4536236"
+  },
+  "applicationUnchangedSinceOriginal": true,
+  "foregroundRequiredThroughoutEachSample": true,
+  "excludedWarmupPerOperation": 1,
+  "open": {
+    "durationsMs": [
+      979.9694000000018,
+      835.0561999999991,
+      798.0820000000022,
+      812.8603000000003,
+      958.1140999999989,
+      776.6210999999967,
+      767.502800000002,
+      804.7047999999995,
+      806.1984000000011,
+      775.4693000000043,
+      777.2726000000039,
+      776.7266000000018,
+      792.7137999999977,
+      759.7772999999943,
+      810.3498000000036,
+      789.3352999999988,
+      798.5034000000014,
+      826.9691999999923,
+      787.3366999999998,
+      803.4870000000083
+    ],
+    "limitMs": 2000,
+    "underLimit": 20,
+    "p95Ms": 958.1140999999989
+  },
+  "refresh": {
+    "durationsMs": [
+      410.4890000000014,
+      410.20990000000165,
+      412.373700000011,
+      407.71719999999914,
+      410.611699999994,
+      409.70350000000326,
+      415.23309999999765,
+      416.6322999999975,
+      416.10719999999856,
+      428.89370000000054,
+      416.13700000000244,
+      409.59330000000773,
+      416.325800000006,
+      410.37390000000596,
+      404.2737999999954,
+      398.6061000000045,
+      416.1047000000108,
+      428.1566000000021,
+      410.17949999999837,
+      406.81440000000293
+    ],
+    "limitMs": 2000,
+    "underLimit": 20,
+    "p95Ms": 428.1566000000021
+  },
+  "rnf3PassedWithOriginalOwnerSeries": true,
+  "humanDurationsPreserved": {
+    "owner": 11873.59999999404,
+    "cashier": 3859
+  },
+  "humanTargetMet": false
+}

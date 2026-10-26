@@ -186,6 +186,29 @@ La venta en preparación conserva sus líneas, cantidades y medio de pago en el 
 
 Para repetirla desde la computadora usada para comprobar el sistema, sigue la preparación de Neon y Render del informe y ejecuta `npm run measure:sales`. Ingresa directamente en Chromium, deja trabajar al medidor y después registra tú la venta de tres productos cuando lo indique la terminal. Se conservan las ventas ficticias; la prueba humana no se automatiza. `npm run test:measure` comprueba los medidores con datos ficticios.
 
+## Dashboard
+
+Dueño y cajero abren **Resumen de ventas** desde la pantalla inicial (`/resumen`). Los dos ven **Hoy**, con la fecha de Bolivia, el total vendido, la cantidad de ventas, la venta promedio, el desglose de **Efectivo** y **QR** y hasta cinco productos más vendidos con sus unidades e importes. El dueño ve después el resumen del **mes en curso** y una tabla con cada día desde el 1 hasta hoy, incluidos los días sin ventas. El cajero no pide ni ve el resumen del mes.
+
+La API calcula las cifras usando las ventas registradas y sus nombres y precios históricos. Las fechas y el momento «Datos al…» se muestran en hora de Bolivia, y los importes, en bolivianos. **Actualizar** vuelve a consultar los resúmenes; no hay actualización automática. Durante la carga o ante un error de conexión o del servidor se conservan las cifras anteriores. Un período sin ventas muestra ceros, «—» como promedio y su aviso.
+
+**T022 medida el 2026-10-26:** con 202 productos vigentes y 6000 ventas del mes, el dueño cumplió 20/20 aperturas y 20/20 actualizaciones bajo 2 segundos. La primera ejecución del cajero no cumplió; se conserva íntegra y la repetición con control del foco obtuvo 20/20 en ambas series. Los recorridos humanos originales fueron 11,874 segundos (dueño) y 3,859 segundos (cajero). La persona aceptó expresamente el exceso manual del dueño según spec §8; no se presenta como cumplido el objetivo de 10 segundos ni se modifica RNF-3. El [informe de comprobación](specs/004-dashboard/measurement.md) enlaza el despliegue y ambos archivos de muestras. El [PR de pulido](https://github.com/Tutuma-jar/kofi-pos-v2/pull/33) conserva la aceptación y queda sujeto a la verificación independiente.
+
+Para preparar la base de comprobación nueva, después de las migraciones, las cuentas y los 200 productos de `seed:menu`, se dispone de:
+
+```text
+npm run build:contracts
+npm run seed:sales -w @kofi/api
+```
+
+`seed:sales` usa la `DATABASE_URL` local de `apps/api/.env`, exige una base sin ventas y exactamente 200 productos vigentes, y carga 6000 ventas ficticias repartidas desde el primer día del mes hasta hoy. Requiere una cuenta existente, prefiere cajero y alterna Efectivo y QR. Toda la carga es atómica: un error revierte ventas, líneas y contador. Rechaza `NODE_ENV=production` antes de acceder a la base y no elimina datos ni permite repetir una carga. Debe usarse en la base de comprobación; el servicio de Render conserva su configuración de producción. La preparación y la medición deben hacerse dentro del mismo mes de Bolivia.
+
+Por instrucción expresa de la persona, también puede prepararse la base existente con `npm run seed:sales -w @kofi/api -- --complete`. Este modo exige al menos 200 productos vigentes y añade solo las ventas que faltan para llegar a 6000 en el mes hasta el momento de la carga. Conserva todos los productos y ventas previos; con 6000 no añade nada y con más de 6000 rechaza la operación. La evidencia de T022 registra el volumen real del menú y de ventas, la medición del despliegue y la aceptación expresa del exceso manual en el [informe de comprobación](specs/004-dashboard/measurement.md).
+
+Para medir desde la computadora del local, ejecutar `npm run build:contracts` y `npm run measure:dashboard` en una terminal interactiva, sin argumentos ni depuración. El medidor abre Chromium: ingresa primero como dueño y, cuando se abra la segunda ventana, como cajero, con la contraseña solo en el navegador. Por cada rol excluye un calentamiento y mide veinte aperturas y veinte actualizaciones; mantén Chromium visible y al frente, sin usar otras aplicaciones durante las series. Después aparecen controles del medidor: desde la pantalla inicial pulsa **Comenzar**, abre tú **Resumen de ventas**, identifica el total de hoy y pulsa **Ya identifiqué el total de hoy**. El programa no hace ese recorrido ni confirma la lectura por ti. Cada serie exige al menos 19/20 muestras bajo 2 segundos; el objetivo humano es menos de 10 segundos y un exceso requiere aceptación expresa documentada según spec §8. El informe conserva el tiempo real y su evaluación, sin convertir esa aceptación en un tiempo menor. Se guarda, sin credenciales, en la ruta de `git rev-parse --git-path dashboard-performance.json`. Los SHA desplegados de web y API se acreditan aparte del SHA local del medidor; las pruebas con datos ficticios están en `npm run test:measure`.
+
+El Blueprint de comprobación apunta a `feat/004-dashboard-pulido` tanto en la API como en la web. Antes de abrir Chromium, el medidor verifica que el bundle público de la web ya contenga ambas secciones del Dashboard. Si todavía sirve una versión anterior, detiene la medición sin pedir credenciales; sincroniza el Blueprint y comprueba el despliegue Live de ambos servicios antes de repetirla.
+
 ## Flujo de trabajo
 
 Las reglas completas están en [AGENTS.md](AGENTS.md) y la [constitución](docs/constitution.md), que Claude y Codex cargan automáticamente.
