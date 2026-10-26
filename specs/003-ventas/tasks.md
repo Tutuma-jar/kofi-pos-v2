@@ -101,20 +101,26 @@ Rama: `feat/003-ventas-us2`. Esta historia no tiene tareas `[api]`: lo que pide 
 
 Rama: `feat/003-ventas-pulido`.
 
-- [ ] **T026 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T025, SPEC-002 T034
+- [x] **T033 [integración]** Preparar la medición asistida de T026: medidor Node/Playwright, tests con datos ficticios, Blueprint en la rama de pulido y guía de ejecución sin compartir credenciales (plan D-14; RNF-3, criterio de 30 segundos). Depende de: T025, SPEC-002 T034
+  Hecho cuando: el medidor exige 200 productos vigentes de prueba, excluye un calentamiento por operación, mide tres series de 20 operaciones reales hasta ver su resultado, cronometra una venta humana de tres productos y guarda las muestras sin secretos; sus pruebas y las comprobaciones pasan y los pasos para Render y Neon quedan documentados. Esta preparación no acredita la medición real de T026.
+- [x] **T026 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y medir RNF-3 y el criterio de 30 segundos como indica el plan (§8.3). Requiere a una persona con acceso a Render y a Neon. Depende de: T025, T033, SPEC-002 T034
   Hecho cuando: al menos 19 de cada 20 aperturas de «Nueva venta» y registros tardan menos de 2 segundos, 19 de cada 20 cambios menos de 1 segundo, una persona registra una venta de 3 productos en menos de 30 segundos y los resultados quedan anotados en la descripción del PR de pulido.
-- [ ] **T027 [integración]** Actualizar `README.md` con el estado del módulo Ventas: quién registra ventas, cómo llegar a «Nueva venta» y qué se conserva de una venta en preparación (RF-1 a RF-14). Depende de: T026
+- [x] **T027 [integración]** Actualizar `README.md` con el estado del módulo Ventas: quién registra ventas, cómo llegar a «Nueva venta» y qué se conserva de una venta en preparación (RF-1 a RF-14). Depende de: T026
   Hecho cuando: el README describe esos tres puntos.
+- [x] **T034 [web] [integración]** Corregir RF-2 tras la verificación completa: conservar la lista de productos entre cálculos sin casos de RF-5 y al sincronizar otra pestaña; actualizarla al abrir/recargar, ante avisos de RF-5 o cambios de nombre/categoría de una línea. Corregir el plan §5.4, con regresiones de hook y E2E escritas antes del código. Depende de: T027
+  Hecho cuando: editar un producto ajeno a la preparación y cambiar una cantidad conserva la lista, sin impedir el cálculo oficial; abrir/recargar y los casos de RF-5 sí la actualizan, y todas las comprobaciones pasan.
+- [x] **T035 [integración]** Repetir la medición real de RNF-3 y de la venta humana tras T034, desplegando el mismo código corregido en ambos servicios y actualizando la evidencia y el README. Depende de: T034
+  Hecho cuando: se registran las 60 muestras nuevas, los límites de T026 vuelven a cumplirse y la venta humana de tres productos tarda menos de 30 segundos. Después se vuelve a delegar la verificación del mismo PR.
 
 ## Cobertura de RF
 
 | RF | Tareas |
 | --- | --- |
 | RF-1 | T001, T011, T015, T017, T020, T021 |
-| RF-2 | T005, T008, T010, T013, T017, T020, T021 |
+| RF-2 | T005, T008, T010, T013, T017, T020, T021, T034 |
 | RF-3 | T004, T010, T015, T016, T017, T018, T021 |
 | RF-4 | T005, T012, T013, T016, T018, T021 |
-| RF-5 | T004, T010, T012, T013, T016, T018, T021 |
+| RF-5 | T004, T010, T012, T013, T016, T018, T021, T034 |
 | RF-6 | T003, T004, T005, T006, T007, T014, T015, T019, T021, T028, T029, T030, T031, T032 |
 | RF-7 | T002, T010, T012, T014, T019, T021 |
 | RF-8 | T004, T007, T010, T014, T015, T019, T021, T031 |
@@ -126,5 +132,5 @@ Rama: `feat/003-ventas-pulido`.
 | RF-14 | T024, T025 |
 | RNF-1 | T017, T018, T019, T021, T024, T025 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T006, T012 |
-| RNF-3 | T026 |
+| RNF-3 | T033 (preparación), T026 (medición real), T035 (medición tras corregir RF-2) |
 | RNF-4 | T017, T018, T019, T024 |

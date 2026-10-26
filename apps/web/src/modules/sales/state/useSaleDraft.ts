@@ -27,6 +27,19 @@ function persistQuote(draft: StoredSaleDraft, quote: SaleQuote): StoredSaleDraft
   draftStore.save(next);
   return next;
 }
+// RF-2: la lista presentada se conserva entre cálculos sin cambios de RF-5. Las líneas,
+// los importes y los avisos siguen siendo siempre los que acaba de responder la API.
+function presentQuote(previous: SaleQuote | null, calculated: SaleQuote, refreshMenu = false) {
+  const renamedOrMoved = calculated.lines.some((line) => {
+    const shown = previous?.lines.find((item) => item.productId === line.productId);
+    return (
+      shown && (shown.productName !== line.productName || shown.categoryName !== line.categoryName)
+    );
+  });
+  return previous && !refreshMenu && !calculated.notices.length && !renamedOrMoved
+    ? { ...calculated, menu: previous.menu }
+    : calculated;
+}
 function errorMessage(error: unknown): string {
   if (error instanceof ApiFetchError) return error.error.fields?.lines ?? error.message;
   return error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo';
@@ -46,7 +59,7 @@ export function useSaleDraft(userId: string) {
   const sequence = useRef(0);
   useEffect(() => {
     let active = true;
-    async function restore() {
+    async function restore(refreshMenu = false) {
       const current = ++sequence.current;
       const saved = draftStore.load(userId) ?? emptyDraft(userId);
       draft.current = saved;
@@ -58,7 +71,7 @@ export function useSaleDraft(userId: string) {
         const calculated = await client.quote({ lines: saved.lines });
         if (!active || current !== sequence.current) return;
         draft.current = persistQuote(saved, calculated);
-        setQuote(calculated);
+        setQuote((previous) => presentQuote(previous, calculated, refreshMenu));
         if (calculated.lines.length) setConfirmation(null);
       } catch (failure) {
         if (active && current === sequence.current) setError(errorMessage(failure));
@@ -72,7 +85,7 @@ export function useSaleDraft(userId: string) {
     const unsubscribe = draftStore.subscribe(() => {
       void restore();
     });
-    void restore();
+    void restore(true);
     return () => {
       active = false;
       sequence.current++;
@@ -91,7 +104,7 @@ export function useSaleDraft(userId: string) {
       const calculated = await client.quote({ lines });
       if (current !== sequence.current) return;
       draft.current = persistQuote(saved, calculated);
-      setQuote(calculated);
+      setQuote((previous) => presentQuote(previous, calculated));
       if (addedProductId && calculated.lines.some((line) => line.productId === addedProductId))
         setConfirmation(null);
     } catch (failure) {
