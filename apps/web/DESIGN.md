@@ -251,7 +251,7 @@ Firmes y altos, sin adornos.
 - **State:** solo informativa; no es interactiva.
 
 ### Cards / Containers
-No hay tarjetas. Los accesos de módulo son filas de una lista: sin fondo propio, separadas por filetes de 1 px de línea, con 16 px de relleno; en hover la fila toma el crema tostado. Ninguna sombra (ver Elevation & Depth).
+No hay tarjetas. Los accesos de módulo son filas de una lista, separadas por filetes de 1 px de línea, con 16 px de relleno; en hover la fila toma el crema tostado. «Nueva venta» tiene una superficie naranja al 16 % sobre crema, un borde naranja de 1 px y 16 px de separación arriba y abajo; en hover el naranja sube al 26 %. Ninguna sombra (ver Elevation & Depth).
 
 ### Inputs / Fields
 - **Style:** crema de campo, borde de 2 px de línea, 8 px de esquina, 44 px de alto por defecto y 56 px dentro de un campo de formulario (texto a 1.125rem). Etiqueta encima en 600.
@@ -263,7 +263,11 @@ No hay tarjetas. Los accesos de módulo son filas de una lista: sin fondo propio
 - **Error:** rojo velado con texto rojo y borde rojo de 1 px, 600. Ambos con 12 por 16 px de relleno y 8 px de esquina.
 
 ### Navigation
-La barra de sesión es la navegación persistente de toda pantalla interna: bloque azul a la izquierda con el nombre de quien opera (Title, 800), su rol en píldora y «Cerrar sesión» al pie, seguido de la tira tejida. Bajo 900 px se convierte en una fila superior con la tira horizontal debajo. En la pantalla inicial, cada módulo es una fila de 72 px de alto con la muestra de rombo tejido, el nombre en Title y una flecha que avanza 4 px y toma el color del módulo en hover. El color del módulo se asigna por destino, no por orden. «Nueva venta», la tarea del mostrador, es la única fila destacada (96 px, Feature y muestra de 56 px) sin cambiar el orden de los enlaces, que sigue el de las rutas.
+La barra de sesión es la navegación persistente de toda pantalla interna: bloque azul a la izquierda con el nombre de quien opera (Title, 800), su rol en píldora y «Cerrar sesión» al pie, seguido de la tira tejida. Bajo 900 px se convierte en una fila superior con la tira horizontal debajo.
+
+En la pantalla inicial, el título «Kofi POS» mide 32 px y el saludo usa el tamaño de cuerpo, separados por 8 px; los accesos empiezan 24 px después. Cada módulo es una fila de 72 px con un SVG de tarea y un rombo pequeño como firma: ajustes para administrar menú, taza para ver menú, recibo con «+» para nueva venta, barras para resumen y reloj con flecha para historial. Los SVG son propios, decorativos y de trazo uniforme; los nombres de los enlaces conservan su función accesible. Esta combinación sustituye las muestras grandes de rombo solo en HomePage, por pedido de la persona.
+
+El color del módulo se asigna por destino, no por orden. «Nueva venta» es la única fila destacada (96 px, Feature y símbolo de 56 px); las secundarias usan símbolos de 40 px con glifos de 28 px y rombos de 12 px. La venta combina un glifo de 40 px en tinta con un rombo naranja de 16 px. El orden de los enlaces sigue el de las rutas. Bajo 480 px el texto de las filas secundarias pasa a Body, la venta a Title y el relleno horizontal baja a 8 px. Las flechas conservan su movimiento de hover, que se desactiva cuando se pide movimiento reducido.
 
 ### La tira tejida (Signature Component)
 La firma de Kofi: una tira de aguayo dibujada en SVG, de 64 px de grosor. A cada lado, franjas simétricas naranja y verde separadas por filetes crema de 2 px; al centro, una banda de pallay de 28 px sobre magenta con rombos escalonados crema que alternan anillo verde y anillo naranja, como se tejen. Va siempre en el borde del bloque azul: vertical en escritorio, horizontal bajo 900 px. Es decorativa (oculta para lectores de pantalla, sin foco) y aparece completa desde el primer fotograma, sin animación de entrada.
