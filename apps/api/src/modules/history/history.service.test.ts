@@ -1,0 +1,310 @@
+import { describe, expect, it, vi } from 'vitest';
+import {
+  dayHistorySchema,
+  historySaleResponseSchema,
+  monthHistorySchema,
+  HISTORY_MESSAGES,
+} from '@kofi/contracts';
+import { createFakeClock } from '../../shared/clock.ts';
+import type { Database } from '../../shared/database/database.ts';
+import { testSale } from '../../../test/test-sales.ts';
+import { createHistoryService } from './history.service.ts';
+
+function setup(instant = '2026-10-25T15:00:00.000Z') {
+  const clock = createFakeClock(new Date(instant));
+  const db = {} as Database;
+  const listSales = vi.fn().mockResolvedValue([testSale()]);
+  const findSale = vi.fn().mockResolvedValue(testSale({ number: 3 }));
+  return {
+    clock,
+    db,
+    listSales,
+    findSale,
+    service: createHistoryService({ clock, db, listSales, findSale }),
+  };
+}
+
+describe('detalle histórico por número (RF-7, RF-8, RF-9)', () => {
+  it.each([
+    ['2026-10-25T03:59:00Z', '2026-10-24'],
+    ['2026-10-25T04:00:00Z', '2026-10-25'],
+  ])(
+    'conserva la instantánea y obtiene la fecha de Bolivia para %s',
+    async (registeredAt, date) => {
+      const { service, db, findSale } = setup();
+      const sale = testSale({ number: 3, registeredAt });
+      findSale.mockResolvedValue(sale);
+      const before = structuredClone(sale);
+      const response = historySaleResponseSchema.parse(await service.sale('3'));
+      expect(response).toEqual({ sale, date });
+      expect(findSale).toHaveBeenCalledExactlyOnceWith(db, 3);
+      expect(sale).toEqual(before);
+    },
+  );
+  it.each(['003', ' 3 ', '00000000000000000000003'])(
+    'normaliza %s antes de buscar',
+    async (number) => {
+      const { service, db, findSale } = setup();
+      await service.sale(number);
+      expect(findSale).toHaveBeenCalledExactlyOnceWith(db, 3);
+    },
+  );
+  it.each(['', '0', '-3', '2,5', 'abc', '1e3'])('rechaza %s sin consultar', async (number) => {
+    const { service, findSale } = setup();
+    await expect(service.sale(number)).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'VALIDATION_ERROR',
+      message: HISTORY_MESSAGES.invalidSaleNumber,
+    });
+    expect(findSale).not.toHaveBeenCalled();
+  });
+  it.each(['2147483648', '12345678901234567890'])(
+    'responde 404 a %s sin perder cifras ni consultar',
+    async (number) => {
+      const { service, findSale } = setup();
+      await expect(service.sale(number)).rejects.toMatchObject({
+        statusCode: 404,
+        code: 'NOT_FOUND',
+        message: `No existe la venta N.º ${number}`,
+      });
+      expect(findSale).not.toHaveBeenCalled();
+    },
+  );
+  it('consulta el máximo representable y devuelve 404 si el repositorio no encuentra la venta', async () => {
+    const { service, db, findSale } = setup();
+    findSale.mockResolvedValue(null);
+    await expect(service.sale('2147483647')).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'No existe la venta N.º 2147483647',
+    });
+    expect(findSale).toHaveBeenCalledWith(db, 2147483647);
+    await expect(service.sale('99')).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'No existe la venta N.º 99',
+    });
+  });
+});
+
+describe('consulta de un día (RF-2, RF-3, RF-5, RF-7)', () => {
+  it('asigna cada venta al día local correcto a ambos lados del salto de 1931 (T031)', async () => {
+    const { service, listSales } = setup();
+    const sales = [
+      '1931-10-15T04:00:00Z',
+      '1931-10-15T04:32:35.999Z',
+      '1931-10-15T04:32:36Z',
+      '1931-10-16T03:32:35.999Z',
+      '1931-10-16T03:32:36Z',
+    ].map((registeredAt, index) => testSale({ registeredAt, number: index + 1 }));
+    listSales.mockImplementation(async (_db, { from, to }: { from: Date; to: Date }) =>
+      sales.filter(
+        (sale) => new Date(sale.registeredAt) >= from && new Date(sale.registeredAt) < to,
+      ),
+    );
+    expect((await service.day('1931-10-14')).sales.map((sale) => sale.number)).toEqual([2, 1]);
+    expect((await service.day('1931-10-15')).sales.map((sale) => sale.number)).toEqual([4, 3]);
+    expect((await service.day('1931-10-16')).sales.map((sale) => sale.number)).toEqual([5]);
+  });
+  it('0099 solo lee su día y no incluye una venta registrada en 1950 (T030)', async () => {
+    const { service, db, listSales } = setup();
+    const sale = testSale({ registeredAt: '1950-01-01T12:00:00Z' });
+    listSales.mockImplementation(async (_db, { from, to }: { from: Date; to: Date }) =>
+      new Date(sale.registeredAt) >= from && new Date(sale.registeredAt) < to ? [sale] : [],
+    );
+    expect(dayHistorySchema.parse(await service.day('0099-12-31'))).toMatchObject({
+      date: '0099-12-31',
+      previousDate: '0099-12-30',
+      nextDate: '0100-01-01',
+      salesCount: 0,
+      sales: [],
+    });
+    expect(listSales).toHaveBeenCalledWith(db, {
+      from: new Date('0099-12-31T04:32:36Z'),
+      to: new Date('0100-01-01T04:32:36Z'),
+    });
+  });
+  it('el primer día representable no retrocede y el año cero se rechaza sin leer (T030)', async () => {
+    const { service, listSales } = setup();
+    listSales.mockResolvedValue([]);
+    expect(dayHistorySchema.parse(await service.day('0001-01-01'))).toMatchObject({
+      date: '0001-01-01',
+      previousDate: null,
+      nextDate: '0001-01-02',
+    });
+    listSales.mockClear();
+    await expect(service.day('0000-12-31')).rejects.toMatchObject({
+      statusCode: 400,
+      message: HISTORY_MESSAGES.invalidDate,
+    });
+    expect(listSales).not.toHaveBeenCalled();
+  });
+  it('consulta hoy en Bolivia hasta now + 1 ms y devuelve navegación y momento', async () => {
+    const { service, db, listSales } = setup();
+    const result = dayHistorySchema.parse(await service.day());
+    expect(result).toMatchObject({
+      date: '2026-10-25',
+      today: '2026-10-25',
+      previousDate: '2026-10-24',
+      nextDate: null,
+      asOf: '2026-10-25T15:00:00.000Z',
+      totalCents: 1250,
+    });
+    expect(listSales).toHaveBeenCalledExactlyOnceWith(db, {
+      from: new Date('2026-10-25T04:00:00Z'),
+      to: new Date('2026-10-25T15:00:00.001Z'),
+    });
+  });
+  it('consulta un día pasado completo y conserva los datos históricos', async () => {
+    const { service, db, listSales } = setup();
+    const result = dayHistorySchema.parse(await service.day('2026-10-24'));
+    expect(result).toMatchObject({
+      date: '2026-10-24',
+      previousDate: '2026-10-23',
+      nextDate: '2026-10-25',
+    });
+    expect(result.sales[0]).toMatchObject({
+      registeredBy: { userId: null, displayName: 'Cajero de prueba', role: 'cashier' },
+    });
+    expect(listSales).toHaveBeenCalledWith(db, {
+      from: new Date('2026-10-24T04:00:00Z'),
+      to: new Date('2026-10-25T04:00:00Z'),
+    });
+  });
+  it.each([
+    ['2026-02-30', HISTORY_MESSAGES.invalidDate],
+    ['ayer', HISTORY_MESSAGES.invalidDate],
+    ['', HISTORY_MESSAGES.invalidDate],
+    ['2026-10-26', HISTORY_MESSAGES.futureDate],
+  ])('rechaza %s sin leer ventas', async (date, message) => {
+    const { service, listSales } = setup();
+    await expect(service.day(date)).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'VALIDATION_ERROR',
+      message,
+    });
+    expect(listSales).not.toHaveBeenCalled();
+  });
+  it('cambia hoy solo al volver a consultar tras medianoche de Bolivia', async () => {
+    const { service, clock } = setup('2026-10-26T03:59:59.999Z');
+    expect((await service.day()).date).toBe('2026-10-25');
+    clock.advance(1);
+    expect((await service.day()).date).toBe('2026-10-26');
+    expect((await service.day('2026-10-25')).nextDate).toBe('2026-10-26');
+  });
+  it('permite fechas anteriores a la primera venta, con el desfase histórico de Bolivia', async () => {
+    const { service, db, listSales } = setup();
+    listSales.mockResolvedValue([]);
+    expect(dayHistorySchema.parse(await service.day('1900-01-01'))).toMatchObject({
+      date: '1900-01-01',
+      previousDate: '1899-12-31',
+      nextDate: '1900-01-02',
+      salesCount: 0,
+    });
+    expect(listSales).toHaveBeenCalledWith(db, {
+      from: new Date('1900-01-01T04:32:36Z'),
+      to: new Date('1900-01-02T04:32:36Z'),
+    });
+  });
+});
+
+describe('consulta de un mes (T024, RF-7, RF-11 a RF-13)', () => {
+  it('consulta el mes actual hasta now + 1 ms y devuelve cifras, días y navegación', async () => {
+    const { service, db, listSales } = setup();
+    const result = monthHistorySchema.parse(await service.month());
+    expect(result).toMatchObject({
+      month: '2026-10',
+      currentMonth: '2026-10',
+      previousMonth: '2026-09',
+      nextMonth: null,
+      asOf: '2026-10-25T15:00:00.000Z',
+      totalCents: 1250,
+      salesCount: 1,
+    });
+    expect(result.days).toHaveLength(25);
+    expect(result.days[0]).toEqual({ date: '2026-10-01', totalCents: 0, salesCount: 0 });
+    expect(result.days[23]).toEqual({ date: '2026-10-24', totalCents: 1250, salesCount: 1 });
+    expect(result.days[24]!.date).toBe('2026-10-25');
+    expect(listSales).toHaveBeenCalledExactlyOnceWith(db, {
+      from: new Date('2026-10-01T04:00:00Z'),
+      to: new Date('2026-10-25T15:00:00.001Z'),
+    });
+  });
+  it('lee un mes pasado completo sin ventas de meses vecinos ni modificar instantáneas', async () => {
+    const { service, db, listSales } = setup('2026-11-05T15:00:00Z');
+    const sales = [
+      testSale({ number: 1, registeredAt: '2026-10-01T03:59:00Z', totalCents: 1250 }),
+      testSale({ number: 2, registeredAt: '2026-10-01T12:00:00Z', totalCents: 800 }),
+      testSale({
+        number: 3,
+        registeredAt: '2026-10-15T20:20:00Z',
+        paymentMethod: 'qr',
+        totalCents: 2500,
+      }),
+      testSale({ number: 4, registeredAt: '2026-11-01T04:00:00Z', totalCents: 1000 }),
+    ];
+    const before = structuredClone(sales);
+    listSales.mockImplementation(async (_db, { from, to }: { from: Date; to: Date }) =>
+      sales.filter(
+        (sale) => new Date(sale.registeredAt) >= from && new Date(sale.registeredAt) < to,
+      ),
+    );
+    const result = monthHistorySchema.parse(await service.month('2026-10'));
+    expect(result).toMatchObject({
+      month: '2026-10',
+      currentMonth: '2026-11',
+      previousMonth: '2026-09',
+      nextMonth: '2026-11',
+      totalCents: 3300,
+      salesCount: 2,
+      byPaymentMethod: [
+        { paymentMethod: 'cash', totalCents: 800, salesCount: 1 },
+        { paymentMethod: 'qr', totalCents: 2500, salesCount: 1 },
+      ],
+    });
+    expect(result.days).toHaveLength(31);
+    expect(result.days[0]).toEqual({ date: '2026-10-01', totalCents: 800, salesCount: 1 });
+    expect(result.days[14]).toEqual({ date: '2026-10-15', totalCents: 2500, salesCount: 1 });
+    expect(result.days.at(-1)).toEqual({ date: '2026-10-31', totalCents: 0, salesCount: 0 });
+    expect(listSales).toHaveBeenCalledWith(db, {
+      from: new Date('2026-10-01T04:00:00Z'),
+      to: new Date('2026-11-01T04:00:00Z'),
+    });
+    expect(sales).toEqual(before);
+  });
+  it.each([
+    ['0001-01', 31, null, '0001-02'],
+    ['0099-12', 31, '0099-11', '0100-01'],
+    ['0012-02', 29, '0012-01', '0012-03'],
+    ['0100-02', 28, '0100-01', '0100-03'],
+  ])('conserva el calendario de %s', async (month, length, previousMonth, nextMonth) => {
+    const { service, listSales } = setup();
+    listSales.mockResolvedValue([]);
+    const result = monthHistorySchema.parse(await service.month(String(month)));
+    expect(result).toMatchObject({ month, previousMonth, nextMonth, totalCents: 0, salesCount: 0 });
+    expect(result.days).toHaveLength(Number(length));
+    expect(result.days[0]!.date).toBe(String(month) + '-01');
+  });
+  it.each([
+    ['', HISTORY_MESSAGES.invalidMonth],
+    ['2026-13', HISTORY_MESSAGES.invalidMonth],
+    ['octubre', HISTORY_MESSAGES.invalidMonth],
+    ['2026-1', HISTORY_MESSAGES.invalidMonth],
+    ['0000-01', HISTORY_MESSAGES.invalidMonth],
+    ['2026-11', HISTORY_MESSAGES.futureMonth],
+  ])('rechaza %s sin leer', async (month, message) => {
+    const { service, listSales } = setup();
+    await expect(service.month(month)).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'VALIDATION_ERROR',
+      message,
+    });
+    expect(listSales).not.toHaveBeenCalled();
+  });
+  it('cambia de mes solo al consultar después de medianoche de Bolivia', async () => {
+    const { service, clock, listSales } = setup('2026-11-01T03:59:59.999Z');
+    listSales.mockResolvedValue([]);
+    expect((await service.month()).month).toBe('2026-10');
+    clock.advance(1);
+    expect((await service.month()).month).toBe('2026-11');
+    expect((await service.month('2026-10')).nextMonth).toBe('2026-11');
+  });
+});

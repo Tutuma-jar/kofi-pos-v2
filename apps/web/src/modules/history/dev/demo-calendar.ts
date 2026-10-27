@@ -2,8 +2,11 @@
 // siguiente y los días de un mes, para moverse por días en desarrollo. En producción lo calcula la
 // API (D-4); este archivo no llega al build.
 
-const isoDate = (year: number, monthIndex: number, day: number) =>
-  new Date(Date.UTC(year, monthIndex, day)).toISOString().slice(0, 'YYYY-MM-DD'.length);
+const isoDate = (year: number, monthIndex: number, day: number) => {
+  const instant = new Date(0);
+  instant.setUTCFullYear(year, monthIndex, day);
+  return instant.toISOString().slice(0, 'YYYY-MM-DD'.length);
+};
 
 export function shiftDate(date: string, days: number): string {
   const [year, month, day] = date.split('-').map(Number);

@@ -9,29 +9,37 @@ const dateFormat = new Intl.DateTimeFormat('en-CA', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
+  era: 'short',
 });
 
-const offsetFormat = new Intl.DateTimeFormat('en-US', {
-  timeZone: BOLIVIA_TIME_ZONE,
-  timeZoneName: 'longOffset',
-});
-
-// 'YYYY-MM-DD' del instante en Bolivia.
-export function boliviaDate(instant: Date): string {
+function localCalendarDate(instant: Date): Date {
   const parts = Object.fromEntries(
     dateFormat.formatToParts(instant).map((part) => [part.type, part.value]),
   );
-  return `${parts.year}-${parts.month}-${parts.day}`;
+  const year = parts.era === 'BC' ? 1 - Number(parts.year) : Number(parts.year);
+  return calendarDate(year, Number(parts.month) - 1, Number(parts.day));
 }
 
-// Instante de las 00:00 de esa fecha en Bolivia. El desfase sale de Intl («GMT-04:00») y no se
-// escribe fijo, para no depender de que Bolivia nunca cambie de hora.
+// 'YYYY-MM-DD' del instante en Bolivia.
+export function boliviaDate(instant: Date): string {
+  return localCalendarDate(instant).toISOString().split('T')[0]!;
+}
+
+// Primer instante de esa fecha en Bolivia. No presupone que exista su medianoche ni que el
+// desfase sea constante durante el día (el 15/10/1931 empieza a la 01:00 local).
 export function startOfBoliviaDay(date: string): Date {
-  const zoneName = offsetFormat
-    .formatToParts(new Date(`${date}T12:00:00Z`))
-    .find((part) => part.type === 'timeZoneName')!.value;
-  const offset = zoneName.slice('GMT'.length) || '+00:00';
-  return new Date(`${date}T00:00:00${offset}`);
+  const target = new Date(`${date}T00:00:00Z`).getTime();
+  const margin = 2 * 24 * 60 * 60 * 1000;
+  let lower = target - margin;
+  let upper = target + margin;
+  // Las fechas locales de Bolivia avanzan en este intervalo; Intl resuelve saltos y repeticiones
+  // de horas. La búsqueda incluye segundos y milisegundos, sin aproximar un desfase al mediodía.
+  while (lower < upper) {
+    const middle = Math.floor((lower + upper) / 2);
+    if (localCalendarDate(new Date(middle)).getTime() < target) lower = middle + 1;
+    else upper = middle;
+  }
+  return new Date(lower);
 }
 
 export interface BoliviaDayRange {
@@ -70,20 +78,26 @@ export function boliviaMonthRange(now: Date): BoliviaMonthRange {
 }
 
 // Días y meses cualesquiera, para el Historial (SPEC-005 plan §5.1, D-4). Las fechas se suman como
-// fechas de calendario, sin zona horaria: Date.UTC solo resuelve los fines de mes y los bisiestos.
+// fechas de calendario, sin zona horaria, conservando también los años anteriores a 0100.
 
 const isoDate = (instant: Date) => instant.toISOString().slice(0, 'YYYY-MM-DD'.length);
+
+function calendarDate(year: number, monthIndex: number, day: number): Date {
+  const instant = new Date(0);
+  instant.setUTCFullYear(year, monthIndex, day);
+  return instant;
+}
 
 // 'YYYY-MM-DD' ± n días.
 export function addDays(date: string, days: number): string {
   const [year, month, day] = date.split('-').map(Number);
-  return isoDate(new Date(Date.UTC(year!, month! - 1, day! + days)));
+  return isoDate(calendarDate(year!, month! - 1, day! + days));
 }
 
 // 'YYYY-MM' ± n meses.
 export function addMonths(month: string, months: number): string {
   const [year, number] = month.split('-').map(Number);
-  return isoDate(new Date(Date.UTC(year!, number! - 1 + months, 1))).slice(0, 'YYYY-MM'.length);
+  return isoDate(calendarDate(year!, number! - 1 + months, 1)).slice(0, 'YYYY-MM'.length);
 }
 
 // Todas las fechas del mes, del día 1 al último.

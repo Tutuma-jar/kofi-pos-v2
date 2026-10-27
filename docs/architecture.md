@@ -184,6 +184,7 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - Las rutas se declaran en `apps/web/src/routes.tsx` con `react-router`.
 - Cada ruta protegida declara los roles que pueden verla (`roles`; por defecto, `owner` y `cashier`). La interfaz solo usa esa lista para navegar y para no mostrar lo que el rol no puede ver; los permisos reales los aplica la API en cada módulo.
 - Una ruta protegida puede declarar `homeLink` (el texto de su enlace). La pantalla inicial recibe esos enlaces desde `routes.tsx` y muestra los que el rol de la sesión puede ver, así que ningún módulo modifica `auth` para añadir el suyo (SPEC-002, D-8).
+- La clave de pantalla para comprobar la sesión es el patrón declarado de la ruta. Cambiar los parámetros de una consulta dentro de ese patrón conserva la pantalla y sus datos mientras la API valida la siguiente petición; abrir, recargar o cambiar de pantalla comprueba la sesión. Todo 401 de la API mantiene la invalidación global y el regreso a la URL completa tras el vencimiento (SPEC-005, T026, plan §18; RF-5/RF-6).
 
 ### 6.7 Importes
 

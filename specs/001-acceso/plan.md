@@ -246,6 +246,8 @@ deleteAccount(u):        DELETE FROM users … # las sesiones quedan con user_id
 
 ### 5.6 Interfaz: navegación (RF-4, RF-6, RF-10, RF-11, RF-12)
 
+Integración de SPEC-005 T026: la apertura se identifica por el patrón de ruta declarado; cambiar parámetros de consulta dentro de la misma pantalla no desmonta sus datos ni repite `getSession`. Las peticiones de datos siguen comprobando sesión y permisos en la API; un 401 invalida la sesión y conserva la URL completa para RF-11. Abrir, recargar o cambiar de pantalla mantiene la comprobación siguiente (SPEC-005 plan §18).
+
 ```text
 RequireSession (en cada ruta protegida, al abrirla o recargarla, y en pageshow persistido):
   r ← authClient.getSession()

@@ -12,7 +12,7 @@
     "build:contracts": "npm run build -w @kofi/contracts",
     "check:web-build": "npm run check:build -w @kofi/web",
     "test:build": "node --test apps/web/scripts/check-production-build.test-node.mjs",
-    "test:measure": "node --test scripts/measure-access.test.mjs scripts/measure-menu.test.mjs scripts/measure-sales.test.mjs scripts/measure-dashboard.test.mjs",
+    "test:measure": "node --test --test-concurrency=1 scripts/measure-access.test.mjs scripts/measure-menu.test.mjs scripts/measure-sales.test.mjs scripts/measure-dashboard.test.mjs scripts/measure-history.test.mjs scripts/build-history-measurement.test.mjs",
     "test:measure:menu": "node --test scripts/measure-menu.test.mjs",
     "measure:access": "node scripts/measure-access.mjs",
     "measure:menu": "node scripts/measure-menu.mjs",
@@ -25,7 +25,10 @@
     "test": "npm run build:contracts && vitest run --maxWorkers=4",
     "test:e2e": "npm run build:contracts && npm run build -w @kofi/web && playwright test",
     "test:git": "node --test scripts/git-rules.test.mjs scripts/agent-hooks/guard-commands.test.mjs",
-    "build": "npm run build:contracts && npm run build -w @kofi/api && npm run build -w @kofi/web"
+    "build": "npm run build:contracts && npm run build -w @kofi/api && npm run build -w @kofi/web",
+    "test:measure:history": "npm run build:contracts && node --test --test-concurrency=1 scripts/measure-history.test.mjs scripts/build-history-measurement.test.mjs",
+    "measure:history": "npm run build:contracts && node scripts/measure-history.mjs",
+    "build:measure:history": "npm run build:contracts && npm run build:history-measurement -w @kofi/web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

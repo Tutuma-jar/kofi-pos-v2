@@ -1,6 +1,6 @@
 import { HISTORY_ROLES, roleSchema, type Role } from '@kofi/contracts';
 import type { ReactNode } from 'react';
-import { Navigate, Route, Routes } from 'react-router';
+import { matchRoutes, Navigate, Route, Routes, useLocation } from 'react-router';
 import {
   HomePage,
   LoginPage,
@@ -12,7 +12,12 @@ import {
   canView,
 } from './modules/auth/index.ts';
 import { DashboardPage } from './modules/dashboard/index.ts';
-import { DayHistoryPage, MonthHistoryPage, SaleDetailPage } from './modules/history/index.ts';
+import {
+  DayHistoryPage,
+  MonthHistoryPage,
+  SaleDetailPage,
+  HistoryTimingObserver,
+} from './modules/history/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
 import { discardStoredSaleDraft, NewSalePage } from './modules/sales/index.ts';
 
@@ -83,8 +88,13 @@ export const protectedRoutes = protectedRouteDefinitions.map((route) => ({
 }));
 
 export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) {
+  const location = useLocation();
+  const screenKey =
+    matchRoutes([...publicRoutes, ...protectedRoutes], location)?.at(-1)?.route.path ??
+    location.pathname;
   return (
-    <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft}>
+    <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft} screenKey={screenKey}>
+      {import.meta.env.VITE_HISTORY_MEASUREMENT === 'true' && <HistoryTimingObserver />}
       <Routes>
         {publicRoutes.map(({ path, element }) => (
           <Route key={path} path={path} element={element} />

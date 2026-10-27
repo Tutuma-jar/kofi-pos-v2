@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router';
 import { HISTORY_ROLES } from '@kofi/contracts';
 import { describe, expect, it } from 'vitest';
@@ -8,6 +8,7 @@ import { ApiFetchError } from './shared/http/api-fetch.ts';
 import { MenuClientProvider, httpMenuClient } from './modules/menu/index.ts';
 import { SalesClientProvider, httpSalesClient } from './modules/sales/index.ts';
 import { DashboardClientProvider, httpDashboardClient } from './modules/dashboard/index.ts';
+import { HistoryClientProvider, httpHistoryClient } from './modules/history/index.ts';
 
 function CurrentPath() {
   return <output aria-label="ruta actual">{useLocation().pathname}</output>;
@@ -62,7 +63,62 @@ async function renderAt(path: string, role: 'owner' | 'cashier' = 'owner') {
               }),
             }}
           >
-            <AppRoutes client={client} />
+            <HistoryClientProvider
+              client={{
+                ...httpHistoryClient,
+                month: async () => ({
+                  month: '2026-10',
+                  currentMonth: '2026-10',
+                  previousMonth: '2026-09',
+                  nextMonth: null,
+                  asOf: '2026-10-25T15:00:00Z',
+                  totalCents: 0,
+                  salesCount: 0,
+                  days: [{ date: '2026-10-01', totalCents: 0, salesCount: 0 }],
+                  byPaymentMethod: [
+                    { paymentMethod: 'cash', totalCents: 0, salesCount: 0 },
+                    { paymentMethod: 'qr', totalCents: 0, salesCount: 0 },
+                  ],
+                }),
+                sale: async () => ({
+                  date: '2026-10-25',
+                  sale: {
+                    id: 'd1e2f3a4-0000-4000-8000-000000000007',
+                    number: 7,
+                    registeredAt: '2026-10-25T15:00:00Z',
+                    registeredBy: { userId: null, displayName: 'Ana Quispe', role: 'owner' },
+                    paymentMethod: 'cash',
+                    totalCents: 1250,
+                    lines: [
+                      {
+                        productId: 'c4e1a2b3-0000-4000-8000-000000000007',
+                        productName: 'Café',
+                        categoryName: 'Bebidas',
+                        quantity: 1,
+                        unitPriceCents: 1250,
+                        subtotalCents: 1250,
+                      },
+                    ],
+                  },
+                }),
+                day: async () => ({
+                  date: '2026-10-25',
+                  today: '2026-10-25',
+                  previousDate: '2026-10-24',
+                  nextDate: null,
+                  asOf: '2026-10-25T15:00:00Z',
+                  totalCents: 0,
+                  salesCount: 0,
+                  sales: [],
+                  byPaymentMethod: [
+                    { paymentMethod: 'cash', totalCents: 0, salesCount: 0 },
+                    { paymentMethod: 'qr', totalCents: 0, salesCount: 0 },
+                  ],
+                }),
+              }}
+            >
+              <AppRoutes client={client} />
+            </HistoryClientProvider>
           </DashboardClientProvider>
         </SalesClientProvider>
       </MenuClientProvider>
@@ -145,13 +201,13 @@ describe('routes', () => {
 
   // SPEC-005 Historial (plan §3, D-6, D-7; RF-1): solo los roles de HISTORY_ROLES.
   it.each([
-    ['/ventas', 'Historial de ventas'],
-    ['/ventas/mes', 'Ventas por mes'],
-    ['/ventas/7', 'Detalle de una venta'],
+    ['/ventas', 'Ventas del 25/10/2026'],
+    ['/ventas/mes', 'Octubre de 2026'],
+    ['/ventas/7', 'Venta N.º 7'],
   ])('%s muestra su página del historial con una sesión de dueño', async (path, heading) => {
     await renderAt(path);
 
-    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument());
     expect(screen.getByLabelText('ruta actual')).toHaveTextContent(path);
   });
 

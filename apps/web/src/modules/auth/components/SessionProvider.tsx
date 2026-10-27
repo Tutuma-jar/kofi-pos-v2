@@ -16,13 +16,16 @@ export function SessionProvider({
   client,
   children,
   onSessionEnd,
+  screenKey,
 }: {
   client: AuthClient;
   children: ReactNode;
   onSessionEnd?: (reason: 'logout' | 'terminated') => void;
+  screenKey?: string;
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const sessionKey = screenKey ?? location.key;
   const generation = useRef(0);
   const [state, setState] = useState<State>({ user: null, checkedKey: null, error: null });
 
@@ -43,7 +46,7 @@ export function SessionProvider({
       generation.current++;
       setState({
         user: null,
-        checkedKey: location.pathname === '/ingresar' ? location.key : null,
+        checkedKey: location.pathname === '/ingresar' ? sessionKey : null,
         error: null,
       });
       if (location.pathname !== '/ingresar' || error.code !== 'SESSION_MISSING') {
@@ -54,30 +57,35 @@ export function SessionProvider({
       }
       return true;
     },
-    [location.key, location.pathname, location.search, location.hash, navigate, onSessionEnd],
+    [sessionKey, location.pathname, location.search, location.hash, navigate, onSessionEnd],
   );
+
+  const checker = useRef({ client, key: sessionKey, rejectSession });
+  useEffect(() => {
+    checker.current = { client, key: sessionKey, rejectSession };
+  }, [client, sessionKey, rejectSession]);
 
   const checkSession = useCallback(() => {
     const current = ++generation.current;
+    const { client, key } = checker.current;
     return Promise.resolve()
       .then(() => client.getSession())
       .then((user) => {
-        if (current === generation.current)
-          setState({ user, checkedKey: location.key, error: null });
+        if (current === generation.current) setState({ user, checkedKey: key, error: null });
       })
       .catch((error: unknown) => {
         if (current !== generation.current) return;
-        if (!rejectSession(error))
+        if (!checker.current.rejectSession(error))
           setState({
             user: null,
-            checkedKey: location.key,
+            checkedKey: key,
             error:
               error instanceof ApiFetchError
                 ? error.message
                 : 'Ocurrió un error. Inténtalo de nuevo',
           });
       });
-  }, [client, location.key, rejectSession]);
+  }, []);
 
   useEffect(() => {
     const sequence = generation;
@@ -85,7 +93,7 @@ export function SessionProvider({
     return () => {
       sequence.current++;
     };
-  }, [checkSession]);
+  }, [checkSession, client, sessionKey]);
   useEffect(() => subscribeUnauthorized(rejectSession), [rejectSession]);
 
   const refresh = useCallback(() => {
@@ -103,10 +111,10 @@ export function SessionProvider({
     await client.logout();
     onSessionEnd?.('logout');
     generation.current++;
-    setState({ user: null, checkedKey: location.key, error: null });
+    setState({ user: null, checkedKey: sessionKey, error: null });
     navigate('/ingresar', { replace: true });
-  }, [client, location.key, navigate, onSessionEnd]);
-  const checking = state.checkedKey !== location.key;
+  }, [client, sessionKey, navigate, onSessionEnd]);
+  const checking = state.checkedKey !== sessionKey;
   return (
     <SessionContext
       value={{

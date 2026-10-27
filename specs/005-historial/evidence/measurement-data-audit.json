@@ -1,0 +1,14 @@
+{
+  "environment": "comprobacion",
+  "observedAt": "2026-10-27T14:26:34.876Z",
+  "originalSalesCount": 6000,
+  "totalSalesCount": 12000,
+  "originalSalesSha256": "a9a58df8a3e62190d21187123d01ee2f45c36862285ca3b24b9e4353a66f7cf0",
+  "originalSalesPreserved": true,
+  "productCount": 202,
+  "roles": {
+    "admin": "owner",
+    "operador1": "cashier"
+  },
+  "readOnly": true
+}

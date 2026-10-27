@@ -8,6 +8,7 @@ test-results/
 # Evidencia original del medidor: conservar sus bytes sin reformatear.
 specs/004-dashboard/evidence/measurement-attempt-1.json
 specs/004-dashboard/evidence/measurement-cashier-repeat.json
+specs/005-historial/evidence/*.json
 
 # Documentación: su formato se mantiene a mano (y docs/constitution.md solo cambia en su propio PR).
 *.md
