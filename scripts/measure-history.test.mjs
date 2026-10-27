@@ -7,7 +7,7 @@ const args=['--date','2026-10-24','--web-commit',metadata.webCommit,'--api-commi
 
 test('Historial exige los volúmenes, el rol, fechas y commits de comprobación sin filtrar secretos',()=>{
  const report=buildReport(samples(),{...metadata,password:'privado',cookie:'privado',databaseUrl:'privado'});
- assert.equal(report.complete,true);assert.equal(report.rnf3Passed,true);assert.equal(report.humanCriteria.status,'pending');assert.equal(JSON.stringify(report).includes('privado'),false);
+ assert.equal(report.complete,true);assert.equal(report.rnf3Passed,true);assert.equal(report.humanCriteria.status,'pending');assert.equal(JSON.stringify(report).includes('privado'),false);assert.equal(report.queryMonth,metadata.month);
  for(const invalid of [{productCount:199},{dailySalesCount:399},{monthlySalesCount:5999},{role:'cashier'},{webCommit:'otro'},{month:'2026-09'}])assert.throws(()=>buildReport(samples(),{...metadata,...invalid}));
  assert.throws(()=>buildReport({...samples(),dayMs:Array(21).fill(1)},metadata));
  for(const invalid of [NaN,Infinity,-1])assert.throws(()=>buildReport({...samples(),saleMs:[invalid]},metadata));
@@ -53,7 +53,7 @@ test('Chromium observa día completo de 400 ventas, mes de 6000 y detalle sin mo
   const monthData=await (await page.request.get(target+'/api/history/month?month=2026-10')).json();
   const dayData=await (await page.request.get(target+'/api/history/day?date=2026-10-24')).json();
   const source={session:await(await page.request.get(target+'/api/auth/session')).json(),menu:await(await page.request.get(target+'/api/menu')).json(),day:dayData,month:monthData,sale:await(await page.request.get(target+'/api/history/sales/'+dayData.sales[0].number)).json()};
-  const existing=createExistingTabDriver({goto:url=>page.goto(url),screenshot:()=>page.screenshot(),playwright:new Proxy(page,{get(target,key){if(key==='evaluate')return ()=>{throw new Error('El adaptador Cua no dispone de globals de página');};const value=target[key];return typeof value==='function'?value.bind(target):value;}})},{...metadata,target},source);
+  const existing=createExistingTabDriver({goto:url=>page.goto(url),screenshot:()=>page.screenshot(),playwright:new Proxy(page,{get(target,key){if(key==='evaluate')return ()=>{throw new Error('El adaptador Cua no dispone de globals de página');};if(key==='getByLabel')return name=>{if(name==='Mes')throw new Error('Cua no confirma el selector nativo de mes');return page.getByLabel(name);};const value=target[key];return typeof value==='function'?value.bind(target):value;}})},{...metadata,target},source);
   assert.equal((await existing.inspect()).role,'owner');
   for(const kind of ['day','month','sale']){const measured=await existing[kind]();assert.ok(measured>0);assert.equal(measured,Number(await page.locator('main').getAttribute('data-history-duration-ms')));}
   const measured=await measureCycles(driver);assert.equal(measured.dayMs.length,20);assert.equal(measured.monthMs.length,20);assert.equal(measured.saleMs.length,20);assert.ok(Object.values(measured).filter(Array.isArray).flat().every(value=>Number.isFinite(value)&&value>0));

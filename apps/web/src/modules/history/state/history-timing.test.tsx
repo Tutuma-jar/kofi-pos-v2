@@ -19,6 +19,10 @@ function Probe({
         </a>
         <input aria-label="Mes de prueba" type="month" />
         <input aria-label="Contraseña de prueba" type="password" />
+        <button data-history-open-target="/ventas/mes?mes=2026-09">Mes anterior</button>
+        <button disabled data-history-open-target="/ventas/mes?mes=2026-11">
+          Mes siguiente
+        </button>
       </main>
     </>
   );
@@ -100,6 +104,23 @@ describe('intervalo de renderizado de comprobación (T036, RNF-3)', () => {
     paint();
     paint();
     expect(view.container.querySelector('main')).toHaveAttribute('data-history-focus-ok', 'false');
+  });
+  it('mide la apertura con el botón del mes e ignora los botones deshabilitados', () => {
+    clock = 100;
+    const view = render(<Probe />);
+    const main = view.container.querySelector('main')!;
+    fireEvent.click(view.getByText('Mes siguiente'));
+    view.rerender(<Probe readyKey="/ventas/mes?mes=2026-11" />);
+    paint();
+    paint();
+    expect(main).not.toHaveAttribute('data-history-duration-ms');
+    fireEvent.click(view.getByText('Mes anterior'));
+    view.rerender(<Probe readyKey="/ventas/mes?mes=2026-09" />);
+    clock = 300;
+    paint();
+    paint();
+    expect(main).toHaveAttribute('data-history-duration-ms', '200');
+    expect(main).toHaveAttribute('data-history-target', '/ventas/mes?mes=2026-09');
   });
   it('no acredita datos anteriores para un destino distinto', () => {
     const view = render(<Probe />);

@@ -29,6 +29,14 @@ export function installHistoryTiming() {
     };
   }
   function click(event: MouseEvent) {
+    const button =
+      event.target instanceof Element
+        ? event.target.closest('button[data-history-open-target]')
+        : null;
+    if (button instanceof HTMLButtonElement) {
+      if (!button.disabled) start(button.dataset.historyOpenTarget!);
+      return;
+    }
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
     if (!(anchor instanceof HTMLAnchorElement)) return;
     const url = new URL(anchor.href);

@@ -23,7 +23,7 @@ export function buildReport(input,metadata){
  const series=Object.fromEntries(['day','month','sale'].map(kind=>[kind,summarize(input[kind+'Ms'])]));
  const warmupsMs=Object.fromEntries(Object.entries(input.warmupsMs??{}).filter(([kind])=>['day','month','sale'].includes(kind)).map(([kind,value])=>[kind,duration(value)]));
  const complete=Object.values(series).every(series=>series.durationsMs.length===20)&&Object.keys(warmupsMs).length===3;
- return {target:TARGET,focusValidation:metadata.timingMethod==='browser_render_probe'?'browser_probe':metadata.timingMethod==='existing_tab_ui'?'not_exposed_by_cua':'continuous',timingMethod:metadata.timingMethod==='browser_render_probe'?'browser_render_probe':metadata.timingMethod==='existing_tab_ui'?'existing_tab_ui':'playwright_navigation',measuredAt:new Date().toISOString(),timeZone:'America/La_Paz',platform:typeof process==='undefined'?'browser-runtime':process.platform,nodeVersion:typeof process==='undefined'?null:process.versions.node,localCommit:commit(metadata.localCommit)?metadata.localCommit:null,browserVersion:metadata.browserVersion??null,webCommit:metadata.webCommit,apiCommit:metadata.apiCommit,date:metadata.date,month:metadata.month,saleNumber:metadata.saleNumber,role:metadata.role,productCount:metadata.productCount,dailySalesCount:400,monthlySalesCount:6000,warmupsMs,excludedWarmupPerOperation:1,...series,complete,rnf3Passed:complete&&Object.values(series).every(series=>series.underLimit>=19),humanCriteria:{task:'T028-H',status:'pending'}};
+ return {target:TARGET,focusValidation:metadata.timingMethod==='browser_render_probe'?'browser_probe':metadata.timingMethod==='existing_tab_ui'?'not_exposed_by_cua':'continuous',timingMethod:metadata.timingMethod==='browser_render_probe'?'browser_render_probe':metadata.timingMethod==='existing_tab_ui'?'existing_tab_ui':'playwright_navigation',measuredAt:new Date().toISOString(),timeZone:'America/La_Paz',platform:typeof process==='undefined'?'browser-runtime':process.platform,nodeVersion:typeof process==='undefined'?null:process.versions.node,localCommit:commit(metadata.localCommit)?metadata.localCommit:null,browserVersion:metadata.browserVersion??null,webCommit:metadata.webCommit,apiCommit:metadata.apiCommit,date:metadata.date,queryMonth:metadata.month,saleNumber:metadata.saleNumber,role:metadata.role,productCount:metadata.productCount,dailySalesCount:400,monthlySalesCount:6000,warmupsMs,excludedWarmupPerOperation:1,...series,complete,rnf3Passed:complete&&Object.values(series).every(series=>series.underLimit>=19),humanCriteria:{task:'T028-H',status:'pending'}};
 }
 
 export async function measureCycles(driver,onSample=async()=>{}){
@@ -58,7 +58,7 @@ export function createExistingTabDriver(tab,config,source){
   if(kind==='day'){
    const row=month.days.find(row=>row.date===day.date);if(!row)fail();
    await tab.playwright.getByRole('link',{name:formatDate(row.date)+' · '+formatPrice(row.totalCents)+' · '+countText(row.salesCount),exact:true}).click();
-  }else if(kind==='month')await tab.playwright.getByLabel('Mes',{exact:true}).fill(month.month);
+  }else if(kind==='month')await tab.playwright.getByRole('button',{name:month.nextMonth?'Mes anterior':'Mes siguiente',exact:true}).click();
   else await tab.playwright.getByRole('link',{name:listed(day.sales[0]),exact:true}).click();
   await observeHistoryDocument(views[kind],tab);
   const main=tab.playwright.locator('main');

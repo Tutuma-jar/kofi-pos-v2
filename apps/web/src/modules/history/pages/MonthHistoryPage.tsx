@@ -51,6 +51,11 @@ export function MonthHistoryPage() {
             <button
               type="button"
               disabled={data.previousMonth === null}
+              data-history-open-target={
+                import.meta.env.VITE_HISTORY_MEASUREMENT === 'true' && data.previousMonth
+                  ? `/ventas/mes?mes=${data.previousMonth}`
+                  : undefined
+              }
               onClick={() => {
                 if (data.previousMonth) chooseMonth(data.previousMonth);
               }}
@@ -60,6 +65,11 @@ export function MonthHistoryPage() {
             <button
               type="button"
               disabled={data.nextMonth === null}
+              data-history-open-target={
+                import.meta.env.VITE_HISTORY_MEASUREMENT === 'true' && data.nextMonth
+                  ? `/ventas/mes?mes=${data.nextMonth}`
+                  : undefined
+              }
               onClick={() => {
                 if (data.nextMonth) chooseMonth(data.nextMonth);
               }}
