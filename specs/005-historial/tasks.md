@@ -93,14 +93,14 @@ Rama: `feat/005-historial-us2`.
 
 Rama: `feat/005-historial-us3`.
 
-- [ ] **T023 [api] [P] [US3]** Escribir en `history.report.ts` `salesByDay` (plan §5.2; RF-13, RNF-2). Depende de: T009
+- [x] **T023 [api] [P] [US3]** Escribir en `history.report.ts` `salesByDay` (plan §5.2; RF-13, RNF-2). Depende de: T009
   Hecho cuando: las pruebas unitarias comprueban un día por fecha de la lista, en orden, con ceros en los días sin ventas; que una venta a las 23:59 y otra a las 00:00 de Bolivia caen en días distintos; y que las filas suman el total y el número de ventas del mes.
-- [ ] **T024 [api] [P] [US3]** Añadir el mes (`month`) a `history.service.ts` y `GET /api/history/month` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-4, D-10; RF-7, RF-11, RF-12, RF-13). Depende de: T010, T011, T023
+- [x] **T024 [api] [P] [US3]** Añadir el mes (`month`) a `history.service.ts` y `GET /api/history/month` a `history.routes.ts` (plan §5.3, §5.4, §6.2, D-4, D-10; RF-7, RF-11, RF-12, RF-13). Depende de: T010, T011, T023
   Hecho cuando: las pruebas comprueban que sin mes se consulta el mes en curso; que se pide el rango de `boliviaMonthBounds`; que la respuesta cumple `monthHistorySchema` con `currentMonth`, `previousMonth` (nulo en enero de 0001), `nextMonth` (nulo en el mes en curso), `asOf` y los días (todo el mes pasado, del 1 a hoy el en curso); que una venta del último día del mes anterior a las 23:59 no cuenta; que un mes futuro responde `400` «No se pueden consultar meses futuros» y uno inválido («2026-13», «octubre») `400` «El mes no es válido», sin llamar a la función de ventas; y que la ruta responde `403` al cajero y `401` sin sesión.
-- [ ] **T025 [web] [P] [US3]** Escribir `MonthDaysTable.tsx` y `MonthHistoryPage.tsx`: «[Mes] de [año]» con `formatMonth`, «Mes anterior», «Mes siguiente» (deshabilitado si `nextMonth` es nulo), campo de mes con `min = HISTORY_MIN_MONTH` y `max = currentMonth`, el mes en `?mes=`, `PeriodTotals`, «No hay ventas registradas este mes» si no tiene ventas, una fila por día (también en un mes sin ventas) «[fecha] · [total] · [ventas]» que enlaza a `/ventas?fecha=`, «Ver por día», `SaleSearch` y `QueryStatus`; y añadir «Ver por mes» a `DayHistoryPage` (plan §5.5, D-7; RF-5, RF-6, RF-11, RF-12, RF-13, RNF-4). Usar previousMonth nulo en HISTORY_MIN_MONTH y min = HISTORY_MIN_MONTH en el campo. Depende de: T020
+- [x] **T025 [web] [P] [US3]** Escribir `MonthDaysTable.tsx` y `MonthHistoryPage.tsx`: «[Mes] de [año]» con `formatMonth`, «Mes anterior», «Mes siguiente» (deshabilitado si `nextMonth` es nulo), campo de mes con `min = HISTORY_MIN_MONTH` y `max = currentMonth`, el mes en `?mes=`, `PeriodTotals`, «No hay ventas registradas este mes» si no tiene ventas, una fila por día (también en un mes sin ventas) «[fecha] · [total] · [ventas]» que enlaza a `/ventas?fecha=`, «Ver por día», `SaleSearch` y `QueryStatus`; y añadir «Ver por mes» a `DayHistoryPage` (plan §5.5, D-7; RF-5, RF-6, RF-11, RF-12, RF-13, RNF-4). Usar previousMonth nulo en HISTORY_MIN_MONTH y min = HISTORY_MIN_MONTH en el campo. Depende de: T020
   Hecho cuando: las pruebas de componente, con el cliente simulado, muestran tal cual «Octubre de 2026» con sus cifras y sus días («24/10/2026 · Bs 45,50 · 2 ventas», «01/10/2026 · Bs 0,00 · 0 ventas»); el mes vacío con su aviso y sus filas en cero; la navegación por `?mes=`; una fila que lleva a su día; «Ver por mes» y «Ver por día»; un mes futuro en la URL con su mensaje y sin cifras; los escenarios sin conexión, con error, sin permiso y lento; y todo con Tab e Intro.
-- [ ] **T026 [integración] [US3]** Escribir `e2e/history-us3-cifras-mes.spec.ts` con los 7 pasos de §8.2 del plan, contra la API real de E2E (RF-11, RF-12, RF-13, RNF-4). Depende de: T022, T024, T025
-  Hecho cuando: `npm run test:e2e` pasa con las pruebas de US1, US2 y US3.
+- [x] **T026 [integración] [US3]** Escribir `e2e/history-us3-cifras-mes.spec.ts` con los 7 pasos de §8.2 del plan, contra la API real de E2E, y corregir la integración con la sesión para conservar la consulta al cambiar sus parámetros dentro de una misma pantalla (plan §18; RF-5, RF-6, RF-11, RF-12, RF-13, RNF-4). Depende de: T022, T024, T025
+  Hecho cuando: las regresiones de sesión comprueban conservación de datos dentro de la pantalla, validación al cambiar de pantalla e invalidación ante 401; el E2E real conserva las cifras con desconexión y error al cambiar de mes; y todas las comprobaciones automatizadas pasan con US1, US2 y US3.
 
 ## Fase 6 — Pulido
 
@@ -123,11 +123,11 @@ Rama: `feat/005-historial-pulido`.
 | RF-2 | T003, T004, T005, T010, T011, T014, T016, T030, T031 |
 | RF-3 | T002, T009, T010, T013, T014, T015, T016, T030, T031 |
 | RF-4 | T003, T009, T013, T016 |
-| RF-5 | T010, T012, T014, T016, T020, T022, T025 |
-| RF-6 | T007, T012, T014, T016, T020, T025 |
+| RF-5 | T010, T012, T014, T016, T020, T022, T025, T026 |
+| RF-6 | T007, T012, T014, T016, T020, T025, T026 |
 | RF-7 | T009, T010, T011, T015, T017, T018, T021, T022, T024 |
 | RF-8 | T002, T003, T005, T017, T018, T020, T021, T022, T033 |
-| RF-9 | T003, T017, T018, T019, T020, T022, T032 |
+| RF-9 | T003, T017, T018, T019, T020, T022, T025, T032 |
 | RF-10 | T020, T022 |
 | RF-11 | T003, T004, T005, T024, T025, T026, T030 |
 | RF-12 | T003, T024, T025, T026 |

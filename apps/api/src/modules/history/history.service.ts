@@ -1,19 +1,28 @@
 import {
   historyDateSchema,
+  historyMonthSchema,
   HISTORY_MIN_DATE,
+  HISTORY_MIN_MONTH,
   HISTORY_MESSAGES,
   parseSaleNumber,
   SALE_NUMBER_MAX,
   saleNotFoundMessage,
   type DayHistory,
   type HistorySaleResponse,
+  type MonthHistory,
   type Sale,
 } from '@kofi/contracts';
-import { addDays, boliviaDate, boliviaDayBounds } from '../../shared/calendar.ts';
+import {
+  addDays,
+  addMonths,
+  boliviaDate,
+  boliviaDayBounds,
+  boliviaMonthBounds,
+} from '../../shared/calendar.ts';
 import type { Clock } from '../../shared/clock.ts';
 import type { Database } from '../../shared/database/database.ts';
 import { AppError } from '../../shared/http/errors.ts';
-import { listedSales, periodTotals } from './history.report.ts';
+import { listedSales, periodTotals, salesByDay } from './history.report.ts';
 
 export interface HistoryDeps {
   db: Database;
@@ -24,6 +33,27 @@ export interface HistoryDeps {
 
 export function createHistoryService({ db, clock, listSales, findSale }: HistoryDeps) {
   return {
+    async month(monthParam?: string): Promise<MonthHistory> {
+      const now = clock.now();
+      const currentMonth = boliviaDate(now).slice(0, 'YYYY-MM'.length);
+      const month = monthParam ?? currentMonth;
+      if (!historyMonthSchema.safeParse(month).success) {
+        throw new AppError(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.invalidMonth);
+      }
+      if (month > currentMonth)
+        throw new AppError(400, 'VALIDATION_ERROR', HISTORY_MESSAGES.futureMonth);
+      const { days, from, to } = boliviaMonthBounds(month, now);
+      const sales = await listSales(db, { from, to });
+      return {
+        month,
+        currentMonth,
+        previousMonth: month === HISTORY_MIN_MONTH ? null : addMonths(month, -1),
+        nextMonth: month < currentMonth ? addMonths(month, 1) : null,
+        asOf: now.toISOString(),
+        ...periodTotals(sales),
+        days: salesByDay(sales, days),
+      };
+    },
     async sale(numberParam: string): Promise<HistorySaleResponse> {
       const number = parseSaleNumber(numberParam);
       if (number === null)

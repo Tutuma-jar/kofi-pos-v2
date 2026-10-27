@@ -1,5 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { dayHistorySchema, historySaleResponseSchema, HISTORY_MESSAGES } from '@kofi/contracts';
+import {
+  dayHistorySchema,
+  historySaleResponseSchema,
+  monthHistorySchema,
+  HISTORY_MESSAGES,
+} from '@kofi/contracts';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../app.ts';
 import { authPlugin, createAccountsService } from '../auth/index.ts';
@@ -46,6 +51,61 @@ describe('rutas del historial (RF-1, RF-2, RF-7)', () => {
   afterAll(async () => {
     await app?.close();
     await db?.close();
+  });
+
+  it.each(['', '?month=2026-09', '?month=2026-09&month=2026-11'])(
+    'devuelve el mes al dueño para %s (T024)',
+    async (query) => {
+      listSales.mockResolvedValue([]);
+      const response = await app.inject({
+        url: '/api/history/month' + query,
+        headers: { cookie: cookies.owner! },
+      });
+      expect(response.statusCode).toBe(200);
+      const result = monthHistorySchema.parse(response.json());
+      expect(result.month).toBe(query ? '2026-09' : '2026-10');
+      expect(result.days).toHaveLength(query ? 30 : 25);
+      expect(result.salesCount).toBe(0);
+      expect(findSale).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    ['2026-13', HISTORY_MESSAGES.invalidMonth],
+    ['octubre', HISTORY_MESSAGES.invalidMonth],
+    ['2026-11', HISTORY_MESSAGES.futureMonth],
+  ])('rechaza el mes %s con su mensaje (T024)', async (month, message) => {
+    const response = await app.inject({
+      url: '/api/history/month?month=' + month,
+      headers: { cookie: cookies.owner! },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({ error: { code: 'VALIDATION_ERROR', message } });
+    expect(listSales).not.toHaveBeenCalled();
+  });
+  it.each(['', '?month=octubre', '?month=2026-11'])(
+    'comprueba sesión y rol antes del mes %s (T024)',
+    async (query) => {
+      const url = '/api/history/month' + query;
+      expect((await app.inject(url)).statusCode).toBe(401);
+      const response = await app.inject({ url, headers: { cookie: cookies.cashier! } });
+      expect(response.statusCode).toBe(403);
+      expect(response.json()).toEqual({
+        error: { code: 'FORBIDDEN', message: HISTORY_MESSAGES.forbidden },
+      });
+      expect(listSales).not.toHaveBeenCalled();
+    },
+  );
+  it('no acepta POST en el mes (T024)', async () => {
+    expect(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/history/month',
+          headers: { cookie: cookies.owner! },
+        })
+      ).statusCode,
+    ).toBe(404);
+    expect(listSales).not.toHaveBeenCalled();
   });
 
   it('valida un número de 101 cifras dentro del historial sin truncarlo (T032)', async () => {

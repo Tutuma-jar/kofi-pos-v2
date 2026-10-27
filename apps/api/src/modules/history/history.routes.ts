@@ -1,6 +1,8 @@
 import {
   dayHistorySchema,
   historyDayQuerySchema,
+  historyMonthQuerySchema,
+  monthHistorySchema,
   historySaleResponseSchema,
   HISTORY_MESSAGES,
   HISTORY_ROLES,
@@ -27,6 +29,13 @@ export const historyPlugin: FastifyPluginAsync<HistoryDeps & { production?: bool
       date: Array.isArray(query.date) ? query.date[0] : query.date,
     });
     return dayHistorySchema.parse(await service.day(date));
+  });
+  app.get('/api/history/month', async (request) => {
+    const query = request.query as { month?: string | string[] };
+    const { month } = historyMonthQuerySchema.parse({
+      month: Array.isArray(query.month) ? query.month[0] : query.month,
+    });
+    return monthHistorySchema.parse(await service.month(month));
   });
   const readSale = async (number: string) =>
     historySaleResponseSchema.parse(await service.sale(number));
