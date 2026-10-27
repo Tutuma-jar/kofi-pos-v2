@@ -1,0 +1,73 @@
+{
+  "target": "https://kofi-web.onrender.com",
+  "focusValidation": "browser_probe",
+  "timingMethod": "browser_render_probe",
+  "measuredAt": "2026-10-27T14:12:59.806Z",
+  "timeZone": "America/La_Paz",
+  "platform": "browser-runtime",
+  "nodeVersion": null,
+  "localCommit": "af643aa0e529236ecfca0c7024eacc6f8ecfd61b",
+  "browserVersion": null,
+  "webCommit": "af643aa0e529236ecfca0c7024eacc6f8ecfd61b",
+  "apiCommit": "af643aa0e529236ecfca0c7024eacc6f8ecfd61b",
+  "date": "2026-09-15",
+  "month": {
+    "durationsMs": [],
+    "limitMs": 2000,
+    "underLimit": 0,
+    "p95Ms": null
+  },
+  "saleNumber": 9104,
+  "role": "owner",
+  "productCount": 202,
+  "dailySalesCount": 400,
+  "monthlySalesCount": 6000,
+  "warmupsMs": {
+    "day": 1385.5
+  },
+  "excludedWarmupPerOperation": 1,
+  "day": {
+    "durationsMs": [
+      1338.5999999940395,
+      1112.1000000238419,
+      1569.9000000059605,
+      1146.9000000059605,
+      1043.5999999940395,
+      1266.300000011921,
+      1117.199999988079,
+      1227.300000011921,
+      1213.7000000178814,
+      1110.300000011921,
+      1219.2000000178814,
+      1107.300000011921,
+      1216.8999999761581,
+      1073.5,
+      1151.699999988079,
+      1082.699999988079,
+      1214.2000000178814,
+      1200.5999999940395,
+      1190.5,
+      1083.300000011921
+    ],
+    "limitMs": 2000,
+    "underLimit": 20,
+    "p95Ms": 1338.5999999940395
+  },
+  "sale": {
+    "durationsMs": [],
+    "limitMs": 2000,
+    "underLimit": 0,
+    "p95Ms": null
+  },
+  "complete": false,
+  "rnf3Passed": false,
+  "humanCriteria": {
+    "task": "T028-H",
+    "status": "pending"
+  },
+  "failure": {
+    "operation": "month",
+    "code": "UI_MEASUREMENT_STOPPED",
+    "observedAt": "2026-10-27T14:12:59.806Z"
+  }
+}

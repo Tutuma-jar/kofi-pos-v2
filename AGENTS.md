@@ -171,10 +171,13 @@ Requisitos: Node 24 y npm 11.
 | Ver los hooks de Git | `npm run hooks` |
 | Probar los medidores de acceso, menú y ventas con datos ficticios | `npm run test:measure` |
 | Probar solo el medidor de menú con datos ficticios | `npm run test:measure:menu` |
+| Probar el medidor de Historial con datos ficticios | `npm run test:measure:history` |
+| Generar el medidor autocontenido para la pestaña de comprobación | `npm run build:measure:history` |
 | Medir acceso en el despliegue de prueba³ | `npm run measure:access` |
 | Medir menú en el despliegue de prueba³ | `npm run measure:menu` |
 | Medir ventas en el despliegue de prueba³ | `npm run measure:sales` |
 | Medir Dashboard en el despliegue de prueba³ | `npm run measure:dashboard` |
+| Medir Historial automáticamente en el despliegue de comprobación⁴ | `npm run measure:history -- --date YYYY-MM-DD --web-commit SHA --api-commit SHA` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
@@ -182,3 +185,5 @@ Requisitos: Node 24 y npm 11.
 ³ Mediciones interactivas que ejecuta la persona en su terminal, fuera de las comprobaciones automáticas. Acceso (T043) pide una contraseña sin eco y después un ingreso manual en Chromium. Menú (T035) y Ventas (T026) piden ingresar directamente en Chromium, miden tres series de veinte operaciones y cronometran una creación o venta manual. No reciben credenciales por chat, archivos ni argumentos. Las comprobaciones automáticas usan `npm run test:measure` con datos ficticios.
 
 Dashboard (T022) pide ingresar directamente en Chromium con cada rol, mide veinte aperturas y veinte actualizaciones por rol y muestra controles para que la persona cronometre su propio recorrido e identificación del total de hoy. No automatiza el recorrido humano ni recibe credenciales fuera del navegador.
+
+⁴ Historial (SPEC-005 T028) solo requiere autenticación en el navegador cuando no hay sesión reutilizable. Automatiza veinte aperturas de día, mes y detalle, con calentamiento separado y muestras originales. Verifica el rol real de dueño, 400 ventas del día y 6000 del mes. No cronometra personas ni acredita T028-H. Los SHA se obtienen del despliegue real de cada servicio; no se reciben credenciales por argumentos, archivos ni chat.

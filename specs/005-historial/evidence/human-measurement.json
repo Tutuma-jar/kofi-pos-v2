@@ -1,0 +1,62 @@
+{
+  "task": "T028-H",
+  "status": "passed",
+  "recordedAt": "2026-10-27T14:57:49.086Z",
+  "timeZone": "America/La_Paz",
+  "equipment": {
+    "source": "user_confirmation",
+    "statement": "Esta misma computadora donde está abierto Chrome será la computadora del local para acreditar T028-H",
+    "confirmed": true,
+    "replyText": "Sí, esta computadora"
+  },
+  "rnf3": {
+    "automatedEvidence": "measurement-render-probe.json",
+    "executionOnDesignatedComputerConfirmed": true,
+    "webCommit": "86ecfe8cc204fe10b3193e7e8d3042397dd08458",
+    "apiCommit": "86ecfe8cc204fe10b3193e7e8d3042397dd08458",
+    "applicationSourceMatchesAutomatedEvidence": true
+  },
+  "day": {
+    "status": "passed",
+    "date": "2026-10-26",
+    "start": "Pantalla inicial",
+    "timingSource": "user_reported",
+    "durationSeconds": 13.4,
+    "strictLimitSeconds": 15,
+    "reportedAmountsBob": {
+      "total": "5430,00",
+      "cash": "2850,00",
+      "qr": "2580,00"
+    },
+    "visibleUiMatched": true,
+    "sourceText": {
+      "duration": "13.4 s",
+      "amounts": "5430, 2850, 2580"
+    }
+  },
+  "sale": {
+    "status": "passed",
+    "number": 9104,
+    "strictLimitSeconds": 15,
+    "start": "Pantalla inicial",
+    "action": "Abrir Historial de ventas y buscar por el número conocido",
+    "timingSource": "user_reported",
+    "durationSeconds": 8,
+    "visibleUi": {
+      "requestedNumberMatched": true,
+      "number": 9104,
+      "totalBob": "20,00",
+      "totalSource": "assistant_visible_ui_observation"
+    },
+    "sourceText": {
+      "duration": "8s"
+    }
+  },
+  "authorization": {
+    "source": "user_request",
+    "statement": "hagamos las pruebas",
+    "scope": "Realizar y registrar los criterios humanos de T028-H, anteriormente aplazados"
+  },
+  "repositoryCommitAtRecording": "d18a9ad1cacc58df7589294542307bb910841d5c",
+  "completedAt": "2026-10-27T15:01:04.659Z"
+}

@@ -7,6 +7,7 @@ import { PeriodTotals } from '../components/PeriodTotals.tsx';
 import { SalesList } from '../components/SalesList.tsx';
 import { QueryStatus } from '../components/QueryStatus.tsx';
 import { SaleSearch } from '../components/SaleSearch.tsx';
+import { useHistoryTiming } from '../state/useHistoryTiming.ts';
 
 export function DayHistoryPage() {
   const client = useHistoryClient();
@@ -14,6 +15,7 @@ export function DayHistoryPage() {
   const date = params.get('fecha') ?? undefined;
   const query = useHistoryQuery(() => client.day(date), date);
   const { data } = query;
+  const timing = useHistoryTiming(data ? `/ventas?fecha=${data.date}` : null, query.loading);
   const chooseDate = useCallback(
     (value: string, replace = false) => {
       setParams(
@@ -34,7 +36,7 @@ export function DayHistoryPage() {
   }, [data, date, chooseDate]);
 
   return (
-    <main>
+    <main ref={timing}>
       <h1>{data ? `Ventas del ${formatDate(data.date)}` : 'Historial de ventas'}</h1>
       <p>
         <Link to="/">Volver al inicio</Link>

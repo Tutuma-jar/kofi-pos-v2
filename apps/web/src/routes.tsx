@@ -12,7 +12,12 @@ import {
   canView,
 } from './modules/auth/index.ts';
 import { DashboardPage } from './modules/dashboard/index.ts';
-import { DayHistoryPage, MonthHistoryPage, SaleDetailPage } from './modules/history/index.ts';
+import {
+  DayHistoryPage,
+  MonthHistoryPage,
+  SaleDetailPage,
+  HistoryTimingObserver,
+} from './modules/history/index.ts';
 import { MenuAdminPage, MenuPage } from './modules/menu/index.ts';
 import { discardStoredSaleDraft, NewSalePage } from './modules/sales/index.ts';
 
@@ -89,6 +94,7 @@ export function AppRoutes({ client = httpAuthClient }: { client?: AuthClient }) 
     location.pathname;
   return (
     <SessionProvider client={client} onSessionEnd={discardStoredSaleDraft} screenKey={screenKey}>
+      {import.meta.env.VITE_HISTORY_MEASUREMENT === 'true' && <HistoryTimingObserver />}
       <Routes>
         {publicRoutes.map(({ path, element }) => (
           <Route key={path} path={path} element={element} />
