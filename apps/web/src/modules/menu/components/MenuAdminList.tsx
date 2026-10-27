@@ -49,6 +49,7 @@ export function MenuAdminList({
               )}
               {onCategoryActive && (
                 <button
+                  className="menu__availability"
                   type="button"
                   disabled={busy}
                   onClick={() => onCategoryActive(category)}
@@ -86,6 +87,7 @@ export function MenuAdminList({
                     )}
                     {onProductActive && (
                       <button
+                        className="menu__availability"
                         type="button"
                         disabled={busy}
                         onClick={() => onProductActive(product)}
