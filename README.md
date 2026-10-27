@@ -15,7 +15,7 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
 | Ventas | `specs/003-ventas/` | US1 y US2 implementadas; medición de T026 cumplida, pulido en revisión |
 | Dashboard | `specs/004-dashboard/` | Implementado; definición, historias y pulido fusionados |
-| Historial y reportes | `specs/005-historial/` | US1, US2 y US3 implementadas; Pulido y criterios humanos pendientes |
+| Historial y reportes | `specs/005-historial/` | Implementado; T028 automatizada cumplida, Pulido en revisión y T028-H humana pendiente |
 
 El estado se actualiza en el PR que completa cada especificación.
 
@@ -219,7 +219,9 @@ Solo el **dueño** puede abrir **Historial de ventas** desde la pantalla inicial
 
 Los importes se muestran en bolivianos y las fechas y horas, en hora de Bolivia. No se admiten días ni meses futuros. **Actualizar** obtiene los datos de nuevo; no hay actualización automática. Las cifras diarias y mensuales indican **Datos al …**. Durante la carga y ante fallos de conexión o errores inesperados se conserva la consulta anterior con su título y momento propios.
 
-Las historias están implementadas. El cierre de [SPEC-005](specs/005-historial/spec.md) requiere las mediciones reales de T028 y los criterios humanos de T028-H, con su estado en [tasks.md](specs/005-historial/tasks.md). El medidor automatizado y sus pruebas ficticias no acreditan el recorrido humano ni su ejecución desde la computadora del local.
+**T028 automatizada medida el 2026-10-27:** con 202 productos, 400 ventas del día y 6000 del mes, las tres series reales obtuvieron 20/20 aperturas por debajo de 2 segundos en Render y Neon de comprobación. El [informe](specs/005-historial/measurement.md) conserva las muestras originales, los intentos parciales, los commits desplegados y la auditoría de datos.
+
+El cierre de [SPEC-005](specs/005-historial/spec.md) sigue impedido por los criterios humanos de T028-H, con su estado en [tasks.md](specs/005-historial/tasks.md). La automatización no acredita el recorrido humano ni la comprobación desde la computadora del local. Pulido queda sujeto a verificación independiente y revisión humana.
 
 ## Flujo de trabajo
 
