@@ -14,8 +14,8 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | Acceso | `specs/001-acceso/` | Implementado; pulido en revisión |
 | Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
 | Ventas | `specs/003-ventas/` | US1 y US2 implementadas; medición de T026 cumplida, pulido en revisión |
-| Dashboard | `specs/004-dashboard/` | Pendiente |
-| Historial y reportes | `specs/005-historial/` | Pendiente |
+| Dashboard | `specs/004-dashboard/` | Implementado; definición, historias y pulido fusionados |
+| Historial y reportes | `specs/005-historial/` | US1, US2 y US3 implementadas; Pulido y criterios humanos pendientes |
 
 El estado se actualiza en el PR que completa cada especificación.
 
@@ -207,7 +207,19 @@ Por instrucción expresa de la persona, también puede prepararse la base existe
 
 Para medir desde la computadora del local, ejecutar `npm run build:contracts` y `npm run measure:dashboard` en una terminal interactiva, sin argumentos ni depuración. El medidor abre Chromium: ingresa primero como dueño y, cuando se abra la segunda ventana, como cajero, con la contraseña solo en el navegador. Por cada rol excluye un calentamiento y mide veinte aperturas y veinte actualizaciones; mantén Chromium visible y al frente, sin usar otras aplicaciones durante las series. Después aparecen controles del medidor: desde la pantalla inicial pulsa **Comenzar**, abre tú **Resumen de ventas**, identifica el total de hoy y pulsa **Ya identifiqué el total de hoy**. El programa no hace ese recorrido ni confirma la lectura por ti. Cada serie exige al menos 19/20 muestras bajo 2 segundos; el objetivo humano es menos de 10 segundos y un exceso requiere aceptación expresa documentada según spec §8. El informe conserva el tiempo real y su evaluación, sin convertir esa aceptación en un tiempo menor. Se guarda, sin credenciales, en la ruta de `git rev-parse --git-path dashboard-performance.json`. Los SHA desplegados de web y API se acreditan aparte del SHA local del medidor; las pruebas con datos ficticios están en `npm run test:measure`.
 
-El Blueprint de comprobación apunta a `feat/004-dashboard-pulido` tanto en la API como en la web. Antes de abrir Chromium, el medidor verifica que el bundle público de la web ya contenga ambas secciones del Dashboard. Si todavía sirve una versión anterior, detiene la medición sin pedir credenciales; sincroniza el Blueprint y comprueba el despliegue Live de ambos servicios antes de repetirla.
+Durante la comprobación del Dashboard se usó `feat/004-dashboard-pulido`; la configuración vigente se consulta en `render.yaml`. Antes de abrir Chromium, el medidor verifica que el bundle público de la web ya contenga ambas secciones del Dashboard. Si todavía sirve una versión anterior, detiene la medición sin pedir credenciales; sincroniza el Blueprint y comprueba el despliegue Live de ambos servicios antes de repetirla.
+
+## Historial y reportes
+
+Solo el **dueño** puede abrir **Historial de ventas** desde la pantalla inicial (`/ventas`). El cajero no ve ese acceso y la API rechaza sus consultas al Historial.
+
+- **Un día:** muestra el total vendido, el número de ventas, el reparto entre efectivo y QR y todas sus ventas, de mayor a menor número. Se puede cambiar con **Día anterior**, **Día siguiente** o el campo de fecha; la fecha consultada queda en la URL. Un día sin ventas muestra sus cifras en cero.
+- **Una venta:** se abre al elegir una fila o escribir su número en **Buscar venta por número**. Muestra fecha y hora, quién la registró y su rol de ese momento, medio de pago, productos, categorías, precios, cantidades, subtotales y total originales. **Volver** abre el día de esa venta. Los cambios posteriores del menú o de las cuentas no alteran la instantánea.
+- **Un mes:** **Ver por mes** abre el mes en curso (`/ventas/mes`). **Mes anterior**, **Mes siguiente** y el campo de mes permiten consultar otros meses. Muestra total, número de ventas, reparto de pagos y una fila por día, incluidos los días sin ventas; cada fila abre su día. **Ver por día** regresa a hoy.
+
+Los importes se muestran en bolivianos y las fechas y horas, en hora de Bolivia. No se admiten días ni meses futuros. **Actualizar** obtiene los datos de nuevo; no hay actualización automática. Las cifras diarias y mensuales indican **Datos al …**. Durante la carga y ante fallos de conexión o errores inesperados se conserva la consulta anterior con su título y momento propios.
+
+Las historias están implementadas. El cierre de [SPEC-005](specs/005-historial/spec.md) requiere las mediciones reales de T028 y los criterios humanos de T028-H, con su estado en [tasks.md](specs/005-historial/tasks.md). El medidor automatizado y sus pruebas ficticias no acreditan el recorrido humano ni su ejecución desde la computadora del local.
 
 ## Flujo de trabajo
 
