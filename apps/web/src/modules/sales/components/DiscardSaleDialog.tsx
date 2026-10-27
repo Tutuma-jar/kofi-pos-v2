@@ -23,6 +23,7 @@ export function DiscardSaleDialog({
   }, []);
   return (
     <dialog
+      className="sale-discard-dialog"
       ref={dialog}
       aria-labelledby="discard-sale-title"
       onCancel={(event) => {
@@ -31,12 +32,14 @@ export function DiscardSaleDialog({
       }}
     >
       <h2 id="discard-sale-title">¿Descartar esta venta? Se quitarán todos sus productos</h2>
-      <button type="button" ref={back} onClick={onBack}>
-        Volver
-      </button>
-      <button type="button" disabled={busy} onClick={onDiscard}>
-        Descartar
-      </button>
+      <div className="sale-discard-dialog__actions">
+        <button type="button" ref={back} onClick={onBack}>
+          Volver
+        </button>
+        <button className="button-primary" type="button" disabled={busy} onClick={onDiscard}>
+          Descartar
+        </button>
+      </div>
     </dialog>
   );
 }

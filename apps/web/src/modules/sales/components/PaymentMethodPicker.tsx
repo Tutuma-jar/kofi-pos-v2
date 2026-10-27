@@ -10,10 +10,10 @@ export function PaymentMethodPicker({
   onChange(value: PaymentMethod): void;
 }) {
   return (
-    <fieldset disabled={busy}>
+    <fieldset disabled={busy} className="sale-payment">
       <legend>Medio de pago</legend>
       {PAYMENT_METHODS.map((method) => (
-        <label key={method}>
+        <label key={method} className="sale-payment__option">
           <input
             type="radio"
             name="sale-payment"
