@@ -15,7 +15,7 @@ Kofi POS es el sistema web de punto de venta de **Kofi**, una cafetería fictici
 | Menú | `specs/002-menu/` | US1, US2 y US3 implementadas; medición de T035 cumplida, en revisión |
 | Ventas | `specs/003-ventas/` | US1 y US2 implementadas; medición de T026 cumplida, pulido en revisión |
 | Dashboard | `specs/004-dashboard/` | Implementado; definición, historias y pulido fusionados |
-| Historial y reportes | `specs/005-historial/` | Implementado; T028 automatizada cumplida, Pulido en revisión y T028-H humana pendiente |
+| Historial y reportes | `specs/005-historial/` | Implementado; mediciones automatizadas y humanas cumplidas, Pulido en revisión |
 
 El estado se actualiza en el PR que completa cada especificación.
 
@@ -221,7 +221,7 @@ Los importes se muestran en bolivianos y las fechas y horas, en hora de Bolivia.
 
 **T028 automatizada medida el 2026-10-27:** con 202 productos, 400 ventas del día y 6000 del mes, las tres series reales obtuvieron 20/20 aperturas por debajo de 2 segundos en Render y Neon de comprobación. El [informe](specs/005-historial/measurement.md) conserva las muestras originales, los intentos parciales, los commits desplegados y la auditoría de datos.
 
-El cierre de [SPEC-005](specs/005-historial/spec.md) sigue impedido por los criterios humanos de T028-H, con su estado en [tasks.md](specs/005-historial/tasks.md). La automatización no acredita el recorrido humano ni la comprobación desde la computadora del local. Pulido queda sujeto a verificación independiente y revisión humana.
+**T028-H comprobada el 2026-10-27:** la persona confirmó esta misma computadora como la del local y realizó desde Inicio la consulta del día en **13,4 s** y la búsqueda por número en **8 s**, ambos bajo 15 segundos. Los tiempos comunicados y el contraste visible quedan en el [informe](specs/005-historial/measurement.md), separados de la evidencia automatizada. El estado de [SPEC-005](specs/005-historial/spec.md) está en [tasks.md](specs/005-historial/tasks.md); Pulido queda sujeto a nueva verificación independiente y revisión humana.
 
 ## Flujo de trabajo
 

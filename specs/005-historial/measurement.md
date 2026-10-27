@@ -2,7 +2,7 @@
 
 Fecha de ejecución: 2026-10-27, hora de Bolivia. Registro final UTC: 2026-10-27T14:26:27.312Z.
 
-**Resultado de T028 automatizable: cumplido.** Las tres series completas superan el mínimo de 19 de 20 aperturas estrictamente menores de 2000 ms. **T028-H permanece pendiente e impide acreditar el cierre completo de SPEC-005.** No se ejecutaron pruebas manuales ni recorridos humanos cronometrados.
+**Resultado de T028 automatizable: cumplido.** Las tres series completas superan el mínimo de 19 de 20 aperturas estrictamente menores de 2000 ms. La ejecución automatizada no acreditó los criterios humanos. **T028-H se completó después, el 2026-10-27, con autorización y participación de la persona**, según el registro separado al final de este informe.
 
 ## Entorno y revisión medida
 
@@ -44,4 +44,17 @@ Un calentamiento por consulta queda registrado y excluido: día 1489.09999999403
 | [seed-audit.json](evidence/seed-audit.json) | 1525189fe80a2eed1e90df9e780e8c632f792fcae30bb0912981e4be8af2c273 |
 | [measurement-data-audit.json](evidence/measurement-data-audit.json) | 94b5930f045c49417060ff9f99a41f36d11d6aa573dcfa86ccfebd03fe189196 |
 
-T028 acredita exclusivamente la parte automatizable del entorno de comprobación. Falta la acreditación humana desde la computadora del local y los dos recorridos del dueño en menos de 15 segundos descritos en T028-H. Se mantienen pendientes, sin sustituirlos por estos resultados. El [PR #39](https://github.com/Tutuma-jar/kofi-pos-v2/pull/39) conserva el estado de verificación y la revisión humana.
+T028 acredita exclusivamente la parte automatizable del entorno de comprobación. El [PR #39](https://github.com/Tutuma-jar/kofi-pos-v2/pull/39) conserva el estado de verificación y la revisión humana. El campo `humanCriteria.status: pending` de los JSON automatizados refleja su estado al generarlos; se conserva intacto y no se reescribe después de realizar T028-H.
+
+## Comprobación humana — T028-H
+
+La persona pidió «hagamos las pruebas» el 2026-10-27 y confirmó «Sí, esta computadora» a la pregunta de si el equipo de Chrome sería la computadora del local. Esto habilitó las comprobaciones humanas antes aplazadas. Las series de RNF-3 ya conservadas se ejecutaron en ese mismo Chrome y equipo; el código de las aplicaciones coincide con la revisión medida. No se repiten ni se reclasifican las muestras automatizadas como recorridos humanos.
+
+Se reactivó la API antes del recorrido y se comprobó la sesión admin con rol owner. El agente dejó Inicio preparado; la persona realizó por sí misma los dos recorridos siguiendo las instrucciones de usar un cronómetro independiente. Los tiempos son **comunicados por la persona**, no obtenidos ni certificados por un cronómetro automático del agente. El agente contrastó después la fecha, los importes y la venta visibles.
+
+| Criterio desde Inicio | Tiempo comunicado | Contraste posterior | Resultado |
+| --- | --- | --- | --- |
+| Ver el total de un día anterior y su desglose | 13,4 s | 26/10/2026: total Bs 5430,00; Efectivo Bs 2850,00; QR Bs 2580,00. La persona comunicó los tres importes y coinciden con la pantalla | Cumple < 15 s |
+| Abrir una venta por su número conocido | 8 s | La persona abrió la venta N.º 9104; el agente observó ese detalle, con total Bs 20,00. El total fue observado por el agente, no comunicado por la persona | Cumple < 15 s |
+
+**Resultado de T028-H: cumplido**, con confirmación humana del equipo y los dos recorridos. No se modificaron contraseñas, permisos, ventas ni menú. Registro: [human-measurement.json](evidence/human-measurement.json), SHA-256 f41e9fe4b11ca4c41be50b3493859ecd57e49046bad818f830d00a7471d676de. El commit del repositorio al registrar la prueba es d18a9ad1cacc58df7589294542307bb910841d5c; esta tarea solo actualiza documentación y evidencias. Se solicita de nuevo la verificación completa antes de la revisión y fusión por una persona.
