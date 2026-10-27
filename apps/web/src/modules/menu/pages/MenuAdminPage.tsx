@@ -8,6 +8,7 @@ import { CategoryForm } from '../components/CategoryForm.tsx';
 import type { Category, AdminProduct } from '@kofi/contracts';
 import { ProductForm } from '../components/ProductForm.tsx';
 import { SaveStatus, type SaveState } from '../components/SaveStatus.tsx';
+import '../menu.css';
 
 type Editor =
   { kind: 'category'; category?: Category } | { kind: 'product'; product?: AdminProduct };
@@ -81,10 +82,16 @@ export function MenuAdminPage() {
     };
   }, [client, navigate]);
   return (
-    <main>
-      <h1>Administrar menú</h1>
-      <Link to="/">Volver al inicio</Link>
-      {error && <p role="alert">{error}</p>}
+    <main className="menu menu--admin">
+      <header className="menu__header">
+        <h1>Administrar menú</h1>
+        <Link to="/">Volver al inicio</Link>
+      </header>
+      {error && (
+        <p className="alert" role="alert">
+          {error}
+        </p>
+      )}
       <SaveStatus state={saveState} />
       {categories ? (
         <>
@@ -118,8 +125,9 @@ export function MenuAdminPage() {
               }
             />
           ) : (
-            <>
+            <div className="menu__toolbar">
               <button
+                className="button-primary"
                 type="button"
                 disabled={saveState === 'saving'}
                 onClick={() => setEditor({ kind: 'category' })}
@@ -127,6 +135,7 @@ export function MenuAdminPage() {
                 Crear categoría
               </button>
               <button
+                className="button-primary"
                 type="button"
                 disabled={saveState === 'saving' || !categories.some((category) => category.active)}
                 onClick={() => setEditor({ kind: 'product' })}
@@ -134,9 +143,9 @@ export function MenuAdminPage() {
                 Crear producto
               </button>
               {!categories.some((category) => category.active) && (
-                <p>Crea o reactiva una categoría antes de añadir productos</p>
+                <p className="notice">Crea o reactiva una categoría antes de añadir productos</p>
               )}
-            </>
+            </div>
           )}
           <MenuAdminList
             categories={categories}
@@ -173,7 +182,11 @@ export function MenuAdminPage() {
           />
         </>
       ) : (
-        !error && <p role="status">Cargando menú…</p>
+        !error && (
+          <p className="menu__empty" role="status">
+            Cargando menú…
+          </p>
+        )
       )}
     </main>
   );

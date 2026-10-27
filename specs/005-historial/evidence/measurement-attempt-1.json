@@ -1,0 +1,57 @@
+{
+  "target": "https://kofi-web.onrender.com",
+  "focusValidation": "not_exposed_by_cua",
+  "timingMethod": "existing_tab_ui",
+  "measuredAt": "2026-10-27T04:19:49.121Z",
+  "timeZone": "America/La_Paz",
+  "platform": "browser-runtime",
+  "nodeVersion": null,
+  "localCommit": "0b0a2fbc22ddb1b4edac3ee523600593f1d94b94",
+  "browserVersion": null,
+  "webCommit": "0b0a2fbc22ddb1b4edac3ee523600593f1d94b94",
+  "apiCommit": "0b0a2fbc22ddb1b4edac3ee523600593f1d94b94",
+  "date": "2026-09-15",
+  "month": {
+    "durationsMs": [],
+    "limitMs": 2000,
+    "underLimit": 0,
+    "p95Ms": null
+  },
+  "saleNumber": 9104,
+  "role": "owner",
+  "productCount": 202,
+  "dailySalesCount": 400,
+  "monthlySalesCount": 6000,
+  "warmupsMs": {
+    "day": 3009.063200000208
+  },
+  "excludedWarmupPerOperation": 1,
+  "day": {
+    "durationsMs": [
+      3263.0419000000693,
+      3388.7343000001274,
+      3279.0208999998868,
+      2830.4235000000335,
+      3560.038100000005
+    ],
+    "limitMs": 2000,
+    "underLimit": 0,
+    "p95Ms": null
+  },
+  "sale": {
+    "durationsMs": [],
+    "limitMs": 2000,
+    "underLimit": 0,
+    "p95Ms": null
+  },
+  "complete": false,
+  "rnf3Passed": false,
+  "humanCriteria": {
+    "task": "T028-H",
+    "status": "pending"
+  },
+  "evaluation": {
+    "status": "not_accredited",
+    "reason": "Intervalo parcial que incluye las comprobaciones posteriores del controlador; se conserva íntegro antes de corregir el método."
+  }
+}

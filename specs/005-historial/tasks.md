@@ -106,14 +106,23 @@ Rama: `feat/005-historial-us3`.
 
 Rama: `feat/005-historial-pulido`.
 
-- [ ] **T027 [api]** Hacer que `seed:sales` (SPEC-004 T021) pueda cargar 6000 ventas en un mes con 400 de ellas en un mismo día; reutilizar el cargador fusionado en el PR #33 como indica SPEC-004 D-11 (plan D-11; RNF-3). Depende de: T026
+- [x] **T027 [api]** Hacer que `seed:sales` (SPEC-004 T021) pueda cargar 6000 ventas en un mes con 400 de ellas en un mismo día; reutilizar el cargador fusionado en el PR #33 como indica SPEC-004 D-11 (plan D-11; RNF-3). Depende de: T026
   Hecho cuando: una prueba de integración con PGlite carga 6000 ventas del mes, 400 en un día, que cumplen `saleSchema`, y otra comprueba que con `NODE_ENV=production` no escribe nada.
-- [ ] **T028 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las ventas con `seed:sales`, y automatizar la medición de RNF-3 observando la interfaz completa, como indica el plan (§8.3). Reutilizar sesiones autenticadas disponibles, comprobar roles y commits desplegados, y conservar datos existentes y muestras reales. Si falta autenticación humana, dejar pendiente esa parte. Depende de: T027, SPEC-002 T034
-  Hecho cuando: al menos 19 de cada 20 aperturas del día de 400 ventas, del mes de 6000 y del detalle de una venta tardan menos de 2 segundos, los commits web/API y las muestras reales quedan conservados y los resultados anotados en la descripción del PR de pulido. Esta automatización no acredita los criterios humanos de T028-H.
-- [ ] **T028-H [integración]** Criterios humanos de T028: desde la computadora del local acreditar RNF-3; el dueño ve el total de un día anterior y abre una venta por su número en menos de 15 segundos desde la pantalla inicial. Depende de: T028
-  Hecho cuando: una persona completa y registra esas comprobaciones. Quedan expresamente pendientes; no se ejecutan pruebas manuales ni se solicita un recorrido cronometrado durante este desarrollo. Impiden acreditar el cierre completo mientras sigan pendientes.
-- [ ] **T029 [integración]** Actualizar `README.md` con el estado del módulo Historial: quién lo usa, cómo llegar a él y qué muestra de un día, de una venta y de un mes (RF-1 a RF-13). Depende de: T026
+- [x] **T034 [integración]** Preparar el medidor automatizado de RNF-3 de Historial y el Blueprint de comprobación, con tests de datos ficticios, muestras parciales y completas y validación de toda la interfaz visible (plan §20). Depende de: T027
+  Hecho cuando: los tests verifican veinte aperturas de día, mes y detalle, un calentamiento excluido por serie, límites estrictos de 2 s, volúmenes 400/6000 y permisos de dueño; los secretos no aparecen en informes; los errores detienen y conservan muestras parciales; todas las comprobaciones automatizadas pasan. No acredita la medición real de T028 ni los criterios humanos de T028-H.
+- [x] **T035 [integración]** Corregir la carga del medidor en el entorno de Cua: separar su núcleo de observación y generar un módulo ESM autocontenido con Vite existente, sin resolver paquetes desde la pestaña autenticada (plan §21; RNF-3). Depende de: T034
+  Hecho cuando: las pruebas generan e importan el módulo sin dependencias externas, comprueban sus informes y límites, todas las comprobaciones automatizadas pasan y el entorno de Cua puede cargarlo sin exportar credenciales. No acredita las muestras reales de T028.
+- [x] **T036 [integración]** Corregir el intervalo de RNF-3: instrumentar solo el build de comprobación para medir desde el evento de apertura hasta el renderizado completo, y verificar después todas las filas sin sumar al intervalo las llamadas de inspección de Cua (plan §22). Depende de: T035
+  Hecho cuando: los tests cubren inicio, datos cargando, dos cuadros de renderizado, pérdida de foco, eventos ajenos ignorados y ausencia de instrumentación en el build normal; los medidores usan el intervalo del navegador y todas las comprobaciones pasan. El intento parcial anterior se conserva sin acreditarlo.
+- [x] **T028 [integración]** Desplegar en Render con el Blueprint apuntando a esta rama y su base de Neon de comprobación (`docs/architecture.md` §6.5), cargar los 200 productos con `seed:menu` (SPEC-002 T034) y las ventas con `seed:sales`, y automatizar la medición de RNF-3 observando la interfaz completa, como indica el plan (§8.3). Reutilizar sesiones autenticadas disponibles, comprobar roles y commits desplegados, y conservar datos existentes y muestras reales. Si falta autenticación humana, dejar pendiente esa parte. Depende de: T027, T034, T035, T036, T037, SPEC-002 T034
+  Hecho cuando: al menos 19 de cada 20 aperturas del día de 400 ventas, del mes de 6000 y del detalle de una venta tardan menos de 2 segundos, los commits web/API y las muestras reales quedan conservados y los resultados anotados en la descripción del PR de pulido. Esta automatización no acredita los criterios humanos de T028-H. Requiere también T035 para reutilizar la pestaña de Cua.
+- [x] **T028-H [integración]** Criterios humanos de T028: desde la computadora del local acreditar RNF-3; el dueño ve el total de un día anterior y abre una venta por su número en menos de 15 segundos desde la pantalla inicial. Depende de: T028
+  Hecho cuando: una persona completa y registra esas comprobaciones. La persona habilitó las pruebas humanas el 2026-10-27 y confirmó esta misma computadora como la del local. Resultados registrados en `evidence/human-measurement.json`: día 13,4 s con importes contrastados y búsqueda de la venta N.º 9104 en 8 s, ambos desde Inicio. Los tiempos fueron comunicados por la persona; la automatización solo contrasta las pantallas y no sustituye el recorrido humano.
+- [x] **T029 [integración]** Actualizar `README.md` con el estado del módulo Historial: quién lo usa, cómo llegar a él y qué muestra de un día, de una venta y de un mes (RF-1 a RF-13). Depende de: T026
   Hecho cuando: el README describe esos tres puntos.
+
+- [x] **T037 [integración]** Corregir la apertura mensual del medidor en Chrome: usar la navegación al mes vecino y conservar el identificador del mes en el informe (plan §22; RNF-3). Depende de: T036
+  Hecho cuando: tests escritos primero verifican el intervalo desde el botón mensual, el rechazo de botones deshabilitados y una ejecución del driver sin usar el selector nativo; todas las comprobaciones pasan y se conserva el segundo intento parcial sin acreditarlo.
 
 ## Cobertura de RF
 
@@ -134,5 +143,5 @@ Rama: `feat/005-historial-pulido`.
 | RF-13 | T003, T004, T023, T024, T025, T026 |
 | RNF-1 | T013, T014, T016, T020, T025, T033 (textos en español comparados tal como los define `spec.md`) |
 | RNF-2 | T009, T023 |
-| RNF-3 | T027, T028, T028-H |
+| RNF-3 | T027, T034, T035, T036, T037, T028, T028-H |
 | RNF-4 | T014, T016, T019, T020, T022, T025, T026 |

@@ -1,0 +1,18 @@
+{
+  "environment": "comprobacion",
+  "databaseHost": "ep-rapid-bread-b8cq6eal.c-14.us-east-1.aws.neon.tech",
+  "recordedAt": "2026-10-27T03:39:40.496Z",
+  "date": "2026-09-15",
+  "month": "2026-09",
+  "originalSalesCount": 6000,
+  "addedSalesCount": 6000,
+  "totalSalesCount": 12000,
+  "dailySalesCount": 400,
+  "monthlySalesCount": 6000,
+  "productCount": 202,
+  "beforeSalesSha256": "a9a58df8a3e62190d21187123d01ee2f45c36862285ca3b24b9e4353a66f7cf0",
+  "preservedSalesSha256": "a9a58df8a3e62190d21187123d01ee2f45c36862285ca3b24b9e4353a66f7cf0",
+  "salesPreserved": true,
+  "menuPreserved": true,
+  "accountsPreserved": true
+}

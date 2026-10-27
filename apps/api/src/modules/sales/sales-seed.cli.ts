@@ -1,8 +1,14 @@
 import { randomUUID } from 'node:crypto';
+import { historyDateSchema } from '@kofi/contracts';
 import { createAccountsService } from '../auth/index.ts';
 import { getCurrentMenu } from '../menu/index.ts';
 import { systemClock, type Clock } from '../../shared/clock.ts';
-import { boliviaMonthRange, startOfBoliviaDay } from '../../shared/calendar.ts';
+import {
+  boliviaDate,
+  boliviaMonthBounds,
+  boliviaMonthRange,
+  startOfBoliviaDay,
+} from '../../shared/calendar.ts';
 import { createPgDatabase, type Database } from '../../shared/database/database.ts';
 import { loadEnv } from '../../shared/config/env.ts';
 import { migrate } from '../../shared/database/migrate.ts';
@@ -23,7 +29,9 @@ const messages = {
   account: 'Crea primero una cuenta de prueba con accounts',
   productsComplete: 'Se necesitan al menos 200 productos vigentes para completar la carga',
   tooMany: 'El mes ya supera las 6000 ventas. No se modifica la base',
-  usage: 'Uso: npm run seed:sales -w @kofi/api -- [--complete]',
+  historyDay: 'El día de comprobación debe ser válido y no futuro',
+  historyVolume: 'No se puede completar el día con 400 ventas sin superar 6000 en el mes',
+  usage: 'Uso: npm run seed:sales -w @kofi/api -- [--complete] [--history-day YYYY-MM-DD]',
 } as const;
 function allowSeed() {
   if (process.env.NODE_ENV === 'production') throw new Error(messages.production);
@@ -33,11 +41,24 @@ function allowSeed() {
 export async function seedSales(
   db: Database,
   clock: Clock = systemClock,
-  options: { complete?: boolean; onProgress?: (prepared: number, total: number) => void } = {},
+  options: {
+    complete?: boolean;
+    historyDay?: string;
+    onProgress?: (prepared: number, total: number) => void;
+  } = {},
 ) {
   allowSeed();
   const now = clock.now();
-  const { days, from, to } = boliviaMonthRange(now);
+  const historyDay = options.historyDay;
+  if (
+    historyDay !== undefined &&
+    (!historyDateSchema.safeParse(historyDay).success || historyDay > boliviaDate(now))
+  )
+    throw new Error(messages.historyDay);
+  const { days, from, to } =
+    historyDay === undefined
+      ? boliviaMonthRange(now)
+      : boliviaMonthBounds(historyDay.slice(0, 7), now);
   return db.transaction(async (tx) => {
     // Serializar dos intentos de carga antes de comprobar si existen ventas.
     await tx.query('SELECT id FROM sale_counter FOR UPDATE');
@@ -51,6 +72,23 @@ export async function seedSales(
       : 0;
     if (currentCount > 6000) throw new Error(messages.tooMany);
     const count = 6000 - currentCount;
+    let historyDates: string[] | undefined;
+    if (historyDay !== undefined) {
+      const existingDayCount = existing.filter(
+        (sale) => boliviaDate(new Date(sale.registeredAt)) === historyDay,
+      ).length;
+      const missing = 400 - existingDayCount;
+      const otherDays = days.filter((date) => date !== historyDay);
+      if (missing < 0 || missing > count || (count > missing && otherDays.length === 0))
+        throw new Error(messages.historyVolume);
+      historyDates = [
+        ...Array<string>(missing).fill(historyDay),
+        ...Array.from(
+          { length: count - missing },
+          (_, index) => otherDays[Math.floor((index * otherDays.length) / (count - missing))]!,
+        ),
+      ].sort();
+    }
     if (count === 0) return { salesCount: 0, totalCents: 0 };
     const batch: Database = { ...db, ...tx, transaction: async (work) => work(tx) };
     const products = (await getCurrentMenu(batch)).flatMap((category) =>
@@ -64,14 +102,18 @@ export async function seedSales(
     let totalCents = 0;
     const firstNumber = options.complete ? await reserveSaleNumbers(tx, count) : null;
     const pending: NewSale[] = [];
+    const instants = new Map(
+      days.map((date) => [
+        date,
+        Math.min(startOfBoliviaDay(date).getTime() + 8 * 3600000, now.getTime()),
+      ]),
+    );
     for (let index = 0; index < count; index++) {
       const product = products[index % products.length]!;
       const quantity = (index % 3) + 1;
       const subtotalCents = quantity * product.priceCents;
-      const date = days[Math.floor((index * days.length) / count)]!;
-      const registeredAt = new Date(
-        Math.min(startOfBoliviaDay(date).getTime() + 8 * 3600000, now.getTime()),
-      );
+      const date = historyDates?.[index] ?? days[Math.floor((index * days.length) / count)]!;
+      const registeredAt = new Date(instants.get(date)!);
       const sale: NewSale = {
         number: firstNumber === null ? await nextSaleNumber(tx) : firstNumber + index,
         draftId: randomUUID(),
@@ -108,13 +150,12 @@ if (import.meta.main) {
   void (async () => {
     allowSeed();
     const args = process.argv.slice(2);
-    if (args.length > 1 || (args.length === 1 && args[0] !== '--complete'))
-      throw new Error(messages.usage);
+    const options = parseSalesSeedArgs(args);
     const db = createPgDatabase(loadEnv().DATABASE_URL);
     try {
       await migrate(db);
       const { salesCount } = await seedSales(db, systemClock, {
-        complete: args[0] === '--complete',
+        ...options,
         onProgress: (prepared, total) =>
           console.log(
             `Ventas preparadas: ${prepared}/${total}; pendientes de confirmar la transacción`,
@@ -135,4 +176,20 @@ if (import.meta.main) {
     );
     process.exitCode = 1;
   });
+}
+
+export function parseSalesSeedArgs(args: string[]): { complete?: boolean; historyDay?: string } {
+  const options: { complete?: boolean; historyDay?: string } = {};
+  for (let index = 0; index < args.length; index++) {
+    if (args[index] === '--complete' && options.complete === undefined) options.complete = true;
+    else if (
+      args[index] === '--history-day' &&
+      options.historyDay === undefined &&
+      args[index + 1] &&
+      !args[index + 1]!.startsWith('--')
+    )
+      options.historyDay = args[++index]!;
+    else throw new Error(messages.usage);
+  }
+  return options;
 }

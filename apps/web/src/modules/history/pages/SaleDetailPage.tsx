@@ -4,14 +4,16 @@ import { useHistoryQuery } from '../state/useHistoryQuery.ts';
 import { SaleDetailView } from '../components/SaleDetailView.tsx';
 import { SaleSearch } from '../components/SaleSearch.tsx';
 import { QueryStatus } from '../components/QueryStatus.tsx';
+import { useHistoryTiming } from '../state/useHistoryTiming.ts';
 
 export function SaleDetailPage() {
   const client = useHistoryClient();
   const { numero = '' } = useParams();
   const query = useHistoryQuery(() => client.sale(numero), numero);
   const { data } = query;
+  const timing = useHistoryTiming(data ? `/ventas/${data.sale.number}` : null, query.loading);
   return (
-    <main>
+    <main ref={timing}>
       <h1>{data ? `Venta N.º ${data.sale.number}` : 'Detalle de una venta'}</h1>
       <p>
         <Link to="/">Volver al inicio</Link>

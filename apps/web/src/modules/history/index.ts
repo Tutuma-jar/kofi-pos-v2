@@ -4,3 +4,4 @@ export { HistoryClientProvider } from './api/HistoryClientProvider.tsx';
 export { DayHistoryPage } from './pages/DayHistoryPage.tsx';
 export { MonthHistoryPage } from './pages/MonthHistoryPage.tsx';
 export { SaleDetailPage } from './pages/SaleDetailPage.tsx';
+export { HistoryTimingObserver } from './components/HistoryTimingObserver.tsx';
