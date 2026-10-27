@@ -3,7 +3,7 @@ import { salesCount } from './counts.ts';
 
 export function DailySalesTable({ days }: { days: DayTotal[] }) {
   return (
-    <table>
+    <table className="dashboard-days">
       <caption>Ventas por día</caption>
       <thead>
         <tr>
