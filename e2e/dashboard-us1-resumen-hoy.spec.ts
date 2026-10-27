@@ -112,8 +112,7 @@ test('US1: resumen real de hoy, actualización, desconexión y nuevo día (RF-1 
   await loginPage('owner');
   await page.getByRole('link', { name: 'Resumen de ventas', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Hoy · 26/10/2026' })).toBeVisible();
-  for (const text of ['Bs 0,00', '0 ventas', '—', 'Todavía no hay ventas hoy'])
-    await expect(
-      page.getByRole('region', { name: 'Hoy · 26/10/2026' }).getByText(text, { exact: true }),
-    ).toBeVisible();
+  const emptyToday = page.getByRole('region', { name: 'Hoy · 26/10/2026' });
+  await expect(emptyToday.getByRole('definition')).toHaveText(['Bs 0,00', '0 ventas', '—']);
+  await expect(emptyToday.getByText('Todavía no hay ventas hoy', { exact: true })).toBeVisible();
 });

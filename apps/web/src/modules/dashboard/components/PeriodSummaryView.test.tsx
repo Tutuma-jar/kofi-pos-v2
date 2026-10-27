@@ -7,24 +7,24 @@ import { salesCount, unitsCount } from './counts.ts';
 describe('cifras del período (RF-3, RF-4, RF-5, RNF-1)', () => {
   it('muestra las cifras recibidas sin calcularlas', () => {
     render(<PeriodSummaryView summary={DEMO_TODAY} emptyMessage="Todavía no hay ventas hoy" />);
-    for (const text of [
-      'Bs 45,50',
-      '2 ventas',
-      'Bs 22,75',
-      'Efectivo: Bs 25,00 · 1 venta',
-      'QR: Bs 20,50 · 1 venta',
-      'Café americano · 3 unidades · Bs 37,50',
-      'Empanada · 1 unidad · Bs 8,00',
-    ])
+    for (const text of ['Bs 45,50', '2 ventas', 'Bs 22,75'])
       expect(screen.getByText(text)).toBeVisible();
+    const payments = screen.getByRole('list', { name: 'Por medio de pago' });
+    const paymentRows = within(payments).getAllByRole('listitem');
+    expect(paymentRows[0]).toHaveTextContent('Efectivo: Bs 25,00 · 1 venta');
+    expect(paymentRows[1]).toHaveTextContent('QR: Bs 20,50 · 1 venta');
+    const products = screen.getByRole('list', { name: 'Productos más vendidos' });
+    const productRows = within(products).getAllByRole('listitem');
+    expect(productRows[0]).toHaveTextContent('Café americano · 3 unidades · Bs 37,50');
+    expect(productRows[1]).toHaveTextContent('Empanada · 1 unidad · Bs 8,00');
     expect(screen.queryByText('Todavía no hay ventas hoy')).not.toBeInTheDocument();
   });
   it('muestra ceros, promedio ausente y aviso sin ventas', () => {
     render(
       <PeriodSummaryView summary={DEMO_EMPTY_TODAY} emptyMessage="Todavía no hay ventas hoy" />,
     );
-    expect(screen.getByText('Bs 0,00')).toBeVisible();
-    expect(screen.getByText('0 ventas')).toBeVisible();
+    expect(screen.getByText('Total vendido').nextElementSibling).toHaveTextContent('Bs 0,00');
+    expect(screen.getByText('Ventas').nextElementSibling).toHaveTextContent('0 ventas');
     expect(screen.getByText('—')).toBeVisible();
     expect(screen.getByText('Todavía no hay ventas hoy')).toBeVisible();
   });
