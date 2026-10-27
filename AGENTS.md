@@ -172,6 +172,7 @@ Requisitos: Node 24 y npm 11.
 | Probar los medidores de acceso, menú y ventas con datos ficticios | `npm run test:measure` |
 | Probar solo el medidor de menú con datos ficticios | `npm run test:measure:menu` |
 | Probar el medidor de Historial con datos ficticios | `npm run test:measure:history` |
+| Generar el medidor autocontenido para la pestaña de comprobación | `npm run build:measure:history` |
 | Medir acceso en el despliegue de prueba³ | `npm run measure:access` |
 | Medir menú en el despliegue de prueba³ | `npm run measure:menu` |
 | Medir ventas en el despliegue de prueba³ | `npm run measure:sales` |

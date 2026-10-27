@@ -53,7 +53,7 @@ test('Chromium observa día completo de 400 ventas, mes de 6000 y detalle sin mo
   const monthData=await (await page.request.get(target+'/api/history/month?month=2026-10')).json();
   const dayData=await (await page.request.get(target+'/api/history/day?date=2026-10-24')).json();
   const source={session:await(await page.request.get(target+'/api/auth/session')).json(),menu:await(await page.request.get(target+'/api/menu')).json(),day:dayData,month:monthData,sale:await(await page.request.get(target+'/api/history/sales/'+dayData.sales[0].number)).json()};
-  const existing=createExistingTabDriver({goto:url=>page.goto(url),playwright:page},{...metadata,target},source);
+  const existing=createExistingTabDriver({goto:url=>page.goto(url),screenshot:()=>page.screenshot(),playwright:new Proxy(page,{get(target,key){if(key==='evaluate')return ()=>{throw new Error('El adaptador Cua no dispone de globals de página');};const value=target[key];return typeof value==='function'?value.bind(target):value;}})},{...metadata,target},source);
   assert.equal((await existing.inspect()).role,'owner');
   for(const kind of ['day','month','sale'])assert.ok(await existing[kind]()>0);
   const measured=await measureCycles(driver);assert.equal(measured.dayMs.length,20);assert.equal(measured.monthMs.length,20);assert.equal(measured.saleMs.length,20);assert.ok(Object.values(measured).filter(Array.isArray).flat().every(value=>Number.isFinite(value)&&value>0));
