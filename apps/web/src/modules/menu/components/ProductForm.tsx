@@ -51,7 +51,7 @@ export function ProductForm({ product, categories, onSave, onCancel, onFailure }
     'aria-describedby': fields[field] ? `${id}-${field}-error` : undefined,
   });
   return (
-    <form aria-labelledby={`${id}-heading`} onSubmit={submit} noValidate>
+    <form className="menu-form" aria-labelledby={`${id}-heading`} onSubmit={submit} noValidate>
       <h2 id={`${id}-heading`}>{product ? 'Editar producto' : 'Crear producto'}</h2>
       <label htmlFor={`${id}-name`}>Nombre del producto</label>
       <input
@@ -101,12 +101,14 @@ export function ProductForm({ product, categories, onSave, onCancel, onFailure }
         </p>
       )}
       {error && <p role="alert">{error}</p>}
-      <button type="submit" disabled={saving}>
-        {saving ? 'Guardando…' : 'Guardar producto'}
-      </button>
-      <button type="button" disabled={saving} onClick={onCancel}>
-        Cancelar
-      </button>
+      <div className="menu-form__actions">
+        <button className="button-primary" type="submit" disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar producto'}
+        </button>
+        <button type="button" disabled={saving} onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
     </form>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { useMenuClient } from '../api/MenuClientProvider.tsx';
 import type { CurrentMenuCategory } from '../api/menu-client.ts';
 import { CurrentMenuList } from '../components/CurrentMenuList.tsx';
+import '../menu.css';
 
 export function MenuPage() {
   const client = useMenuClient();
@@ -24,14 +25,24 @@ export function MenuPage() {
     };
   }, [client]);
   return (
-    <main>
-      <h1>Menú</h1>
-      <Link to="/">Volver al inicio</Link>
-      {error && <p role="alert">{error}</p>}
+    <main className="menu menu--current">
+      <header className="menu__header">
+        <h1>Menú</h1>
+        <Link to="/">Volver al inicio</Link>
+      </header>
+      {error && (
+        <p className="alert" role="alert">
+          {error}
+        </p>
+      )}
       {categories ? (
         <CurrentMenuList categories={categories} />
       ) : (
-        !error && <p role="status">Cargando menú…</p>
+        !error && (
+          <p className="menu__empty" role="status">
+            Cargando menú…
+          </p>
+        )
       )}
     </main>
   );
