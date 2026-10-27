@@ -46,7 +46,7 @@ test('Chromium observa día completo de 400 ventas, mes de 6000 y detalle sin mo
   await seedMenu(db);const account={username:'dueno-ficticio',displayName:'Dueño ficticio',role:'owner',password:'solo prueba automatica'};await createAccountsService(db).create(account);
   const clock=createFakeClock(new Date('2026-10-26T15:00:00Z'));await seedSales(db,clock,{complete:true,historyDay:'2026-10-24'});const before=await listRegisteredSales(db);
   api=buildApp({db,clock,logger:false});const apiTarget=await api.listen({port:0,host:'127.0.0.1'});
-  web=await createServer({root:resolve('apps/web'),configFile:resolve('apps/web/vite.config.ts'),logLevel:'error',server:{host:'127.0.0.1',port:0,proxy:{'/api':{target:apiTarget,changeOrigin:true}}}});await web.listen();
+  web=await createServer({root:resolve('apps/web'),configFile:resolve('apps/web/vite.config.ts'),logLevel:'error',define:{'import.meta.env.VITE_HISTORY_MEASUREMENT':JSON.stringify('true')},server:{host:'127.0.0.1',port:0,proxy:{'/api':{target:apiTarget,changeOrigin:true}}}});await web.listen();
   const target='http://127.0.0.1:'+web.httpServer.address().port;driver=await createBrowserDriver({...metadata,target},{chromium:{launch:async()=>browser},headless:true});
   const page=browser.contexts()[0].pages()[0];const login=driver.login();await page.getByLabel('Usuario',{exact:true}).fill(account.username);await page.getByLabel('Contraseña',{exact:true}).fill(account.password);await page.getByRole('button',{name:'Ingresar',exact:true}).click();await login;
   const inspected=await driver.inspect();assert.equal(inspected.dailySalesCount,400);assert.equal(inspected.monthlySalesCount,6000);assert.equal(inspected.role,'owner');
@@ -55,7 +55,7 @@ test('Chromium observa día completo de 400 ventas, mes de 6000 y detalle sin mo
   const source={session:await(await page.request.get(target+'/api/auth/session')).json(),menu:await(await page.request.get(target+'/api/menu')).json(),day:dayData,month:monthData,sale:await(await page.request.get(target+'/api/history/sales/'+dayData.sales[0].number)).json()};
   const existing=createExistingTabDriver({goto:url=>page.goto(url),screenshot:()=>page.screenshot(),playwright:new Proxy(page,{get(target,key){if(key==='evaluate')return ()=>{throw new Error('El adaptador Cua no dispone de globals de página');};const value=target[key];return typeof value==='function'?value.bind(target):value;}})},{...metadata,target},source);
   assert.equal((await existing.inspect()).role,'owner');
-  for(const kind of ['day','month','sale'])assert.ok(await existing[kind]()>0);
+  for(const kind of ['day','month','sale']){const measured=await existing[kind]();assert.ok(measured>0);assert.equal(measured,Number(await page.locator('main').getAttribute('data-history-duration-ms')));}
   const measured=await measureCycles(driver);assert.equal(measured.dayMs.length,20);assert.equal(measured.monthMs.length,20);assert.equal(measured.saleMs.length,20);assert.ok(Object.values(measured).filter(Array.isArray).flat().every(value=>Number.isFinite(value)&&value>0));
   assert.deepEqual(await listRegisteredSales(db),before);
   await page.route('**/api/history/day**',async route=>{await new Promise(resolve=>setTimeout(resolve,600));await route.continue();});

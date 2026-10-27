@@ -7,6 +7,7 @@ import { PeriodTotals } from '../components/PeriodTotals.tsx';
 import { MonthDaysTable } from '../components/MonthDaysTable.tsx';
 import { QueryStatus } from '../components/QueryStatus.tsx';
 import { SaleSearch } from '../components/SaleSearch.tsx';
+import { useHistoryTiming } from '../state/useHistoryTiming.ts';
 
 export function MonthHistoryPage() {
   const client = useHistoryClient();
@@ -14,6 +15,7 @@ export function MonthHistoryPage() {
   const month = params.get('mes') ?? undefined;
   const query = useHistoryQuery(() => client.month(month), month);
   const { data } = query;
+  const timing = useHistoryTiming(data ? `/ventas/mes?mes=${data.month}` : null, query.loading);
   const chooseMonth = useCallback(
     (value: string, replace = false) => {
       setParams(
@@ -34,7 +36,7 @@ export function MonthHistoryPage() {
   }, [data, month, chooseMonth]);
 
   return (
-    <main>
+    <main ref={timing}>
       <h1>{data ? formatMonth(data.month) : 'Ventas por mes'}</h1>
       <p>
         <Link to="/">Volver al inicio</Link>

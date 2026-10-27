@@ -26,3 +26,11 @@ test('genera e importa el medidor de Historial sin paquetes externos ni borrar a
  assert.equal(runtime.buildReport(samples,metadata).humanCriteria.status,'pending');
  assert.throws(()=>runtime.requireForeground({visibilityState:'hidden',hasFocus:false,lostFocus:true}),/primer plano/);
 });
+
+
+test('el build web normal excluye los atributos y el observador de medición',async()=>{
+ const {checkProductionBuild}=await import('../apps/web/scripts/check-production-build.mjs');
+ const result=await checkProductionBuild({write:false});
+ const outputs=(Array.isArray(result)?result:[result]).flatMap(output=>output.output);
+ for(const output of outputs)if(output.type==='chunk')assert.equal(output.code.includes('data-history-duration-ms'),false);
+});

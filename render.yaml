@@ -30,6 +30,10 @@ services:
     runtime: static
     branch: feat/005-historial-pulido
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/web
+    # Solo para la medición de comprobación; eliminar al volver a main/producción.
+    envVars:
+      - key: VITE_HISTORY_MEASUREMENT
+        value: 'true'
     staticPublishPath: apps/web/dist
     routes:
       # /api/* no incluye /api a secas, que sin su propia regla caería en /index.html.
