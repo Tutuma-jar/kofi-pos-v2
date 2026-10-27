@@ -1,25 +1,30 @@
-/* Pantalla inicial: saludo y una lista de accesos, uno por fila, cada uno con el rombo tejido del
-   color de su módulo. «Nueva venta», la tarea del mostrador, va más grande sin cambiar el orden. */
+/* Pantalla inicial: iconos de tarea con una firma tejida discreta. La venta tiene su propia
+   pausa y superficie dentro de la lista, sin cambiar el orden de lectura ni de teclado. */
 .home {
   display: grid;
   gap: var(--space-3);
   max-width: 44rem;
 }
 
+.home__heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
 .home h1 {
-  font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+  font-size: 2rem;
   color: var(--color-brand);
   letter-spacing: -0.02em;
 }
 
 .home__greeting {
-  margin-top: calc(var(--space-1) * -1);
-  font-size: var(--text-large);
+  font-size: var(--text-body);
   color: var(--color-ink-muted);
+  overflow-wrap: anywhere;
 }
 
 .home__modules {
-  margin: var(--space-3) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--color-line);
@@ -27,6 +32,11 @@
 
 .home__modules li {
   border-bottom: 1px solid var(--color-line);
+}
+
+.home__modules li:has(.home__module[href='/ventas/nueva']) {
+  margin-block: var(--space-2);
+  border: 1px solid var(--color-weave-orange);
 }
 
 .home__module {
@@ -57,6 +67,11 @@
   min-height: 6rem;
   font-size: var(--text-feature);
   font-weight: 800;
+  background: color-mix(in srgb, var(--tone) 16%, var(--color-cream));
+}
+
+.home__module[href='/ventas/nueva']:hover {
+  background: color-mix(in srgb, var(--tone) 26%, var(--color-cream));
 }
 
 .home__module[href='/resumen'] {
@@ -67,20 +82,66 @@
   --tone: var(--color-brand);
 }
 
-.home__swatch {
+.home__symbol {
+  position: relative;
   flex: none;
+  display: grid;
+  place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  background: var(--tone);
+  color: var(--tone);
 }
 
-.home__module[href='/ventas/nueva'] .home__swatch {
+.home__glyph {
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home__diamond {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.home__module[href='/ventas/nueva'] .home__symbol {
   width: 3.5rem;
   height: 3.5rem;
+  color: var(--color-ink);
+}
+
+.home__module[href='/ventas/nueva'] .home__glyph {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.home__module[href='/ventas/nueva'] .home__diamond {
+  width: 1rem;
+  height: 1rem;
 }
 
 .home__label {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 30rem) {
+  .home__module {
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+    font-size: var(--text-body);
+  }
+
+  .home__module[href='/ventas/nueva'] {
+    font-size: var(--text-large);
+  }
 }
 
 .home__arrow {
@@ -98,4 +159,15 @@
 .home__module:hover .home__arrow {
   stroke: var(--tone);
   transform: translateX(0.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__module,
+  .home__arrow {
+    transition: none;
+  }
+
+  .home__module:hover .home__arrow {
+    transform: none;
+  }
 }
