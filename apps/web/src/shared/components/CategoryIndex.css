@@ -1,5 +1,6 @@
-/* Índice de categorías fijo arriba (CategoryIndex). Cada página fija su separación y el
-   `scroll-margin-top` de sus secciones con `--category-index-height`. */
+/* Índice de categorías fijo arriba (CategoryIndex). Cada página fija su separación, el
+   `scroll-margin-top` de sus secciones con `--category-index-height` y, con
+   `--category-index-mark`, el color de su módulo en los marcadores (verde de Menú por omisión). */
 .category-index {
   position: sticky;
   top: 0;
@@ -36,7 +37,7 @@
   width: 0.625rem;
   height: 0.625rem;
   flex: none;
-  background: var(--color-weave-green);
+  background: var(--category-index-mark, var(--color-weave-green));
 }
 
 .category-index a:hover {
