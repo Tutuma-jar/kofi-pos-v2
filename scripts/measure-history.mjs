@@ -29,7 +29,12 @@ export async function createBrowserDriver(config,options={}){
   const json=async(response,schema)=>{if(response.status()!==200)throw new MeasurementError('La API rechazó la consulta; se detuvo sin reintentar.');return schema.parse(await response.json());};
   const request=async(path,schema)=>json(await page.request.get(new URL(path,target).href),schema);
   let inspected;
-  const visible=async(text)=>{await page.getByText(text,{exact:true}).waitFor({state:'visible'});};
+  const visible=async(text)=>{
+   const metric=/^Bs |^\d+ ventas?$/.test(text);
+   const pattern=new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$');
+   const target=metric?page.getByRole('definition').filter({hasText:pattern}):/^(Efectivo|QR):/.test(text)?page.getByRole('paragraph').filter({hasText:pattern}):page.getByText(text,{exact:true});
+   await target.waitFor({state:'visible'});
+  };
   const countText=count=>count===1?'1 venta':count+' ventas';
   const showTotals=async(data)=>{
    await visible(formatPrice(data.totalCents));await visible(countText(data.salesCount));
