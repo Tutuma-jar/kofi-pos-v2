@@ -1,6 +1,6 @@
 # Tareas — SPEC-007 Ventas de demostración
 
-Estado: aprobadas y analizadas (sin hallazgos tras la corrección) · Fecha: 2026-10-28 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
+Estado: aprobadas y analizadas (sin hallazgos tras la corrección); Base común implementada · Fecha: 2026-10-28 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 
 ## Cómo leer estas tareas
 
@@ -21,7 +21,7 @@ Rama: `feat/007-ventas-demo-definicion`.
 
 - [x] **T001 [api] [P]** Exportar `OFFICIAL_MENU` y su tipo `OfficialCategory` desde `apps/api/src/modules/menu/index.ts`, en una línea aparte, y escribir `apps/api/test/official-menu-fixture.ts` con `loadOfficialMenuFixture(db)`, que da de alta `OFFICIAL_MENU` con `saveCategory` y `saveProduct` (plan §3, §8.1, §10, D-4)
   Hecho cuando: `modules/menu/index.test.ts` comprueba que `OFFICIAL_MENU` se exporta desde el `index.ts`; una prueba de integración comprueba que, en una base migrada vacía, `loadOfficialMenuFixture` deja en `getAdminMenu` las 6 categorías y los 37 productos activos; y `npm run typecheck` y `npm run lint` pasan.
-- [ ] **T002 [api] [P]** Escribir `apps/api/src/modules/sales/demo-sales.random.ts` con `createRandom(seed, stream, attempt)`: mulberry32 sobre un hash de los tres datos, con `next()` en [0, 1), `int(min, max)` inclusivo, `pick(items)` y `weighted(items, weight)` (plan §5.2, §5.3, D-5)
+- [x] **T002 [api] [P]** Escribir `apps/api/src/modules/sales/demo-sales.random.ts` con `createRandom(seed, stream, attempt)`: mulberry32 sobre un hash de los tres datos, con `next()` en [0, 1), `int(min, max)` inclusivo, `pick(items)` y `weighted(items, weight)` (plan §5.2, §5.3, D-5)
   Hecho cuando: `demo-sales.random.test.ts` comprueba que la misma semilla, flujo e intento dan la misma secuencia de 1000 valores; que cambiar el flujo o el intento da otra; que `next()` queda en [0, 1); que `int(30, 80)` devuelve solo enteros de 30 a 80 y, en 10 000 tiradas, todos ellos; y que `weighted` respeta los pesos con una tolerancia de 2 puntos en 10 000 tiradas.
 
 ## Fase 3 — US1: llenar una base con tres meses de ventas variadas (P1)
