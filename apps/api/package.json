@@ -10,7 +10,8 @@
     "migrate": "node --env-file-if-exists=.env src/shared/database/migrate.ts",
     "accounts": "node --env-file-if-exists=.env src/modules/auth/accounts.cli.ts",
     "seed:menu": "node --env-file-if-exists=.env test/seed-menu.ts",
-    "seed:sales": "node --env-file-if-exists=.env src/modules/sales/sales-seed.cli.ts"
+    "seed:sales": "node --env-file-if-exists=.env src/modules/sales/sales-seed.cli.ts",
+    "load:menu": "node --env-file-if-exists=.env src/modules/menu/official-menu.cli.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

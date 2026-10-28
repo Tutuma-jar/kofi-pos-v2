@@ -10,7 +10,12 @@ describe('API real de E2E (RF-1, RF-5, RF-7, RF-13)', () => {
     const db = await createTestDatabase();
     const app = buildApp({ db, logger: false, production: true });
     try {
-      for (const url of ['/api/__test/clock', '/api/__test/accounts/ana', '/api/__test/menu'])
+      for (const url of [
+        '/api/__test/clock',
+        '/api/__test/accounts/ana',
+        '/api/__test/menu',
+        '/api/__test/official-menu',
+      ])
         expect((await app.inject({ method: 'POST', url, payload: {} })).statusCode).toBe(404);
       expect((await app.inject({ url: '/api/menu/admin' })).statusCode).toBe(401);
     } finally {

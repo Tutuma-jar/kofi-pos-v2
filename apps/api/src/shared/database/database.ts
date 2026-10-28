@@ -39,16 +39,26 @@ export function createPgDatabase(connectionString: string): Database {
     ...pgQueryable(pool),
     async transaction(work) {
       const client = await pool.connect();
+      // Una conexión que se corta en plena transacción emite 'error' en el cliente: sin este
+      // oyente, el proceso cae; con él, la sentencia en curso rechaza y se deshace (RF-4 de SPEC-006).
+      const ignore = () => {};
+      client.on('error', ignore);
+      let broken = false;
       try {
         await client.query('BEGIN');
         const result = await work(pgQueryable(client));
         await client.query('COMMIT');
         return result;
       } catch (error) {
-        await client.query('ROLLBACK');
+        // Si el ROLLBACK también falla, la conexión está rota: se conserva el error original.
+        await client.query('ROLLBACK').catch(() => {
+          broken = true;
+        });
         throw error;
       } finally {
-        client.release();
+        client.off('error', ignore);
+        // Una conexión rota se descarta en lugar de volver al pool.
+        client.release(broken);
       }
     },
     async close() {
