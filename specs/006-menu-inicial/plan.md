@@ -54,7 +54,7 @@ El menú oficial vive en el código, con la misma forma que el fixture de menú 
 
 ```ts
 // official-menu.data.ts (RF-1)
-export const OFFICIAL_MENU = [
+export const OFFICIAL_MENU: readonly OfficialCategory[] = [
   {
     name: 'Cafés',
     products: [
@@ -64,7 +64,7 @@ export const OFFICIAL_MENU = [
     ],
   },
   // Otras bebidas calientes, Bebidas frías, Jugos y licuados, Salados, Repostería
-] as const satisfies readonly OfficialCategory[];
+];
 ```
 
 Tras la carga, por ejemplo:
@@ -94,7 +94,7 @@ loadOfficialMenu(db, menu = OFFICIAL_MENU):
     para cada categoría de menu:
       c = saveCategory(batch, { name })
       para cada producto: saveProduct(batch, { name, price, categoryId: c.id })
-    devolver { categories: cantidad, products: cantidad }    // 6 y 36
+    devolver { categories: cantidad, products: cantidad }    // 6 y 37
   )
 ```
 
@@ -116,7 +116,7 @@ runOfficialMenuLoad({ env, createDatabase, write }):
 
 | Clave | Mensaje (spec) |
 | --- | --- |
-| `loaded` | «Menú oficial cargado: 6 categorías y 36 productos» (RF-2) |
+| `loaded` | «Menú oficial cargado: 6 categorías y 37 productos» (RF-2) |
 | `notEmpty` | «La base ya tiene categorías o productos. El menú oficial solo se carga en una base nueva» (RF-3) |
 | `failed` | «No se pudo cargar el menú oficial. Comprueba la configuración y la conexión a la base» (RF-4) |
 
@@ -153,7 +153,7 @@ Ninguna nueva.
 
 | Nivel | Archivo | Qué comprueba |
 | --- | --- | --- |
-| Unitaria | `official-menu.data.test.ts` | 6 categorías y 36 productos; cada nombre cumple `categoryNameSchema` o `productNameSchema` y cada precio `priceSchema`; sin nombres repetidos según `menuNameKey`; coincidencia exacta con la tabla de `spec.md` (D-6) |
+| Unitaria | `official-menu.data.test.ts` | 6 categorías y 37 productos; cada nombre cumple `categoryNameSchema` o `productNameSchema` y cada precio `priceSchema`; sin nombres repetidos según `menuNameKey`; coincidencia exacta con la tabla de `spec.md` (D-6) |
 | Integración (PGlite) | `official-menu.service.integration.test.ts` | Carga en base migrada y en base sin tablas; fallo a mitad sin cambios; rechazos de RF-3 sin cambios; dos cargas a la vez y orden de los bloqueos |
 | Integración (PGlite) | `official-menu.cli.integration.test.ts` | Mensajes y código de salida de cada caso; ningún mensaje contiene la dirección de la base |
 | Punta a punta | `e2e/menu-inicial-us1-cargar.spec.ts` | HU-1 en el navegador (§8.2) |
@@ -162,7 +162,7 @@ Ninguna nueva.
 
 **HU-1** (`e2e/menu-inicial-us1-cargar.spec.ts`): la prueba llama a `POST /api/__test/official-menu`.
 
-1. Con una sesión de cajero, «Ver menú» muestra las 6 categorías y los 36 productos con sus precios en el formato «Bs 10,00», y ninguno de prueba.
+1. Con una sesión de cajero, «Ver menú» muestra las 6 categorías y los 37 productos con sus precios en el formato «Bs 10,00», y ninguno de prueba.
 2. Con una sesión de dueño, «Administrar menú» los muestra activos; al cambiar el precio de «Americano» a 14, «Ver menú» muestra «Bs 14,00» (RF-2).
 
 ### 8.3 Requisitos no funcionales y comprobación real
@@ -179,7 +179,7 @@ Ninguna nueva.
 node -e "const { spawn } = require('node:child_process'); for (let i = 0; i < 2; i++) spawn('npm', ['run', 'load:menu', '-w', '@kofi/api'], { stdio: 'inherit', shell: true })"
 ```
 
-Una debe escribir «Menú oficial cargado: 6 categorías y 36 productos» y la otra el mensaje de RF-3, y la base debe tener 36 productos. El resultado se anota en el PR de pulido.
+Una debe escribir «Menú oficial cargado: 6 categorías y 37 productos» y la otra el mensaje de RF-3, y la base debe tener 37 productos. El resultado se anota en el PR de pulido.
 
 La carga en la base oficial de producción la hace la persona que prepara el sistema cuando cree esa base; no forma parte de las tareas.
 
@@ -187,8 +187,8 @@ La carga en la base oficial de producción la hace la persona que prepara el sis
 
 | RF | Pruebas |
 | --- | --- |
-| RF-1 | Unitaria: reglas de SPEC-002, nombres únicos, 6 y 36, coincidencia con `spec.md` |
-| RF-2 | Integración: tras cargar en una base migrada sin menú, `getAdminMenu` coincide con `OFFICIAL_MENU` (todo activo) y `getCurrentMenu` tiene 36 productos; en una base sin tablas (`createEmptyTestDatabase`) migra y carga; con cuentas ya creadas, carga. Comando: «Menú oficial cargado: 6 categorías y 36 productos», salida 0. E2E de §8.2 |
+| RF-1 | Unitaria: reglas de SPEC-002, nombres únicos, 6 y 37, coincidencia con `spec.md` |
+| RF-2 | Integración: tras cargar en una base migrada sin menú, `getAdminMenu` coincide con `OFFICIAL_MENU` (todo activo) y `getCurrentMenu` tiene 37 productos; en una base sin tablas (`createEmptyTestDatabase`) migra y carga; con cuentas ya creadas, carga. Comando: «Menú oficial cargado: 6 categorías y 37 productos», salida 0. E2E de §8.2 |
 | RF-3 | Integración: rechazo sin cambios con una sola categoría, con productos inactivos, con los 200 productos de `seedMenu` y al cargar dos veces; dos cargas simultáneas (`Promise.all`): una carga y la otra se rechaza; el orden de las sentencias de la transacción: `pg_advisory_xact_lock` antes de la primera migración y `LOCK TABLE` antes de comprobar si hay menú. Comando: mensaje de RF-3, salida 1. Pulido: dos cargas a la vez contra PostgreSQL real (§8.3) |
 | RF-4 | Integración: un fallo en un producto intermedio deja `getAdminMenu` vacío; sobre una base sin tablas, tampoco quedan tablas ni `schema_migrations`. Comando: `DATABASE_URL` ausente o inválida y un error de conexión que contiene la dirección muestran solo el mensaje de RF-4, salida 1 |
 
@@ -204,3 +204,5 @@ La persona pidió corregir los dos hallazgos menores del análisis (2026-10-28).
 | --- | --- | --- |
 | 1 | El código de «todo o nada» (RF-4) se escribía en una tarea y sus pruebas en otra posterior (principio 4) | `tasks.md`: las pruebas de RF-4 pasan a la tarea que escribe la transacción |
 | 2 | Las cargas simultáneas (RF-3) solo se probaban en PGlite, que ejecuta las transacciones de una en una | D-5, §8.1, §8.3 y §8.4: prueba del orden de los bloqueos y dos cargas a la vez contra PostgreSQL real en Pulido |
+
+Al implementar T001, la prueba de D-6 mostró que la tabla «Menú oficial» tiene 37 productos y no 36. La persona mantuvo la tabla, así que el total y el mensaje de carga pasan a 37 en `spec.md`, este plan y `tasks.md`.

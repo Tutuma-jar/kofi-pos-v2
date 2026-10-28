@@ -1,4 +1,4 @@
-# SPEC-006 — Menú inicial
+﻿# SPEC-006 — Menú inicial
 
 Estado: revisada · Fecha: 2026-10-28
 
@@ -56,7 +56,7 @@ Todas las categorías y todos los productos se cargan activos.
 | Repostería | Torta de chocolate (porción) | Bs 18,00 |
 | Repostería | Cheesecake de maracuyá | Bs 22,00 |
 
-En total, 6 categorías y 36 productos.
+En total, 6 categorías y 37 productos.
 
 ## 2. Usuarios
 
@@ -70,9 +70,9 @@ En total, 6 categorías y 36 productos.
 
 ### HU-1 — Empezar la base oficial con el menú de Kofi (P1)
 
-Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kofi en la base nueva con una sola orden** para **que el local pueda vender desde el primer día sin que el dueño escriba 36 productos a mano ni se cuele un dato de prueba**.
+Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kofi en la base nueva con una sola orden** para **que el local pueda vender desde el primer día sin que el dueño escriba 37 productos a mano ni se cuele un dato de prueba**.
 
-**Prueba independiente:** sobre una base nueva, sin categorías ni productos, se ejecuta la carga: termina con «Menú oficial cargado: 6 categorías y 36 productos». Con una sesión de dueño, «Administrar menú» muestra exactamente las categorías y los productos de «Menú oficial», activos y con sus precios; «Ver menú» muestra los mismos. Al ejecutar la carga por segunda vez, se rechaza con el mensaje de base no vacía y el menú queda igual. Sobre una base con los productos de prueba, se rechaza igual y no cambia nada.
+**Prueba independiente:** sobre una base nueva, sin categorías ni productos, se ejecuta la carga: termina con «Menú oficial cargado: 6 categorías y 37 productos». Con una sesión de dueño, «Administrar menú» muestra exactamente las categorías y los productos de «Menú oficial», activos y con sus precios; «Ver menú» muestra los mismos. Al ejecutar la carga por segunda vez, se rechaza con el mensaje de base no vacía y el menú queda igual. Sobre una base con los productos de prueba, se rechaza igual y no cambia nada.
 
 *Producto mínimo útil:* por sí sola, esta historia deja la base oficial lista para vender.
 
@@ -82,7 +82,7 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 
 **RF-1. Contenido del menú oficial** (HU-1)
 
-- El sistema deberá tener como menú oficial exactamente las 6 categorías y los 36 productos de «Menú oficial», cada producto en su categoría y con su precio.
+- El sistema deberá tener como menú oficial exactamente las 6 categorías y los 37 productos de «Menú oficial», cada producto en su categoría y con su precio.
 - El sistema deberá cumplir en cada categoría y cada producto del menú oficial las reglas de «Datos de una categoría», «Datos de un producto» y «Comparación de nombres» de SPEC-002.
 
 **RF-2. Carga en una base nueva** (HU-1)
@@ -90,7 +90,7 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 - Cuando la persona que prepara el sistema ejecuta la carga sobre una base sin ninguna categoría ni ningún producto, el sistema deberá crear todas las categorías y todos los productos del menú oficial, activos, con los nombres y los precios de «Menú oficial».
 - Cuando la base está recién creada y el sistema todavía no está preparado en ella, el sistema deberá prepararla y después cargar el menú oficial, con el mismo resultado que en una base ya preparada.
 - El sistema deberá ejecutar la carga sin pedir ni usar una cuenta de dueño o cajero: solo puede hacerlo quien tenga la configuración de acceso a la base.
-- Cuando la carga termina, el sistema deberá mostrar «Menú oficial cargado: 6 categorías y 36 productos».
+- Cuando la carga termina, el sistema deberá mostrar «Menú oficial cargado: 6 categorías y 37 productos».
 - El sistema deberá dejar el menú cargado igual que si el dueño lo hubiera creado desde «Administrar menú»: se ve en la administración y en la consulta, forma parte del menú vigente que se entrega a otros módulos (SPEC-002, RF-15) y el dueño puede editarlo, desactivarlo y reactivarlo como cualquier otro.
 
 **RF-3. Solo en una base sin menú** (HU-1)
@@ -141,11 +141,11 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 
 ## 8. Criterios de finalización
 
-- Tras una sola ejecución sobre una base nueva, «Ver menú» muestra exactamente 6 categorías y 36 productos, con los nombres y los precios de «Menú oficial», y ningún producto de prueba.
+- Tras una sola ejecución sobre una base nueva, «Ver menú» muestra exactamente 6 categorías y 37 productos, con los nombres y los precios de «Menú oficial», y ningún producto de prueba.
 - El 100 % de las ejecuciones sobre una base con alguna categoría o algún producto terminan sin ningún cambio en la base.
 - Ninguna ejecución interrumpida deja una parte del menú oficial en la base.
 - La carga termina en menos de 1 minuto.
-- Un cajero puede vender cualquiera de los 36 productos justo después de la carga, sin pasos adicionales.
+- Un cajero puede vender cualquiera de los 37 productos justo después de la carga, sin pasos adicionales.
 
 ## 9. Dudas abiertas
 
@@ -169,3 +169,7 @@ Ninguna.
 - **P:** (Hallazgos 3 y 5) RF-4 podía leerse como una orden de eliminar y no cubría la cancelación. ¿Cómo queda la base si la carga falla o se cancela? → **R:** Exactamente como estaba antes de ejecutarla, sin eliminar nada. (Aplicado en RF-4 y «Casos límite».)
 - **P:** (Hallazgo 4) SPEC-002 mantenía, sin mencionar esta especificación, la decisión de que el menú no se precarga. ¿Cómo se concilia? → **R:** SPEC-002 registra en sus «Aclaraciones» que la carga del menú oficial en una base nueva la cubre SPEC-006. (Aplicado en `specs/002-menu/spec.md`, «Aclaraciones».)
 - **P:** (Hallazgo 6) Un caso límite citaba una decisión técnica del plan de SPEC-002 y una herramienta de prueba. ¿Se mantiene? → **R:** Se quita: RF-3 ya cubre cualquier base con productos. (Aplicado en «Casos límite».)
+
+**Implementación de T001.**
+
+- **P:** La tabla «Menú oficial» tiene 37 productos (8, 5, 6, 5, 6 y 7), pero la especificación decía 36. ¿Qué se corrige? → **R:** Se mantiene la tabla confirmada y el total pasa a 37 productos, también en el mensaje de carga. (Aplicado en «Menú oficial», HU-1, RF-1, RF-2 y «Criterios de finalización»; también en `plan.md` y `tasks.md`.)
