@@ -40,7 +40,7 @@ apps/api/
         ├── demo-sales.calendar.test.ts
         ├── demo-sales.generator.ts                horas, productos, cantidades, pago y cuenta (RF-4 a RF-8)
         ├── demo-sales.generator.test.ts
-        ├── demo-sales.rules.ts                    checkDemoSales: las reglas de RF-4 a RF-8 (D-6)
+        ├── demo-sales.rules.ts                    checkDemoCalendar y checkDemoSales: las reglas de RF-4 a RF-8 (D-6)
         ├── demo-sales.rules.test.ts
         ├── demo-sales.service.ts                  inspectDemoSales y loadDemoSales (RF-2, RF-3, RF-8 a RF-10)
         ├── demo-sales.service.integration.test.ts
@@ -118,7 +118,7 @@ planDemoCalendar(period, seed):
       si está en cerrados → 0
       si viernes o sábado → entero al azar en [50, 80]
       si no → entero al azar en [30, 62]                  // promedio 46 contra 65: +41 %
-    si cumple las reglas de calendario de checkDemoSales → devolver
+    si checkDemoCalendar(calendario) no encuentra fallos → devolver
 ```
 
 `total` es la suma de los días. Con la misma semilla y el mismo período, el calendario sale igual, así que la carga confirmada carga el mismo [n] que anunció (RF-3, D-5).
@@ -213,7 +213,8 @@ runDemoSalesLoad({ env, createDatabase, ask, write, seed = randomInt(2^31) }):
   si DemoSalesHasSalesError → write(hasSales); devolver 1
   si DemoSalesMenuError(f) → write(menu(f)); devolver 1
   si DemoSalesNoAccountsError → write(noAccounts); devolver 1
-  cualquier otro error → write(failed); devolver 1          // nunca el error original (D-8)
+  cualquier otro error, también DemoSalesGenerationError → write(failed); devolver 1
+                                                            // nunca el error original (D-8, D-11)
   al final: db.close()
 ```
 
@@ -235,7 +236,7 @@ Las fechas se escriben con `formatDate` de `packages/contracts` («27/10/2026»)
 
 **Sin cambios en `packages/contracts`.** La carga no expone rutas de la API ni la usa la interfaz: es un comando que ejecuta a mano la persona que prepara el sistema (spec, «Usuarios»). Usa del contrato lo que ya existe: `menuNameKey`, `formatDate` y los tipos `Role` y `PaymentMethod`.
 
-Los mensajes de §5.6 viven en `demo-sales.cli.ts`, como los de `official-menu.cli.ts` y `sales-seed.cli.ts`, porque solo se muestran en la terminal.
+Los mensajes de §5.6 viven en `demo-sales.cli.ts`, como los de `accounts.cli.ts` y `sales-seed.cli.ts`, porque solo se muestran en la terminal.
 
 La ruta `POST /api/__test/demo-sales` del servidor de E2E no es contrato: solo existe en `apps/api/test/e2e-server.ts`, que nunca se despliega (D-9).
 
@@ -243,14 +244,15 @@ La ruta `POST /api/__test/demo-sales` del servidor de E2E no es contrato: solo e
 
 | # | Decisión | Motivo | Alternativa descartada | RF |
 | --- | --- | --- | --- | --- |
-| D-1 | **Comando nuevo `npm run load:demo-sales -w @kofi/api`** (`node --env-file-if-exists=.env src/modules/sales/demo-sales.cli.ts`), en el módulo `sales` | Escribe ventas, así que pertenece a `sales`, y puede ejecutarse en la base oficial (spec, «Aclaraciones»): es código del producto. Sigue el patrón de `load:menu` y `accounts` | Ampliar `seed:sales`: se niega en producción, exige 200 productos de prueba y su reparto es mecánico; cambiarlo rompería las mediciones de SPEC-004 y SPEC-005 | RF-1 |
+| D-1 | **Comando nuevo `npm run load:demo-sales -w @kofi/api`** (`node --env-file-if-exists=.env src/modules/sales/demo-sales.cli.ts`), en el módulo `sales` | Escribe ventas, así que pertenece a `sales`, y puede ejecutarse en la base oficial (spec, «Aclaraciones»): es código del producto. Sigue el patrón de `accounts` y `seed:sales`, que están en `develop` | Ampliar `seed:sales`: se niega en producción, exige 200 productos de prueba y su reparto es mecánico; cambiarlo rompería las mediciones de SPEC-004 y SPEC-005 | RF-1 |
 | D-2 | **Dos transacciones: inspección siempre deshecha y carga.** La inspección migra, comprueba y calcula [n], y termina con `ROLLBACK`; la carga repite todo con bloqueos | Pedir «CARGAR» con una transacción abierta mantendría bloqueado el contador de ventas y frenaría «Nueva venta» mientras la persona lee. Deshacer la inspección garantiza que nada cambie antes de confirmar (RF-3), y repetir la comprobación cubre los cambios mientras se espera | Una sola transacción abierta durante la pregunta; o comprobar sin transacción, que no podría migrar una base sin cambiarla | RF-2, RF-3 |
 | D-3 | **«Hoy» sale de PostgreSQL** (`SELECT now()`), una vez, en la inspección; las pruebas pasan `now` | RF-1 exige la hora del sistema donde se guardan las ventas, no la de la computadora que ejecuta el comando; `clock.ts` del proceso sería la de la computadora. Usar el `now` de la inspección mantiene el período anunciado aunque pase la medianoche | `systemClock`: un reloj atrasado en la computadora cambiaría el período | RF-1, RF-4 |
 | D-4 | **`menu/index.ts` exporta `OFFICIAL_MENU`**, y la carga busca cada producto oficial con `menuNameKey` en `getAdminMenu` | Es la misma fuente que la carga del menú oficial, comprobada contra la tabla de SPEC-006, y respeta que un módulo solo importe del `index.ts` de otro (§4.2 de la arquitectura) | Copiar la lista en `sales`: dos copias del menú oficial que pueden divergir | RF-2, RF-5 |
 | D-5 | **Generador pseudoaleatorio propio con semilla** (`createRandom(seed, stream, attempt)`, mulberry32 sobre un hash de los tres datos), con flujos separados para el calendario y el contenido | La misma semilla da el mismo [n] en la inspección y en la carga, y las pruebas son repetibles. Separar los flujos hace que [n] no dependa de los precios ni de las cuentas, que pueden cambiar entre la pregunta y la carga | `Math.random()`: no se puede repetir ni probar; una dependencia como `seedrandom`: no hace falta para 20 líneas | RF-3, RF-4 a RF-7 |
 | D-6 | **`checkDemoSales` comprueba cada regla de RF-4 a RF-8 sobre el resultado** y el generador reintenta con otro intento de la misma semilla si alguna falla (hasta 50) | Las reglas son estadísticas (porcentajes, promedios, los 10 más vendidos): un generador al azar las cumple casi siempre, pero no siempre. Comprobar antes de cargar garantiza que nunca se carga una demostración que no cumple la especificación | Confiar en los pesos: una semilla desafortunada cargaría ventas fuera de la especificación que no se pueden borrar | RF-4 a RF-8 |
+| D-11 | **Si el generador agota sus 50 intentos, la carga no se completa y el comando muestra el mensaje de RF-10**, sin cambiar nada. La prueba del generador comprueba que no ocurre con 1000 semillas | RF-10 cubre cualquier carga que «no se puede completar»; sus causas son ejemplos. Es un caso que las pruebas descartan en la práctica, y un mensaje propio sería un texto que la especificación no fija | Un mensaje nuevo para este caso: cambiaría la especificación por un caso que no debería verse; reintentar sin límite: el comando podría no terminar | RF-10 |
 | D-7 | **Confirmación con `node:readline/promises`**: si la entrada se cierra (Ctrl+C antes de responder o una entrada que no es terminal), la respuesta es vacía y se cancela | No necesita dependencias y funciona igual en las terminales de Windows. Una entrada cerrada nunca carga | Un argumento `--yes`: permitiría cargar sin leer el aviso, en contra del resguardo que pidió la persona | RF-3 |
-| D-8 | **El comando recibe sus dependencias** (`env`, `createDatabase`, `ask`, `write`, `seed`) y solo imprime los mensajes de §5.6, nunca el error original | Se prueba sin base real ni proceso aparte, como `runOfficialMenuLoad`. Los errores de `pg` y de `loadEnv` pueden incluir la dirección de la base | Imprimir `error.message` | RF-3, RF-10 |
+| D-8 | **El comando recibe sus dependencias** (`env`, `createDatabase`, `ask`, `write`, `seed`) y solo imprime los mensajes de §5.6, nunca el error original | Se prueba sin base real ni proceso aparte, como `runAccounts` de `accounts.cli.ts`. Los errores de `pg` y de `loadEnv` pueden incluir la dirección de la base | Imprimir `error.message` | RF-3, RF-10 |
 | D-9 | **La prueba de punta a punta carga con una ruta del servidor de E2E**, que reemplaza el menú por `OFFICIAL_MENU` y llama a `loadDemoSales` sobre PGlite con el reloj falso y una semilla fija | La CI no tiene PostgreSQL; así se comprueba en el Historial el resultado de la carga real. El comando contra PostgreSQL se ejecuta en Pulido (§8.3) | Lanzar el comando en la E2E: necesitaría PostgreSQL en la CI | RF-9 |
 | D-10 | **Inserción con `insertSalesBatch` en lotes de 250**, después de reservar todos los números con `reserveSaleNumbers` | Unas 4500 ventas y 9000 líneas llegan a Neon en unas 20 sentencias, dentro de los 3 minutos de RNF-3; es el camino que ya usa `seed:sales` y respeta los disparadores de `003_sales.sql` | `insertSale` de una en una: miles de idas y vueltas a la base | RF-8, RF-10, RNF-3 |
 
@@ -267,7 +269,7 @@ Ninguna nueva.
 | Unitaria | `demo-sales.random.test.ts` | Misma semilla, misma secuencia; flujos e intentos distintos, secuencias distintas |
 | Unitaria | `demo-sales.calendar.test.ts` | Período (28/10, 31/12, 01/11, 31/05 y años bisiestos); domingos sin ventas; ventas por día; misma semilla, mismo [n] |
 | Unitaria | `demo-sales.rules.test.ts` | Cada regla de `checkDemoSales` detecta su incumplimiento con datos armados a mano |
-| Unitaria | `demo-sales.generator.test.ts` | Para 200 semillas, el resultado cumple RF-4 a RF-8 con aserciones propias (no con `checkDemoSales`) y lo consigue en el primer intento en al menos el 95 % de las semillas |
+| Unitaria | `demo-sales.generator.test.ts` | Para 200 semillas, el resultado cumple RF-4 a RF-8 con aserciones propias (no con `checkDemoSales`) y lo consigue en el primer intento en al menos el 95 % de las semillas; para 1000 semillas, ninguna agota los 50 intentos (D-11) |
 | Integración (PGlite) | `demo-sales.service.integration.test.ts` | Inspección sin cambios; carga; rechazos de RF-2; nueva comprobación al cargar; fallo a mitad; dos cargas a la vez; carga y «Nueva venta» a la vez; número siguiente |
 | Integración (PGlite) | `demo-sales.cli.integration.test.ts` | Mensajes y código de salida de cada caso, con `ask` simulado; ningún mensaje contiene la dirección de la base |
 | Punta a punta | `e2e/ventas-demo-us1-cargar.spec.ts` | HU-1 en el navegador (§8.2) |
@@ -321,3 +323,13 @@ Pulido añade la fila de `npm run load:demo-sales` a «Comandos» de `AGENTS.md`
 ## 10. Observaciones para la otra persona
 
 `apps/api/src/modules/menu/index.ts` también lo cambia la rama `feat/006-menu-inicial-us1` (exporta `loadOfficialMenu`). La exportación de `OFFICIAL_MENU` de D-4 va en una línea aparte; si se fusiona después, el conflicto se resuelve conservando las dos líneas.
+
+## 11. Cambios tras el análisis de consistencia
+
+La persona pidió corregir los tres hallazgos menores del análisis (2026-10-28).
+
+| # | Hallazgo | Cambio |
+| --- | --- | --- |
+| 1 | §5.2 llamaba «reglas de calendario de `checkDemoSales`» a lo que `tasks.md` (T003) escribe como `checkDemoCalendar` | §3 y §5.2 usan `checkDemoCalendar` |
+| 2 | D-1, D-8 y §6 citaban como patrones `load:menu`, `official-menu.cli.ts` y `runOfficialMenuLoad`, que no están en `develop` | Citan `accounts.cli.ts` (`runAccounts`) y `sales-seed.cli.ts`, que sí están |
+| 3 | Agotar los intentos del generador mostraba el mensaje de RF-10 sin que el plan lo decidiera | D-11 lo decide; §5.6, §8.1 y `tasks.md` (T006, T009) lo prueban |
