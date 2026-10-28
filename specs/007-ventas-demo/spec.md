@@ -1,6 +1,6 @@
 # SPEC-007 — Ventas de demostración
 
-Estado: aprobada · Fecha: 2026-10-28
+Estado: revisada · Fecha: 2026-10-28
 
 Reglas globales (moneda, zona horaria, un solo local): ver [`docs/business-rules.md`](../../docs/business-rules.md#reglas-globales).
 
@@ -24,10 +24,10 @@ Las ventas de demostración son ventas registradas como cualquier otra (SPEC-003
 
 | Concepto | Definición |
 | --- | --- |
-| **Ventas de demostración** | Las ventas registradas que crea la carga de esta especificación. Cumplen todas las reglas de «Datos de una venta registrada» de SPEC-003. |
+| **Ventas de demostración** | Las ventas registradas que crea la carga de esta especificación. Cumplen las reglas de «Datos de una venta registrada» de SPEC-003, salvo tres que se aplican de otro modo, como registra esa especificación en sus «Aclaraciones»: su fecha y hora es una del período de demostración, no la del momento de la carga (RF-4); quién la registró es una cuenta de la base, sin sesión (RF-7); y sus productos llevan el nombre, la categoría y el precio del menú vigente al cargar (RF-5). |
 | **Período de demostración** | Desde el mismo día del mes, tres meses antes de hoy, hasta ayer, en hora de Bolivia. Si ese día no existe en aquel mes, empieza el último día de ese mes. Ejemplo: si hoy es 28/10/2026, va del 28/07/2026 al 27/10/2026. Hoy queda siempre sin ventas de demostración. |
 | **Menú oficial completo y activo** | La base tiene cada uno de los 37 productos de «Menú oficial» de SPEC-006, activo, en una categoría activa con el nombre de su categoría oficial; nombres comparados según «Comparación de nombres» de SPEC-002. Puede tener además otros productos y categorías. |
-| **Horario del local** | De 07:30 a 20:30, en hora de Bolivia. |
+| **Horario del local** | Desde las 07:30:00 hasta las 20:29:59, en hora de Bolivia: el local cierra a las 20:30 y la última venta se registra antes. |
 | **Horas pico** | De 09:00 a 10:59 y de 15:30 a 17:59. |
 
 ## 2. Usuarios
@@ -44,7 +44,7 @@ Las ventas de demostración son ventas registradas como cualquier otra (SPEC-003
 
 Como **persona que prepara el sistema**, quiero **cargar con una sola orden, en una base con el menú oficial y sin ventas, tres meses de ventas pasadas variadas armadas con ese menú** para **mostrar el Historial de ventas con días, meses y ventas parecidos a los de un local en marcha, sin registrar miles de ventas a mano**.
 
-**Prueba independiente:** el 28/10/2026, sobre una base con el menú oficial cargado (SPEC-006), sin ventas y con una cuenta de dueño «Luis Mamani» y una de cajero «Ana Quispe», se ejecuta la carga: muestra cuántas ventas cargará, del 28/07/2026 al 27/10/2026, avisa que no se pueden borrar y pide escribir «CARGAR». Al escribir «CARGAR» termina con «Ventas de demostración cargadas: [n] ventas del 28/07/2026 al 27/10/2026». Con una sesión de dueño, «Historial de ventas» muestra hoy sin ventas; «Día anterior» muestra el 27/10/2026 con entre 30 y 80 ventas, todas entre las 07:30 y las 20:30, registradas por «Ana Quispe · Cajero» o «Luis Mamani · Dueño», en efectivo y con QR. El detalle de una venta muestra productos del menú oficial con su categoría y su precio. «Ver por mes» en septiembre de 2026 muestra 30 filas, la mayoría con ventas y alguna con «Bs 0,00 · 0 ventas». Al ejecutar la carga otra vez, se rechaza con el mensaje de base con ventas y nada cambia.
+**Prueba independiente:** el 28/10/2026, sobre una base con el menú oficial cargado (SPEC-006), sin ventas y con una cuenta de dueño «Luis Mamani» y una de cajero «Ana Quispe», se ejecuta la carga: muestra cuántas ventas cargará, del 28/07/2026 al 27/10/2026, avisa que no se pueden borrar y pide escribir «CARGAR». Al escribir «CARGAR» termina con «Ventas de demostración cargadas: [n] ventas del 28/07/2026 al 27/10/2026». Con una sesión de dueño, «Historial de ventas» muestra hoy sin ventas; «Día anterior» muestra el 27/10/2026 con entre 30 y 80 ventas, todas entre las 07:30 y las 20:29, registradas por «Ana Quispe · Cajero» o «Luis Mamani · Dueño», en efectivo y con QR. El detalle de una venta muestra productos del menú oficial con su categoría y su precio. «Ver por mes» en septiembre de 2026 muestra 30 filas, la mayoría con ventas y alguna con «Bs 0,00 · 0 ventas». Al ejecutar la carga otra vez, se rechaza con el mensaje de base con ventas y nada cambia.
 
 *Producto mínimo útil:* por sí sola, esta historia deja una base lista para mostrar el Historial.
 
@@ -55,7 +55,7 @@ Como **persona que prepara el sistema**, quiero **cargar con una sola orden, en 
 **RF-1. Ejecución de la carga** (HU-1)
 
 - El sistema deberá ejecutar la carga sin pedir ni usar una sesión de dueño o cajero: solo puede hacerlo quien tenga la configuración de acceso a la base, como en SPEC-006 (RF-2).
-- El sistema deberá calcular hoy, ayer y el período de demostración con su propia fecha y hora en hora de Bolivia, no con la zona horaria de la computadora desde la que se ejecuta.
+- El sistema deberá calcular hoy, ayer y el período de demostración con la fecha y la hora del sistema donde se guardan las ventas, en hora de Bolivia, no con el reloj ni la zona horaria de la computadora desde la que se ejecuta la carga.
 
 **RF-2. Solo en una base preparada y sin ventas** (HU-1)
 
@@ -69,14 +69,15 @@ Antes de pedir la confirmación, el sistema comprueba la base en este orden y se
 **RF-3. Confirmación escrita** (HU-1)
 
 - Cuando la base cumple RF-2, el sistema deberá mostrar «Se cargarán [n] ventas de demostración del [desde] al [hasta]. Las ventas registradas no se pueden borrar. Escribe CARGAR para continuar» y esperar la respuesta, sin cambiar nada todavía.
-- Cuando la persona escribe exactamente «CARGAR» (en mayúsculas, sin tener en cuenta los espacios alrededor), el sistema deberá cargar las [n] ventas anunciadas.
+- Cuando la persona escribe exactamente «CARGAR» (en mayúsculas, sin tener en cuenta los espacios alrededor), el sistema deberá volver a comprobar RF-2 en el mismo momento de cargar y, si se cumple, cargar las [n] ventas anunciadas con el menú y las cuentas tal como están en ese momento.
+- Si al escribir «CARGAR» la base ya no cumple RF-2 (por ejemplo, porque se registró una venta, se desactivó un producto oficial o se eliminaron las cuentas mientras se esperaba la respuesta), entonces el sistema deberá rechazar la carga con el mensaje que corresponda de RF-2, sin cambiar nada.
 - Si la persona escribe cualquier otra cosa o no escribe nada, entonces el sistema deberá terminar sin cambiar nada y mostrar «Carga cancelada. No se cambió nada».
 - Cuando la carga termina, el sistema deberá mostrar «Ventas de demostración cargadas: [n] ventas del [desde] al [hasta]», con las fechas en el formato de SPEC-003 («27/10/2026»).
 
 **RF-4. Días y horas de las ventas** (HU-1)
 
 - El sistema deberá registrar todas las ventas de demostración dentro del período de demostración, en el horario del local, y ninguna hoy ni en un día futuro.
-- El sistema deberá dejar sin ventas entre 2 y 4 domingos del período, nunca dos domingos seguidos, y dar a cada uno de los demás días del período entre 30 y 80 ventas.
+- El sistema deberá dejar sin ventas entre 2 y 4 domingos del período, al menos uno en cada mes calendario completo del período y nunca dos domingos seguidos, y dar a cada uno de los demás días del período entre 30 y 80 ventas.
 - El sistema deberá dar a los viernes y sábados, en promedio, al menos un 20 % más de ventas que a los días de lunes a jueves.
 - El sistema deberá registrar en las horas pico más ventas por hora que en el resto del horario del local, contando todo el período.
 
@@ -84,6 +85,7 @@ Antes de pedir la confirmación, el sistema comprueba la base en este orden y se
 
 - El sistema deberá armar cada venta solo con productos de «Menú oficial» (SPEC-006), con su nombre, el nombre de su categoría y su precio tal como están en el menú vigente de la base al ejecutar la carga; un producto aparece en una sola línea de la venta.
 - El sistema deberá repartir las ventas así, contando todo el período y con una tolerancia de 5 puntos: 40 % con un solo producto y cantidad 1; 20 % con un solo producto y cantidad de 2 a 6; 35 % con 2 a 5 productos distintos; y 5 % con 6 a 12 productos distintos.
+- El sistema deberá dar a cada día con ventas al menos una venta con un solo producto y al menos una con 2 o más productos distintos.
 - El sistema deberá usar en cada línea una cantidad de 1 a 6, salvo en las ventas de 6 a 12 productos, donde puede llegar a 12.
 - El sistema deberá incluir al menos una bebida (categorías «Cafés», «Otras bebidas calientes», «Bebidas frías» o «Jugos y licuados») en al menos el 80 % de las ventas con 2 a 5 productos.
 - El sistema deberá vender cada uno de los 37 productos oficiales al menos una vez en el período.
@@ -106,7 +108,7 @@ Antes de pedir la confirmación, el sistema comprueba la base en este orden y se
 **RF-8. Número y orden de las ventas** (HU-1)
 
 - El sistema deberá numerar las ventas de demostración desde el N.º 1, sin saltos ni repeticiones, en el orden de su fecha y hora: una venta posterior tiene siempre un número mayor (SPEC-003, «Datos de una venta registrada»).
-- El sistema deberá no registrar dos ventas de demostración con la misma fecha y hora exactas.
+- El sistema deberá no registrar dos ventas de demostración en el mismo segundo; varias pueden caer en el mismo minuto, como en un mostrador real.
 - Cuando después de la carga se registra una venta desde «Nueva venta», el sistema deberá darle el número siguiente al de la última venta de demostración.
 
 **RF-9. Ventas como cualquier otra** (HU-1)
@@ -149,7 +151,10 @@ Antes de pedir la confirmación, el sistema comprueba la base en este orden y se
 | Se ejecuta el 31/12/2026 | El período va del 30/09/2026 al 30/12/2026 (ver «Conceptos»). |
 | Se ejecuta el 01/11/2026 | El período va del 01/08/2026 al 31/10/2026, y noviembre queda sin ventas (RF-4). |
 | Se ejecuta a las 23:59 de un día y termina después de medianoche | El período es el calculado al ejecutarla; ninguna venta cae en el día en que se ejecutó ni después (RF-1, RF-4). |
-| La computadora de la persona tiene otra zona horaria | El período y las horas se calculan en hora de Bolivia (RF-1). |
+| La computadora de la persona tiene otra zona horaria o el reloj equivocado | El período y las horas se calculan con la fecha y la hora del sistema, en hora de Bolivia (RF-1). |
+| Se registra una venta, se desactiva un producto oficial o se cambia un precio mientras se espera la respuesta «CARGAR» | Al escribir «CARGAR» se vuelve a comprobar la base: con la venta o el producto inactivo se rechaza sin cambios; con el precio cambiado se carga con el precio nuevo (RF-3). |
+| Dos ventas de demostración caen en el mismo minuto | Tienen segundos distintos y el Historial las ordena por número (RF-8; SPEC-005, RF-3). |
+| Período del 01/08/2026 al 31/10/2026 | Agosto, septiembre y octubre tienen cada uno al menos un domingo sin ventas (RF-4). |
 | Se pierde la conexión a mitad de la carga | La base queda exactamente como estaba (RF-10). |
 | La persona cancela a mitad de la carga | La base queda exactamente como estaba (RF-10). |
 | Dos personas ejecutan la carga a la vez | Solo una se completa; la otra se rechaza (RF-10). |
@@ -171,7 +176,7 @@ Antes de pedir la confirmación, el sistema comprueba la base en este orden y se
 
 ## 8. Criterios de finalización
 
-- Tras una sola ejecución confirmada sobre una base con el menú oficial y sin ventas, el Historial muestra ventas en cada día del período salvo de 2 a 4 domingos, y ninguna venta hoy.
+- Tras una sola ejecución confirmada sobre una base con el menú oficial y sin ventas, el Historial muestra ventas en cada día del período salvo de 2 a 4 domingos, al menos uno en cada mes completo, y ninguna venta hoy.
 - El 100 % de las ventas de demostración tienen solo productos del menú oficial, con los precios vigentes al cargar, y su total es la suma exacta de sus subtotales.
 - Los 37 productos oficiales aparecen en al menos una venta, y hay ventas de un solo producto y ventas de varios productos en cada día con ventas.
 - Cada día con ventas tiene al menos una venta en efectivo y una con QR.
@@ -200,3 +205,13 @@ Ninguna.
 - **P:** ¿Qué productos usa la carga si el menú de la base no es exactamente el oficial? → **R:** Exige el menú oficial completo y activo; los productos extra no se venden. (Aplicado en «Conceptos», RF-2 y RF-5.)
 - **P:** Las ventas registradas no se pueden borrar, y la carga puede ejecutarse en la base oficial. ¿Qué resguardo se pone? → **R:** Una confirmación escrita: muestra cuántas ventas y qué fechas cargará, avisa que no se pueden borrar y pide escribir «CARGAR». (Aplicado en «Contexto y objetivo» y RF-3.)
 - **P:** La idea es cargarla una sola vez, pero ¿qué pasa si se quiere limpiar todo y empezar una demostración limpia? → **R:** No se borra nada: se crea otra base nueva y se cargan en ella el menú oficial (SPEC-006) y las ventas de demostración. Así nunca hay riesgo de borrar ventas reales, y se respeta que una venta registrada no se borra (SPEC-003). Se descartaron una orden «Reiniciar la demo» que borra todas las ventas, que en la base oficial borraría ventas reales, y un reinicio solo para bases marcadas como demostración, que exige definir cómo se marca una base. (Aplicado en «Casos límite» y «Fuera de alcance».)
+
+**Revisión de QA.**
+
+- **P:** (Hallazgo 1) RF-1 no decía de qué reloj salen hoy, ayer y el período. → **R:** Del sistema donde se guardan las ventas, en hora de Bolivia, como en SPEC-005; un reloj equivocado en la computadora no cambia el período. (Aplicado en RF-1 y «Casos límite».)
+- **P:** (Hallazgo 2) RF-8 no fijaba la precisión de «misma fecha y hora». ¿Dos ventas pueden caer en el mismo minuto? → **R:** Sí, con segundos distintos; nunca dos en el mismo segundo. (Aplicado en RF-8 y «Casos límite».)
+- **P:** (Hallazgo 3) El horario no decía si puede haber una venta a las 20:30. → **R:** No: las ventas van de las 07:30:00 a las 20:29:59. (Aplicado en «Conceptos» y HU-1.)
+- **P:** (Hallazgo 4) La prueba de HU-1 espera un día sin ventas en septiembre, pero RF-4 no lo aseguraba. → **R:** RF-4 deja al menos un domingo sin ventas en cada mes completo del período; la prueba queda igual. (Aplicado en RF-4, «Casos límite» y «Criterios de finalización».)
+- **P:** (Hallazgo 5) Un criterio de finalización pedía ventas de un solo producto y de varios en cada día, sin RF que lo exigiera. → **R:** Pasa a RF-5. (Aplicado en RF-5.)
+- **P:** (Hallazgo 6) «Datos de una venta registrada» de SPEC-003 fija la fecha del momento del registro, la cuenta de la sesión y los precios al registrar, y no mencionaba las ventas de demostración. → **R:** SPEC-003 registra la excepción en sus «Aclaraciones», y «Conceptos» de esta especificación la describe. (Aplicado en «Conceptos» y en `specs/003-ventas/spec.md`, «Aclaraciones».)
+- **P:** (Hallazgo 7) No se decía qué pasa si la base cambia entre la comprobación y la respuesta «CARGAR». → **R:** Al escribir «CARGAR» se vuelve a comprobar RF-2 en el mismo momento de cargar: si ya no se cumple, se rechaza sin cambios; si se cumple, se usan el menú y las cuentas de ese momento. (Aplicado en RF-3 y «Casos límite».)
