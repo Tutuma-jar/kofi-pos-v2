@@ -1,7 +1,7 @@
 // API para las pruebas de punta a punta (playwright.config.ts). Nunca se despliega.
 import { buildApp } from '../src/app.ts';
 import { createAccountsService } from '../src/modules/auth/index.ts';
-import { saveCategory, saveProduct } from '../src/modules/menu/index.ts';
+import { loadOfficialMenu, saveCategory, saveProduct } from '../src/modules/menu/index.ts';
 import { listRegisteredSales } from '../src/modules/sales/index.ts';
 import { createFakeClock } from '../src/shared/clock.ts';
 import { createTestDatabase } from './test-database.ts';
@@ -49,6 +49,15 @@ export async function buildE2eApp() {
           await saveProduct(db, { ...product, categoryId: category.id });
       }
       return { ok: true };
+    });
+    // Sustituye el menú de E2E por el oficial con la carga real de SPEC-006 (D-8).
+    app.post('/api/__test/official-menu', async () => {
+      await db.transaction((tx) =>
+        tx.exec(
+          'TRUNCATE sale_lines, sales; UPDATE sale_counter SET last_number = 0; DELETE FROM products; DELETE FROM categories;',
+        ),
+      );
+      return loadOfficialMenu(db);
     });
     app.get('/api/__test/sales', async () => ({ sales: await listRegisteredSales(db) }));
     // Controles exclusivos del servidor de pruebas; buildApp nunca los registra.
