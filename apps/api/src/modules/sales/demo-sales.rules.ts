@@ -1,6 +1,12 @@
 import { menuNameKey, type Role } from '@kofi/contracts';
-import { addDays, boliviaDate, startOfBoliviaDay } from '../../shared/calendar.ts';
-import { completeMonths, datesBetween, weekday, type DemoCalendar } from './demo-sales.calendar.ts';
+import { addDays } from '../../shared/calendar.ts';
+import {
+  completeMonths,
+  datesBetween,
+  dayStart,
+  weekday,
+  type DemoCalendar,
+} from './demo-sales.calendar.ts';
 import type { NewSale } from './sales.repository.ts';
 
 // Reglas de las ventas de demostración (SPEC-007, RF-4 a RF-8; plan D-6). Cada función devuelve
@@ -126,8 +132,17 @@ export function saleType(sale: NewSale): DemoSaleType | null {
   return count >= 6 && count <= 12 ? 'large' : null;
 }
 
-export const isDrink = (categoryName: string) =>
-  DRINK_CATEGORIES.some((category) => menuNameKey(category) === menuNameKey(categoryName));
+// Comparar con menuNameKey es costoso: se recuerda cada categoría ya vista.
+const drinkKeys = new Set(DRINK_CATEGORIES.map(menuNameKey));
+const drinkByCategory = new Map<string, boolean>();
+export function isDrink(categoryName: string): boolean {
+  let drink = drinkByCategory.get(categoryName);
+  if (drink === undefined) {
+    drink = drinkKeys.has(menuNameKey(categoryName));
+    drinkByCategory.set(categoryName, drink);
+  }
+  return drink;
+}
 
 export type DemoSalesRule =
   | 'business-hours' // en el horario del local (RF-4)
@@ -161,11 +176,22 @@ export function checkDemoSales(
   context: DemoSalesContext,
 ): DemoSalesRule[] {
   const failed = new Set<DemoSalesRule>();
-  const starts = new Map<string, number>();
+  // Día del calendario y segundos desde sus 00:00 de cada venta, por búsqueda binaria entre los
+  // inicios de los días; una venta fuera del período queda sin día (date vacío).
+  const starts = context.calendar.days.map((day) => dayStart(day.date));
+  const end = dayStart(addDays(context.calendar.to, 1));
   const local = sales.map((sale) => {
-    const date = boliviaDate(sale.registeredAt);
-    if (!starts.has(date)) starts.set(date, startOfBoliviaDay(date).getTime());
-    return { sale, date, seconds: (sale.registeredAt.getTime() - starts.get(date)!) / 1000 };
+    const time = sale.registeredAt.getTime();
+    if (starts.length === 0 || time < starts[0]! || time >= end)
+      return { sale, date: '', seconds: Number.NaN };
+    let low = 0;
+    let high = starts.length - 1;
+    while (low < high) {
+      const middle = (low + high + 1) >> 1;
+      if (starts[middle]! <= time) low = middle;
+      else high = middle - 1;
+    }
+    return { sale, date: context.calendar.days[low]!.date, seconds: (time - starts[low]!) / 1000 };
   });
   const byId = new Map(context.products.map((product) => [product.id, product]));
   const units = new Map<string, number>(context.products.map((product) => [product.id, 0]));

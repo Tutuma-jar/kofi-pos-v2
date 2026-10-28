@@ -1,4 +1,10 @@
-import { addDays, addMonths, boliviaDate, daysOfMonth } from '../../shared/calendar.ts';
+import {
+  addDays,
+  addMonths,
+  boliviaDate,
+  daysOfMonth,
+  startOfBoliviaDay,
+} from '../../shared/calendar.ts';
 import { createRandom, type Random } from './demo-sales.random.ts';
 import { checkDemoCalendar, DemoSalesGenerationError } from './demo-sales.rules.ts';
 
@@ -18,6 +24,18 @@ const MAX_ATTEMPTS = 50;
 
 // Día de la semana de una fecha YYYY-MM-DD: 0 domingo … 6 sábado.
 export const weekday = (date: string) => new Date(`${date}T00:00:00Z`).getUTCDay();
+
+// Instante de las 00:00 de Bolivia de una fecha, en milisegundos. startOfBoliviaDay hace una
+// búsqueda con Intl en cada llamada: aquí se recuerda cada fecha ya calculada.
+const dayStarts = new Map<string, number>();
+export function dayStart(date: string): number {
+  let start = dayStarts.get(date);
+  if (start === undefined) {
+    start = startOfBoliviaDay(date).getTime();
+    dayStarts.set(date, start);
+  }
+  return start;
+}
 
 export function datesBetween(from: string, to: string): string[] {
   const dates: string[] = [];
