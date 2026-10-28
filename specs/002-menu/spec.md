@@ -238,7 +238,7 @@ Si al crear o editar un producto algún dato no cumple «Datos de un producto»,
 - Historial de precios o registro de quién cambió qué en el menú.
 - Orden personalizado de categorías o productos: se ordenan alfabéticamente.
 - Búsqueda y filtros en la administración o en la consulta.
-- Importar o exportar el menú (por ejemplo, desde una hoja de cálculo) y cargarlo al preparar el sistema.
+- Importar o exportar el menú (por ejemplo, desde una hoja de cálculo) y cargarlo al preparar el sistema. La carga del menú oficial en una base nueva la cubre [SPEC-006](../006-menu-inicial/spec.md).
 - Qué precio se registra en una venta y cómo afectan a una venta los cambios del menú: lo decide SPEC-003 (Ventas).
 - Qué pasa con un cambio no guardado del menú al cerrar sesión: se pierde, como cualquier cambio no guardado.
 
@@ -254,7 +254,7 @@ Si al crear o editar un producto algún dato no cumple «Datos de un producto»,
 
 ## 9. Dudas abiertas
 
-- [NECESITA ACLARACIÓN] ¿Cuáles son las categorías, los productos y los precios reales de Kofi? No bloquea ninguna historia, porque el dueño los carga desde la interfaz (HU-1), pero hacen falta para las pruebas de aceptación con datos reales y para confirmar que el máximo de Bs 1000,00, los largos y los caracteres admitidos de los nombres alcanzan.
+Ninguna. La duda sobre las categorías, los productos y los precios reales de Kofi se resolvió el 2026-10-28 en [SPEC-006 — Menú inicial](../006-menu-inicial/spec.md#menú-oficial), que fija el menú oficial y su carga en una base nueva; sus nombres y precios cumplen los largos, los caracteres admitidos y el máximo de Bs 1000,00 de esta especificación.
 
 ## 10. Aclaraciones
 
@@ -296,3 +296,7 @@ La persona delegó la especificación de 002-menu («Delego la especificación d
 **Análisis de consistencia.** En modo delegado.
 
 - **Decisión delegada:** (Hallazgo 4) ¿Con qué textos responde el sistema a un nombre más largo que el máximo, que la interfaz no deja escribir, y a una categoría o un producto que no existe? → «El nombre de la categoría tiene como máximo 30 caracteres», «El nombre del producto tiene como máximo 40 caracteres», «No se encontró la categoría» y «No se encontró el producto». (Motivo: cada texto nombra el dato, como los de SPEC-001; los dos primeros solo se ven si se esquiva la interfaz, y los dos últimos, si se usa la dirección de algo que no existe. Alternativa descartada: un mensaje genérico «Datos inválidos».) (Aplicado en `plan.md` §6.1 y §6.2.)
+
+### 2026-10-28
+
+- **P:** ¿Sigue vigente que el menú empieza vacío y no se precarga al preparar el sistema? → **R:** Sí para esta especificación; la carga del menú oficial de Kofi en una base nueva, una sola vez y sin tocar un menú existente, la cubre [SPEC-006](../006-menu-inicial/spec.md), que también responde la duda sobre las categorías, los productos y los precios reales. (Aplicado en «Fuera de alcance» y «Dudas abiertas».)
