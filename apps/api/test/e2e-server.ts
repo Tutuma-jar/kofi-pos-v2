@@ -2,8 +2,9 @@
 import { buildApp } from '../src/app.ts';
 import { createAccountsService } from '../src/modules/auth/index.ts';
 import { loadOfficialMenu, saveCategory, saveProduct } from '../src/modules/menu/index.ts';
-import { listRegisteredSales } from '../src/modules/sales/index.ts';
+import { listRegisteredSales, loadDemoSales } from '../src/modules/sales/index.ts';
 import { createFakeClock } from '../src/shared/clock.ts';
+import { loadOfficialMenuFixture } from './official-menu-fixture.ts';
 import { createTestDatabase } from './test-database.ts';
 import { TEST_ACCOUNTS } from '../../../e2e/fixtures.ts';
 import { z } from 'zod';
@@ -58,6 +59,17 @@ export async function buildE2eApp() {
         ),
       );
       return loadOfficialMenu(db);
+    });
+    // Menú oficial y ventas de demostración de SPEC-007 con el reloj de E2E y una semilla fija
+    // (plan §8.2, D-9).
+    app.post('/api/__test/demo-sales', async () => {
+      await db.transaction((tx) =>
+        tx.exec(
+          'TRUNCATE sale_lines, sales; UPDATE sale_counter SET last_number = 0; DELETE FROM products; DELETE FROM categories;',
+        ),
+      );
+      await loadOfficialMenuFixture(db);
+      return loadDemoSales(db, { seed: 7, now: clock.now() });
     });
     app.get('/api/__test/sales', async () => ({ sales: await listRegisteredSales(db) }));
     // Controles exclusivos del servidor de pruebas; buildApp nunca los registra.
