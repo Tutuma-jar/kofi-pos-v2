@@ -296,3 +296,7 @@ La persona delegó la especificación de 002-menu («Delego la especificación d
 **Análisis de consistencia.** En modo delegado.
 
 - **Decisión delegada:** (Hallazgo 4) ¿Con qué textos responde el sistema a un nombre más largo que el máximo, que la interfaz no deja escribir, y a una categoría o un producto que no existe? → «El nombre de la categoría tiene como máximo 30 caracteres», «El nombre del producto tiene como máximo 40 caracteres», «No se encontró la categoría» y «No se encontró el producto». (Motivo: cada texto nombra el dato, como los de SPEC-001; los dos primeros solo se ven si se esquiva la interfaz, y los dos últimos, si se usa la dirección de algo que no existe. Alternativa descartada: un mensaje genérico «Datos inválidos».) (Aplicado en `plan.md` §6.1 y §6.2.)
+
+### 2026-10-28
+
+- **P:** ¿Sigue vigente que el menú empieza vacío y no se precarga al preparar el sistema? → **R:** Sí para esta especificación; la carga del menú oficial de Kofi en una base nueva, una sola vez y sin tocar un menú existente, la cubre [SPEC-006](../006-menu-inicial/spec.md), que también responde la duda sobre las categorías, los productos y los precios reales. (Aplicado en «Fuera de alcance» y «Dudas abiertas».)

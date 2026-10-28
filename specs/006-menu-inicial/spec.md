@@ -1,6 +1,6 @@
 # SPEC-006 — Menú inicial
 
-Estado: borrador · Fecha: 2026-10-28
+Estado: revisada · Fecha: 2026-10-28
 
 Reglas globales (moneda, zona horaria, un solo local): ver [`docs/business-rules.md`](../../docs/business-rules.md#reglas-globales).
 
@@ -62,7 +62,7 @@ En total, 6 categorías y 36 productos.
 
 | Usuario | Qué hace con el menú inicial |
 | --- | --- |
-| **Persona que prepara el sistema** | Una persona del equipo con acceso a la configuración de la base oficial. Ejecuta la carga una sola vez, a mano y desde su computadora, después de crear la base nueva. |
+| **Persona que prepara el sistema** | Una persona del equipo con acceso a la configuración de la base oficial. Ejecuta la carga una sola vez, a mano y desde su computadora, después de crear la base nueva. El sistema no la identifica con una cuenta de dueño o cajero: puede ejecutar la carga quien tenga en su computadora la configuración de acceso a la base. |
 | **Dueño** | No ejecuta la carga. Encuentra el menú oficial en «Administrar menú» y lo mantiene desde ahí (SPEC-002). |
 | **Cajero** | No ejecuta la carga. Encuentra el menú oficial en «Ver menú» y en las ventas (SPEC-002 y SPEC-003). |
 
@@ -88,6 +88,8 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 **RF-2. Carga en una base nueva** (HU-1)
 
 - Cuando la persona que prepara el sistema ejecuta la carga sobre una base sin ninguna categoría ni ningún producto, el sistema deberá crear todas las categorías y todos los productos del menú oficial, activos, con los nombres y los precios de «Menú oficial».
+- Cuando la base está recién creada y el sistema todavía no está preparado en ella, el sistema deberá prepararla y después cargar el menú oficial, con el mismo resultado que en una base ya preparada.
+- El sistema deberá ejecutar la carga sin pedir ni usar una cuenta de dueño o cajero: solo puede hacerlo quien tenga la configuración de acceso a la base.
 - Cuando la carga termina, el sistema deberá mostrar «Menú oficial cargado: 6 categorías y 36 productos».
 - El sistema deberá dejar el menú cargado igual que si el dueño lo hubiera creado desde «Administrar menú»: se ve en la administración y en la consulta, forma parte del menú vigente que se entrega a otros módulos (SPEC-002, RF-15) y el dueño puede editarlo, desactivarlo y reactivarlo como cualquier otro.
 
@@ -100,7 +102,8 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 **RF-4. Carga completa o nada** (HU-1)
 
 - El sistema deberá cargar el menú oficial completo o no cargar nada: nunca queda una parte del menú oficial en la base.
-- Si la carga no se puede completar (por ejemplo, por falta de conexión), entonces el sistema deberá no dejar ninguna categoría ni ningún producto del menú oficial y mostrar «No se pudo cargar el menú oficial. Comprueba la configuración y la conexión a la base».
+- Si la carga no se puede completar (por ejemplo, por falta de conexión o por una configuración de acceso incorrecta), entonces el sistema deberá dejar la base exactamente como estaba antes de ejecutarla, sin eliminar nada, y mostrar «No se pudo cargar el menú oficial. Comprueba la configuración y la conexión a la base».
+- Si la persona cancela la carga antes de que termine, entonces el sistema deberá dejar la base exactamente como estaba antes de ejecutarla.
 - El sistema deberá no mostrar nunca, en ningún mensaje, la dirección de la base, contraseñas ni otros datos de configuración.
 
 ## 5. Requisitos no funcionales
@@ -118,10 +121,12 @@ Como **persona que prepara el sistema**, quiero **cargar el menú oficial de Kof
 | Base con una sola categoría, sin productos | Se rechaza sin cambios (RF-3). |
 | Base con categorías y productos todos inactivos | Se rechaza sin cambios: los inactivos cuentan (RF-3). |
 | Base nueva que ya tiene las cuentas del dueño y del cajero | Se carga: las cuentas no son parte del menú (RF-2). |
+| Base recién creada, sin el sistema preparado | Se prepara y se carga el menú oficial (RF-2). |
 | Base de comprobación nueva y vacía | Se carga igual que la oficial; sirve para probar la carga (RF-2). |
-| Se pierde la conexión a mitad de la carga | No queda ninguna categoría ni ningún producto del menú oficial (RF-4). |
+| Configuración de acceso incorrecta o ausente | No se toca ninguna base y se muestra el mensaje de error (RF-4). |
+| Se pierde la conexión a mitad de la carga | La base queda exactamente como estaba (RF-4). |
+| La persona cancela la carga a mitad | La base queda exactamente como estaba (RF-4). |
 | Dos personas ejecutan la carga a la vez | Solo una se completa; la otra se rechaza (RF-3). |
-| Después de la carga se intenta cargar los productos de prueba | Se rechazan, como ya hace la carga de prueba cuando la base tiene productos (SPEC-002, plan D-12). |
 | El dueño cambia el precio de un producto oficial después de la carga | Se aplica como cualquier cambio del menú (RF-2; SPEC-002, RF-5). |
 
 ## 7. Fuera de alcance
@@ -156,3 +161,11 @@ Ninguna.
 - **P:** ¿Qué hace la carga si la base ya tiene alguna categoría o producto? → **R:** En la base oficial solo debe estar el menú oficial, sin nada de las pruebas. (Aplicado en RF-3.)
 - **P:** ¿Cómo se garantiza que la base oficial tenga solo el menú oficial? → **R:** La base oficial se crea nueva; la carga solo funciona sin categorías ni productos y, si encuentra alguno, se niega sin tocar nada. Nunca se borra nada. (Aplicado en RF-3, «Casos límite» y «Fuera de alcance».)
 - **P:** ¿Quién ejecuta la carga y cuándo? → **R:** La persona que prepara el sistema, a mano y una sola vez, desde su computadora contra la base nueva; después el dueño mantiene el menú desde «Administrar menú». (Aplicado en «Usuarios», RF-2 y «Fuera de alcance».)
+
+**Revisión de QA.**
+
+- **P:** (Hallazgo 1) «Base nueva» no decía si incluye una base recién creada en la que el sistema aún no está preparado. ¿La carga funciona en ella? → **R:** Sí: la prepara y después carga el menú oficial. (Aplicado en RF-2 y «Casos límite».)
+- **P:** (Hallazgo 2) No se decía cómo se reconoce a la persona que prepara el sistema. ¿Quién puede ejecutar la carga? → **R:** Quien tenga en su computadora la configuración de acceso a la base, sin cuenta de dueño ni de cajero. (Aplicado en «Usuarios», RF-2 y «Casos límite».)
+- **P:** (Hallazgos 3 y 5) RF-4 podía leerse como una orden de eliminar y no cubría la cancelación. ¿Cómo queda la base si la carga falla o se cancela? → **R:** Exactamente como estaba antes de ejecutarla, sin eliminar nada. (Aplicado en RF-4 y «Casos límite».)
+- **P:** (Hallazgo 4) SPEC-002 mantenía, sin mencionar esta especificación, la decisión de que el menú no se precarga. ¿Cómo se concilia? → **R:** SPEC-002 registra en sus «Aclaraciones» que la carga del menú oficial en una base nueva la cubre SPEC-006. (Aplicado en `specs/002-menu/spec.md`, «Aclaraciones».)
+- **P:** (Hallazgo 6) Un caso límite citaba una decisión técnica del plan de SPEC-002 y una herramienta de prueba. ¿Se mantiene? → **R:** Se quita: RF-3 ya cubre cualquier base con productos. (Aplicado en «Casos límite».)
