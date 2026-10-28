@@ -1,4 +1,4 @@
-﻿# Tareas — SPEC-006 Menú inicial
+# Tareas — SPEC-006 Menú inicial
 
 Estado: aprobadas y analizadas (sin hallazgos tras la corrección); Base común implementada · Fecha: 2026-10-28 · [`spec.md`](spec.md) · [`plan.md`](plan.md)
 

@@ -1,4 +1,4 @@
-﻿# SPEC-006 — Menú inicial
+# SPEC-006 — Menú inicial
 
 Estado: revisada · Fecha: 2026-10-28
 

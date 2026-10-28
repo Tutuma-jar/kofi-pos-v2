@@ -1,4 +1,4 @@
-﻿# Plan — SPEC-006 Menú inicial
+# Plan — SPEC-006 Menú inicial
 
 Estado: aprobado · Fecha: 2026-10-28 · Especificación: [`spec.md`](spec.md)
 
