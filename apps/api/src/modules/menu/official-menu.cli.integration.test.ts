@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEmptyTestDatabase } from '../../../test/test-database.ts';
-import type { Database } from '../../shared/database/database.ts';
+import { createPgDatabase, type Database } from '../../shared/database/database.ts';
+import { startDroppingPostgres } from '../../../test/dropping-postgres.ts';
 import { runOfficialMenuLoad } from './official-menu.cli.ts';
 import { getAdminMenu, saveCategory } from './index.ts';
 
@@ -95,5 +96,22 @@ describe('comando load:menu (RF-2, RF-3, RF-4, RNF-1)', () => {
     expect(close).toHaveBeenCalledOnce();
     // La base sigue sin tablas: no se tocó.
     expect(await getAdminMenu(db).catch(() => 'sin tablas')).toBe('sin tablas');
+  });
+
+  it('muestra el mensaje de RF-4 si la conexión real se corta a mitad de la carga', async () => {
+    const server = await startDroppingPostgres();
+    try {
+      expect(
+        await runOfficialMenuLoad({
+          env: { DATABASE_URL: server.url },
+          createDatabase: createPgDatabase,
+          write,
+        }),
+      ).toBe(1);
+      expect(messages).toEqual([FAILED]);
+      expect(messages.some((message) => message.includes('127.0.0.1'))).toBe(false);
+    } finally {
+      await server.close();
+    }
   });
 });

@@ -34,6 +34,8 @@ Rama: `feat/006-menu-inicial-us1`.
   Hecho cuando: `official-menu.cli.integration.test.ts`, con PGlite como `createDatabase`, comprueba que una base vacía devuelve 0 y escribe «Menú oficial cargado: 6 categorías y 37 productos»; que una base con menú devuelve 1 y escribe «La base ya tiene categorías o productos. El menú oficial solo se carga en una base nueva»; que sin `DATABASE_URL`, con una `DATABASE_URL` inválida y con un `createDatabase` cuyo error contiene la dirección de la base devuelve 1 y escribe solo «No se pudo cargar el menú oficial. Comprueba la configuración y la conexión a la base», sin la dirección; y que siempre cierra la base que abrió; y `npm run build` incluye `dist/modules/menu/official-menu.cli.js`.
 - [x] **T005 [integración] [US1]** Añadir a `apps/api/test/e2e-server.ts` la ruta `POST /api/__test/official-menu`, que vacía ventas y menú como `POST /api/__test/menu` y llama a `loadOfficialMenu`, y escribir `e2e/menu-inicial-us1-cargar.spec.ts` (plan §8.2, D-8; RF-2). Depende de: T004
   Hecho cuando: la E2E comprueba que, con una sesión de cajero, «Ver menú» muestra las 6 categorías y los 37 productos con sus precios en el formato «Bs 10,00»; y que, con una sesión de dueño, «Administrar menú» los muestra activos y, tras cambiar el precio de «Americano» a 14, «Ver menú» muestra «Bs 14,00»; y `npm run test:e2e` pasa completo.
+- [x] **T008 [api] [US1]** Corregir RF-4: si la conexión se corta a mitad de la carga, el comando real se cae con «Unhandled 'error' event» en lugar de mostrar el mensaje de RF-4 (verificación del PR de US1). `createPgDatabase` escucha el evento `error` del cliente mientras dura la transacción, conserva el error original si el `ROLLBACK` también falla y descarta esa conexión (plan §5.2; RF-4). Depende de: T005
+  Hecho cuando: `official-menu.cli.integration.test.ts`, con `createPgDatabase` contra un servidor local que acepta la conexión, confirma el `BEGIN` y la corta en la siguiente sentencia, comprueba que el comando devuelve 1 y escribe solo «No se pudo cargar el menú oficial. Comprueba la configuración y la conexión a la base», sin la dirección; y `database.integration.test.ts` comprueba que `transaction` rechaza con el error de la conexión cortada.
 
 ## Fase 4 — Pulido
 
@@ -51,7 +53,7 @@ Rama: `feat/006-menu-inicial-pulido`.
 | RF-1 | T001 |
 | RF-2 | T002, T004, T005, T007 |
 | RF-3 | T003, T004, T007 |
-| RF-4 | T002, T004 |
+| RF-4 | T002, T004, T008 |
 | RNF-1 | T004 |
 | RNF-2 | T002 |
 | RNF-3 | T007 |

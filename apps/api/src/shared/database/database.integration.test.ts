@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestDatabase } from '../../../test/test-database.ts';
-import type { Database } from './database.ts';
+import { startDroppingPostgres } from '../../../test/dropping-postgres.ts';
+import { createPgDatabase, type Database } from './database.ts';
 
 describe('Database (PGlite)', () => {
   let db: Database;
@@ -57,5 +58,22 @@ describe('Database (PGlite)', () => {
 
     await expect(failure).rejects.toThrow();
     expect((await db.query('SELECT * FROM notes')).rowCount).toBe(0);
+  });
+});
+
+describe('Database (pg)', () => {
+  it('rechaza la transacción si la conexión se corta a mitad, sin un error sin manejar', async () => {
+    const server = await startDroppingPostgres();
+    const db = createPgDatabase(server.url);
+    try {
+      await expect(
+        db.transaction(async (tx) => {
+          await tx.query('SELECT 1');
+        }),
+      ).rejects.toThrow('Connection terminated unexpectedly');
+    } finally {
+      await db.close();
+      await server.close();
+    }
   });
 });
