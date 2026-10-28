@@ -76,7 +76,13 @@ describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
       'Efectivo: Bs 0,00 · 0 ventas',
       'QR: Bs 0,00 · 0 ventas',
     ])
-      expect(screen.getByText(text, { exact: true })).toBeVisible();
+      expect(
+        screen.getByText((content, element) =>
+          element?.tagName === 'P'
+            ? element.textContent === text
+            : element?.tagName === 'DD' && content === text,
+        ),
+      ).toBeVisible();
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
   it.each([
@@ -170,24 +176,24 @@ describe('pantalla de ventas del día (RF-1 a RF-6, RNF-4)', () => {
     await user.tab();
     expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveFocus();
     await user.tab();
-    expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
-    await user.tab();
-    expect(screen.getByRole('button', { name: 'Buscar' })).toHaveFocus();
-    await user.tab();
     expect(screen.getByRole('link', { name: 'Ver por mes' })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('button', { name: 'Día anterior' })).toHaveFocus();
     await user.keyboard('{Enter}');
     await screen.findByRole('heading', { name: 'Ventas del 23/10/2026' });
     await user.tab();
-    expect(screen.getByRole('button', { name: 'Día siguiente' })).toHaveFocus();
-    await user.tab();
     expect(screen.getByLabelText('Fecha')).toHaveFocus();
     await user.tab();
-    expect(screen.getByRole('link', { name: /^N.º 1/ })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Día siguiente' })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('button', { name: 'Actualizar' })).toHaveFocus();
     await user.keyboard('{Enter}');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Actualizar' })).toBeEnabled());
+    await user.tab();
+    expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Buscar' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('link', { name: /^N.º 1/ })).toHaveFocus();
   });
 });

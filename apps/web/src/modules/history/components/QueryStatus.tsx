@@ -10,14 +10,24 @@ interface QueryStatusProps {
 
 export function QueryStatus({ data, loading, notice, rejection, refresh }: QueryStatusProps) {
   return (
-    <>
-      {data?.asOf && <p>Datos al {formatDateTime(data.asOf)}</p>}
-      <button type="button" disabled={loading} onClick={() => void refresh()}>
-        Actualizar
-      </button>
-      {loading && <p role="status">Cargando…</p>}
-      {notice && <p role="alert">{notice}</p>}
-      {rejection && <p role="alert">{rejection}</p>}
-    </>
+    <div className="history-status">
+      <div className="history-status__actions">
+        {data?.asOf && <p>Datos al {formatDateTime(data.asOf)}</p>}
+        <button type="button" disabled={loading} onClick={() => void refresh()}>
+          Actualizar
+        </button>
+        {loading && <p role="status">Cargando…</p>}
+      </div>
+      {notice && (
+        <p className="alert" role="alert">
+          {notice}
+        </p>
+      )}
+      {rejection && (
+        <p className="alert" role="alert">
+          {rejection}
+        </p>
+      )}
+    </div>
   );
 }

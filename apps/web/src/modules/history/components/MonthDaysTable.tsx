@@ -4,7 +4,7 @@ import { salesCount } from './counts.ts';
 
 export function MonthDaysTable({ days }: { days: MonthHistory['days'] }) {
   return (
-    <table>
+    <table className="history-days">
       <thead>
         <tr>
           <th scope="col">Ventas por día</th>
@@ -14,9 +14,12 @@ export function MonthDaysTable({ days }: { days: MonthHistory['days'] }) {
         {days.map((day) => (
           <tr key={day.date}>
             <td>
-              <Link to={`/ventas?fecha=${day.date}`}>
-                {formatDate(day.date)} · {formatPrice(day.totalCents)} ·{' '}
-                {salesCount(day.salesCount)}
+              <Link className="history-days__row" to={`/ventas?fecha=${day.date}`}>
+                <span className="history-days__date">{formatDate(day.date)}</span>{' '}
+                <span className="history-separator">·</span>{' '}
+                <span className="history-days__amount">{formatPrice(day.totalCents)}</span>{' '}
+                <span className="history-separator">·</span>{' '}
+                <span className="history-days__count">{salesCount(day.salesCount)}</span>
               </Link>
             </td>
           </tr>

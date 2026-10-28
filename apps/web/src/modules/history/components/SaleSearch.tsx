@@ -9,6 +9,7 @@ export function SaleSearch() {
   const errorId = useId();
   return (
     <form
+      className="history-search"
       onSubmit={(event) => {
         event.preventDefault();
         const number = parseSaleNumber(text);
@@ -20,7 +21,7 @@ export function SaleSearch() {
         void navigate(`/ventas/${number}`);
       }}
     >
-      <label>
+      <label className="history-search__field">
         Buscar venta por número{' '}
         <input
           type="text"
@@ -36,7 +37,7 @@ export function SaleSearch() {
       </label>
       <button type="submit">Buscar</button>
       {error && (
-        <p id={errorId} role="alert">
+        <p className="field__error history-search__error" id={errorId} role="alert">
           {error}
         </p>
       )}

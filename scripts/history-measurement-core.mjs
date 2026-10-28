@@ -74,7 +74,13 @@ export function createExistingTabDriver(tab,config,source){
 
 export async function observeHistoryDocument(view,tab){
  await tab.playwright.getByRole('heading',{name:view.title,exact:true}).waitFor({state:'visible'});
- await Promise.all(view.texts.map(text=>tab.playwright.getByText(text,{exact:true}).waitFor({state:'visible'})));
+ await Promise.all(view.texts.map(text=>{
+  // El total y el conteo pertenecen a sus definiciones, aunque una fila repita el mismo importe.
+  const metric=/^Bs |^\d+ ventas?$/.test(text);
+  const pattern=new RegExp('^'+text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$');
+  const target=metric?tab.playwright.getByRole('definition').filter({hasText:pattern}):/^(Efectivo|QR):/.test(text)?tab.playwright.getByRole('paragraph').filter({hasText:pattern}):tab.playwright.getByText(text,{exact:true});
+  return target.waitFor({state:'visible'});
+ }));
  const rows=view.selector==='main tbody tr'?tab.playwright.getByRole('row').filter({has:tab.playwright.getByRole('link')}):tab.playwright.getByRole('listitem');
  const actual=await rows.allTextContents();
  if(JSON.stringify(actual)!==JSON.stringify(view.rows))throw new MeasurementError('La interfaz no muestra todas las filas recibidas.');
