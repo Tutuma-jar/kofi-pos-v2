@@ -8,6 +8,7 @@ import { SalesList } from '../components/SalesList.tsx';
 import { QueryStatus } from '../components/QueryStatus.tsx';
 import { SaleSearch } from '../components/SaleSearch.tsx';
 import { useHistoryTiming } from '../state/useHistoryTiming.ts';
+import '../history.css';
 
 export function DayHistoryPage() {
   const client = useHistoryClient();
@@ -36,18 +37,21 @@ export function DayHistoryPage() {
   }, [data, date, chooseDate]);
 
   return (
-    <main ref={timing}>
-      <h1>{data ? `Ventas del ${formatDate(data.date)}` : 'Historial de ventas'}</h1>
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
-      <SaleSearch />
-      <p>
-        <Link to="/ventas/mes">Ver por mes</Link>
-      </p>
+    <main className="history history--day" ref={timing}>
+      <header className="history-header">
+        <div>
+          <h1>{data ? `Ventas del ${formatDate(data.date)}` : 'Historial de ventas'}</h1>
+          <p>
+            <Link to="/">Volver al inicio</Link>
+          </p>
+        </div>
+        <p>
+          <Link to="/ventas/mes">Ver por mes</Link>
+        </p>
+      </header>
       {data && (
         <>
-          <nav aria-label="Cambiar el día">
+          <nav className="history-period" aria-label="Cambiar el día">
             <button
               type="button"
               disabled={data.previousDate === null}
@@ -57,6 +61,18 @@ export function DayHistoryPage() {
             >
               Día anterior
             </button>
+            <label className="history-period__field">
+              <span className="history-visually-hidden">Fecha</span>
+              <input
+                type="date"
+                min={HISTORY_MIN_DATE}
+                value={data.date}
+                max={data.today}
+                onChange={(event) => {
+                  if (event.target.value) chooseDate(event.target.value);
+                }}
+              />
+            </label>
             <button
               type="button"
               disabled={data.nextDate === null}
@@ -67,27 +83,22 @@ export function DayHistoryPage() {
               Día siguiente
             </button>
           </nav>
-          <label>
-            Fecha{' '}
-            <input
-              type="date"
-              min={HISTORY_MIN_DATE}
-              value={data.date}
-              max={data.today}
-              onChange={(event) => {
-                if (event.target.value) chooseDate(event.target.value);
-              }}
-            />
-          </label>
           <PeriodTotals totals={data} />
+        </>
+      )}
+      <div className="history-tools">
+        <QueryStatus {...query} />
+        <SaleSearch />
+      </div>
+      {data && (
+        <div className="history-results">
           {data.salesCount === 0 ? (
-            <p>{HISTORY_MESSAGES.emptyDay}</p>
+            <p className="history-empty">{HISTORY_MESSAGES.emptyDay}</p>
           ) : (
             <SalesList sales={data.sales} />
           )}
-        </>
+        </div>
       )}
-      <QueryStatus {...query} />
     </main>
   );
 }

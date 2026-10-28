@@ -10,6 +10,14 @@ test('US1: ventas del día, navegación, permisos, conexión, medianoche y tecla
   context,
 }) => {
   test.setTimeout(60000);
+  const historyText = (text: string) =>
+    /^(Efectivo|QR):/.test(text)
+      ? page.getByRole('paragraph').filter({ hasText: text })
+      : /^Bs |^\d+ ventas?$/.test(text)
+        ? page.getByRole('definition').filter({
+            hasText: new RegExp('^' + text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'),
+          })
+        : page.getByText(text, { exact: true });
   let now = new Date('2026-10-24T12:00:00Z');
   const advanceTo = async (instant: string) => {
     const next = new Date(instant);
@@ -123,7 +131,7 @@ test('US1: ventas del día, navegación, permisos, conexión, medianoche y tecla
     'QR: Bs 0,00 · 0 ventas',
     'No hay ventas registradas este día',
   ])
-    await expect(page.getByText(text, { exact: true })).toBeVisible();
+    await expect(historyText(text)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Día siguiente' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Actualizar' })).toBeEnabled();
 
@@ -137,7 +145,7 @@ test('US1: ventas del día, navegación, permisos, conexión, medianoche y tecla
     'QR: Bs 20,50 · 1 venta',
     'Datos al 26/10/2026 11:00',
   ])
-    await expect(page.getByText(text, { exact: true })).toBeVisible();
+    await expect(historyText(text)).toBeVisible();
   await expect(page.getByRole('listitem')).toHaveText([
     'N.º 3 · 10:30 · Ana Quispe · Dueño · QR · Bs 20,50',
     'N.º 2 · 09:15 · Luis Mamani · Cajero · Efectivo · Bs 25,00',
@@ -191,7 +199,7 @@ test('US1: ventas del día, navegación, permisos, conexión, medianoche y tecla
   expect(await (await request.get('/api/__test/sales')).json()).toEqual(originalSales);
   await page.goto('/ventas?fecha=0099-12-31');
   await expect(page.getByRole('heading', { name: 'Ventas del 31/12/0099' })).toBeVisible();
-  await expect(page.getByText('0 ventas', { exact: true })).toBeVisible();
+  await expect(historyText('0 ventas')).toBeVisible();
   await page.getByRole('button', { name: 'Día siguiente' }).click();
   await expect(page.getByRole('heading', { name: 'Ventas del 01/01/0100' })).toBeVisible();
   await page.goto('/ventas?fecha=0001-01-01');
