@@ -186,4 +186,4 @@ La carga en la base oficial de producción la hace la persona que prepara el sis
 
 ## 9. Decisiones globales en `docs/architecture.md`
 
-Ninguna. Pulido añade la fila de `npm run load:menu` a «Comandos» de `AGENTS.md`, como una medición que ejecuta la persona en su terminal (nota ³ de esa tabla).
+Ninguna. Pulido añade la fila de `npm run load:menu` a «Comandos» de `AGENTS.md`, con una nota propia: la ejecuta a mano la persona que prepara el sistema, fuera de las comprobaciones automáticas.
