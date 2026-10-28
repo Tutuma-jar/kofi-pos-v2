@@ -4,7 +4,11 @@ import { getAdminMenu, OFFICIAL_MENU } from '../menu/index.ts';
 import type { Database, Queryable } from '../../shared/database/database.ts';
 import { migrate } from '../../shared/database/migrate.ts';
 import { demoPeriod, planDemoCalendar, type DemoCalendar } from './demo-sales.calendar.ts';
+import { generateDemoSales } from './demo-sales.generator.ts';
 import type { DemoAccount, DemoProduct } from './demo-sales.rules.ts';
+import { insertSalesBatch, reserveSaleNumbers } from './sales.repository.ts';
+
+const BATCH_SIZE = 250; // ventas por sentencia de inserción (D-10)
 
 // Inspección y carga de las ventas de demostración (SPEC-007, RF-1 a RF-3, RF-8 a RF-10;
 // plan §5.4, §5.5, D-2, D-3).
@@ -113,4 +117,33 @@ export async function inspectDemoSales(
     throw error;
   }
   throw new Error('La inspección no terminó');
+}
+
+export interface DemoSalesLoad {
+  count: number;
+  from: string;
+  to: string;
+}
+
+// Carga confirmada (RF-3): vuelve a comprobar la base y carga todo o nada en una transacción. El
+// contador de ventas queda bloqueado hasta el final, así que otra carga o «Nueva venta» esperan:
+// si llegaron antes, la comprobación las ve y rechaza; si llegan después, siguen la numeración
+// (RF-8, RF-10).
+export async function loadDemoSales(
+  db: Database,
+  { seed, now }: { seed: number; now: Date },
+): Promise<DemoSalesLoad> {
+  return db.transaction(async (tx) => {
+    const batch = batchOf(db, tx);
+    await tx.query("SELECT pg_advisory_xact_lock(hashtext('kofi:demo-sales'))");
+    await migrate(batch);
+    await tx.query('SELECT last_number FROM sale_counter FOR UPDATE');
+    const { products, accounts } = await checkBase(batch);
+    const calendar = planDemoCalendar(demoPeriod(now), seed);
+    const firstNumber = await reserveSaleNumbers(tx, calendar.total);
+    const sales = generateDemoSales({ calendar, seed, products, accounts, firstNumber });
+    for (let start = 0; start < sales.length; start += BATCH_SIZE)
+      await insertSalesBatch(tx, sales.slice(start, start + BATCH_SIZE));
+    return { count: calendar.total, from: calendar.from, to: calendar.to };
+  });
 }
