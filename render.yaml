@@ -1,9 +1,9 @@
 # Despliegue en Render (D-12, docs/architecture.md §6.5). Secretos: solo se declaran (sync: false) y
 # se cargan en Render.
 #
-# Comprobación de T028 de Historial: el Blueprint apunta a la rama de pulido
-# y usa una base de Neon de comprobación. Al publicar la especificación, branch pasa a main y DATABASE_URL a la
-# base de producción.
+# Producción: los dos servicios despliegan desde main con la base de producción de Neon. Para una
+# comprobación antes de main, el Blueprint puede apuntar temporalmente a la rama que se comprueba,
+# con su propia base (docs/architecture.md §6.5).
 services:
   # API (Fastify). El plan gratuito no admite preDeployCommand: las migraciones pendientes se
   # aplican al arrancar (npm run start -w @kofi/api).
@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: free
     region: virginia
-    branch: feat/005-historial-pulido
+    branch: main
     # TypeScript y las herramientas de build son dependencias de desarrollo (D-12).
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/api
     startCommand: npm run start -w @kofi/api
@@ -28,12 +28,8 @@ services:
   - type: web
     name: kofi-web
     runtime: static
-    branch: feat/005-historial-pulido
+    branch: main
     buildCommand: npm ci --include=dev && npm run build:contracts && npm run build -w @kofi/web
-    # Solo para la medición de comprobación; eliminar al volver a main/producción.
-    envVars:
-      - key: VITE_HISTORY_MEASUREMENT
-        value: 'true'
     staticPublishPath: apps/web/dist
     routes:
       # /api/* no incluye /api a secas, que sin su propia regla caería en /index.html.
