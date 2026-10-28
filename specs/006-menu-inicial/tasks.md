@@ -41,9 +41,9 @@ Rama: `feat/006-menu-inicial-us1`.
 
 Rama: `feat/006-menu-inicial-pulido`.
 
-- [ ] **T006 [integración]** Añadir a «Comandos» de `AGENTS.md` la fila «Cargar el menú oficial en una base nueva» con `npm run load:menu -w @kofi/api` y una nota propia (⁵) (plan §9). Depende de: T005
+- [x] **T006 [integración]** Añadir a «Comandos» de `AGENTS.md` la fila «Cargar el menú oficial en una base nueva» con `npm run load:menu -w @kofi/api` y una nota propia (⁵) (plan §9). Depende de: T005
   Hecho cuando: la fila está en la tabla y su nota explica que la ejecuta a mano la persona que prepara el sistema, que lee la base de `DATABASE_URL`, que solo carga en una base sin categorías ni productos y que no se ejecuta al desplegar; y `npm run format:check` pasa.
-- [ ] **T007 [integración]** Comprobar el comando contra PostgreSQL real en dos bases de Neon de comprobación nuevas y vacías: en la primera, la persona lo ejecuta desde su computadora, cronometra la carga y lo repite para ver el rechazo; en la segunda, lanza dos cargas a la vez con el comando de Node del plan §8.3. Anotar los resultados en el PR de pulido (plan §8.3, D-5; RNF-3, RF-2, RF-3). Requiere a una persona con acceso a Neon. Depende de: T006
+- [x] **T007 [integración]** Comprobar el comando contra PostgreSQL real en dos bases de Neon de comprobación nuevas y vacías: en la primera, la persona lo ejecuta desde su computadora, cronometra la carga y lo repite para ver el rechazo; en la segunda, lanza dos cargas a la vez con el comando de Node del plan §8.3. Anotar los resultados en el PR de pulido (plan §8.3, D-5; RNF-3, RF-2, RF-3). Requiere a una persona con acceso a Neon. Depende de: T006
   Hecho cuando: el PR de pulido registra que, en la primera base, la primera ejecución escribió «Menú oficial cargado: 6 categorías y 37 productos» en menos de 1 minuto, la segunda escribió el mensaje de RF-3 sin cambios y «Ver menú» mostró los 37 productos; y que, en la segunda base, una de las dos cargas simultáneas escribió el mensaje de carga, la otra el de RF-3 y la base quedó con 37 productos.
 
 ## Cobertura

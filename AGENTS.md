@@ -178,6 +178,7 @@ Requisitos: Node 24 y npm 11.
 | Medir ventas en el despliegue de prueba³ | `npm run measure:sales` |
 | Medir Dashboard en el despliegue de prueba³ | `npm run measure:dashboard` |
 | Medir Historial automáticamente en el despliegue de comprobación⁴ | `npm run measure:history -- --date YYYY-MM-DD --web-commit SHA --api-commit SHA` |
+| Cargar el menú oficial en una base nueva⁵ | `npm run load:menu -w @kofi/api` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
@@ -187,3 +188,5 @@ Requisitos: Node 24 y npm 11.
 Dashboard (T022) pide ingresar directamente en Chromium con cada rol, mide veinte aperturas y veinte actualizaciones por rol y muestra controles para que la persona cronometre su propio recorrido e identificación del total de hoy. No automatiza el recorrido humano ni recibe credenciales fuera del navegador.
 
 ⁴ Historial (SPEC-005 T028) solo requiere autenticación en el navegador cuando no hay sesión reutilizable. Automatiza veinte aperturas de día, mes y detalle, con calentamiento separado y muestras originales. Verifica el rol real de dueño, 400 ventas del día y 6000 del mes. No cronometra personas ni acredita T028-H. Los SHA se obtienen del despliegue real de cada servicio; no se reciben credenciales por argumentos, archivos ni chat.
+
+⁵ Menú inicial (SPEC-006). Lo ejecuta a mano, una sola vez, la persona que prepara el sistema, fuera de las comprobaciones automáticas. Lee la base de `DATABASE_URL` (en `apps/api/.env`, que no se versiona), aplica las migraciones pendientes y carga las 6 categorías y los 37 productos del menú oficial en una sola transacción. Solo carga en una base sin categorías ni productos: si hay alguno, activo o inactivo, se rechaza sin cambiar nada. No se ejecuta al desplegar ni al arrancar la API.
