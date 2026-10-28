@@ -238,7 +238,7 @@ Si al crear o editar un producto algún dato no cumple «Datos de un producto»,
 - Historial de precios o registro de quién cambió qué en el menú.
 - Orden personalizado de categorías o productos: se ordenan alfabéticamente.
 - Búsqueda y filtros en la administración o en la consulta.
-- Importar o exportar el menú (por ejemplo, desde una hoja de cálculo) y cargarlo al preparar el sistema.
+- Importar o exportar el menú (por ejemplo, desde una hoja de cálculo) y cargarlo al preparar el sistema. La carga del menú oficial en una base nueva la cubre [SPEC-006](../006-menu-inicial/spec.md).
 - Qué precio se registra en una venta y cómo afectan a una venta los cambios del menú: lo decide SPEC-003 (Ventas).
 - Qué pasa con un cambio no guardado del menú al cerrar sesión: se pierde, como cualquier cambio no guardado.
 
@@ -254,7 +254,7 @@ Si al crear o editar un producto algún dato no cumple «Datos de un producto»,
 
 ## 9. Dudas abiertas
 
-- [NECESITA ACLARACIÓN] ¿Cuáles son las categorías, los productos y los precios reales de Kofi? No bloquea ninguna historia, porque el dueño los carga desde la interfaz (HU-1), pero hacen falta para las pruebas de aceptación con datos reales y para confirmar que el máximo de Bs 1000,00, los largos y los caracteres admitidos de los nombres alcanzan.
+Ninguna. La duda sobre las categorías, los productos y los precios reales de Kofi se resolvió el 2026-10-28 en [SPEC-006 — Menú inicial](../006-menu-inicial/spec.md#menú-oficial), que fija el menú oficial y su carga en una base nueva; sus nombres y precios cumplen los largos, los caracteres admitidos y el máximo de Bs 1000,00 de esta especificación.
 
 ## 10. Aclaraciones
 
