@@ -138,7 +138,7 @@ La ruta `POST /api/__test/official-menu` del servidor de E2E no es contrato: sol
 | D-2 | **El menú oficial es una constante de TypeScript** (`OFFICIAL_MENU`), con el precio como texto («10,00») | Lo validan los mismos esquemas que lo que escribe el dueño, y se lee igual que la tabla de la especificación | Migración `004` con `INSERT`: se aplicaría sola en todas las bases, también en las de pruebas y comprobación y al arrancar la API, en contra de la carga manual y única de la especificación, y saltaría los servicios | RF-1 |
 | D-3 | **Se carga con `saveCategory` y `saveProduct`** dentro de una única transacción, con el patrón `batch` de `apps/api/test/seed-menu.ts` | Aplica las reglas de SPEC-002 (nombres, precios, categoría activa) sin duplicarlas | `INSERT` directos: tendrían que recalcular `name_key` y los centavos, y podrían divergir de SPEC-002 | RF-1, RF-2 |
 | D-4 | **Las migraciones pendientes se aplican dentro de la misma transacción que la carga** | Una base recién creada queda preparada (RF-2) y, si algo falla o se cancela, queda exactamente como estaba, sin tablas a medias (RF-4). PostgreSQL permite DDL en transacciones, y `migrate` acepta el `batch` porque solo usa `exec`, `query` y `transaction` | Migrar antes en su propia transacción: un fallo posterior dejaría la base cambiada | RF-2, RF-4 |
-| D-5 | **Dos bloqueos al empezar:** `pg_advisory_xact_lock` antes de migrar y `LOCK TABLE categories, products IN SHARE ROW EXCLUSIVE MODE` antes de comprobar | El primero ordena dos cargas simultáneas aun antes de que existan las tablas; la segunda ve el menú de la primera y se rechaza con el mensaje de RF-3. El segundo impide que el dueño cree algo entre la comprobación y la carga, sin bloquear lecturas. PGlite admite los dos (comprobado al planificar) | Comprobar sin bloqueo: la segunda carga fallaría por nombre repetido con el mensaje genérico de RF-4 | RF-3 |
+| D-5 | **Dos bloqueos al empezar:** `pg_advisory_xact_lock` antes de migrar y `LOCK TABLE categories, products IN SHARE ROW EXCLUSIVE MODE` antes de comprobar | El primero ordena dos cargas simultáneas aun antes de que existan las tablas; la segunda ve el menú de la primera y se rechaza con el mensaje de RF-3. El segundo impide que el dueño cree algo entre la comprobación y la carga, sin bloquear lecturas. PGlite admite los dos (comprobado al planificar), pero ejecuta las transacciones de una en una: por eso una prueba comprueba el orden de las sentencias y Pulido lanza dos cargas a la vez contra PostgreSQL real (§8.3) | Comprobar sin bloqueo: la segunda carga fallaría por nombre repetido con el mensaje genérico de RF-4 | RF-3 |
 | D-6 | **Una prueba compara `OFFICIAL_MENU` con la tabla «Menú oficial» de `spec.md`** (categoría, producto y precio con `formatPrice`) | La tabla es la fuente aprobada por la persona; si cambia una sin la otra, la prueba falla (principio 2) | Repetir la lista dentro de la prueba: dos copias que pueden divergir de la especificación | RF-1 |
 | D-7 | **El comando recibe sus dependencias** (`env`, `createDatabase`, `write`) y solo imprime los tres mensajes de §5.2, nunca el error original | Se prueba sin base real ni proceso aparte, como `runAccounts`. Los errores de `pg` y de `loadEnv` pueden incluir la dirección de la base | Imprimir `error.message`: podría mostrar la dirección o el usuario de la base | RF-2, RF-3, RF-4 |
 | D-8 | **La prueba de punta a punta carga el menú con una ruta del servidor de E2E**, que vacía el menú y llama a `loadOfficialMenu` sobre PGlite | La CI no tiene PostgreSQL; así se comprueba en el navegador el resultado de la carga real. El comando contra PostgreSQL se ejecuta en Pulido contra una base de comprobación (§8.3) | Lanzar el comando en la E2E: necesitaría una base PostgreSQL en la CI | RF-2 |
@@ -154,7 +154,7 @@ Ninguna nueva.
 | Nivel | Archivo | Qué comprueba |
 | --- | --- | --- |
 | Unitaria | `official-menu.data.test.ts` | 6 categorías y 36 productos; cada nombre cumple `categoryNameSchema` o `productNameSchema` y cada precio `priceSchema`; sin nombres repetidos según `menuNameKey`; coincidencia exacta con la tabla de `spec.md` (D-6) |
-| Integración (PGlite) | `official-menu.service.integration.test.ts` | Carga en base migrada y en base sin tablas; rechazos de RF-3 sin cambios; dos cargas a la vez; fallo a mitad sin cambios |
+| Integración (PGlite) | `official-menu.service.integration.test.ts` | Carga en base migrada y en base sin tablas; fallo a mitad sin cambios; rechazos de RF-3 sin cambios; dos cargas a la vez y orden de los bloqueos |
 | Integración (PGlite) | `official-menu.cli.integration.test.ts` | Mensajes y código de salida de cada caso; ningún mensaje contiene la dirección de la base |
 | Punta a punta | `e2e/menu-inicial-us1-cargar.spec.ts` | HU-1 en el navegador (§8.2) |
 
@@ -173,6 +173,14 @@ Ninguna nueva.
 | RNF-2 | La integración compara `priceCents` de cada producto con la tabla (por ejemplo, 1500 para «Bs 15,00») |
 | RNF-3 | En Pulido, la persona ejecuta `npm run load:menu -w @kofi/api` contra una base de Neon de comprobación nueva y vacía, desde su computadora, y cronometra que termine en menos de 1 minuto. Repite el comando para comprobar el rechazo de RF-3. El resultado se anota en el PR de pulido |
 
+**Cargas simultáneas en PostgreSQL real (RF-3, D-5).** En Pulido, sobre otra base de comprobación nueva y vacía, la persona lanza dos cargas a la vez con un solo comando de Node, que funciona igual en las terminales de Windows:
+
+```
+node -e "const { spawn } = require('node:child_process'); for (let i = 0; i < 2; i++) spawn('npm', ['run', 'load:menu', '-w', '@kofi/api'], { stdio: 'inherit', shell: true })"
+```
+
+Una debe escribir «Menú oficial cargado: 6 categorías y 36 productos» y la otra el mensaje de RF-3, y la base debe tener 36 productos. El resultado se anota en el PR de pulido.
+
 La carga en la base oficial de producción la hace la persona que prepara el sistema cuando cree esa base; no forma parte de las tareas.
 
 ### 8.4 Cobertura por RF
@@ -181,9 +189,18 @@ La carga en la base oficial de producción la hace la persona que prepara el sis
 | --- | --- |
 | RF-1 | Unitaria: reglas de SPEC-002, nombres únicos, 6 y 36, coincidencia con `spec.md` |
 | RF-2 | Integración: tras cargar en una base migrada sin menú, `getAdminMenu` coincide con `OFFICIAL_MENU` (todo activo) y `getCurrentMenu` tiene 36 productos; en una base sin tablas (`createEmptyTestDatabase`) migra y carga; con cuentas ya creadas, carga. Comando: «Menú oficial cargado: 6 categorías y 36 productos», salida 0. E2E de §8.2 |
-| RF-3 | Integración: rechazo sin cambios con una sola categoría, con productos inactivos, con los 200 productos de `seedMenu` y al cargar dos veces; dos cargas simultáneas (`Promise.all`): una carga y la otra se rechaza. Comando: mensaje de RF-3, salida 1 |
+| RF-3 | Integración: rechazo sin cambios con una sola categoría, con productos inactivos, con los 200 productos de `seedMenu` y al cargar dos veces; dos cargas simultáneas (`Promise.all`): una carga y la otra se rechaza; el orden de las sentencias de la transacción: `pg_advisory_xact_lock` antes de la primera migración y `LOCK TABLE` antes de comprobar si hay menú. Comando: mensaje de RF-3, salida 1. Pulido: dos cargas a la vez contra PostgreSQL real (§8.3) |
 | RF-4 | Integración: un fallo en un producto intermedio deja `getAdminMenu` vacío; sobre una base sin tablas, tampoco quedan tablas ni `schema_migrations`. Comando: `DATABASE_URL` ausente o inválida y un error de conexión que contiene la dirección muestran solo el mensaje de RF-4, salida 1 |
 
 ## 9. Decisiones globales en `docs/architecture.md`
 
 Ninguna. Pulido añade la fila de `npm run load:menu` a «Comandos» de `AGENTS.md`, con una nota propia: la ejecuta a mano la persona que prepara el sistema, fuera de las comprobaciones automáticas.
+
+## 10. Cambios tras el análisis de consistencia
+
+La persona pidió corregir los dos hallazgos menores del análisis (2026-10-28).
+
+| # | Hallazgo | Cambio |
+| --- | --- | --- |
+| 1 | El código de «todo o nada» (RF-4) se escribía en una tarea y sus pruebas en otra posterior (principio 4) | `tasks.md`: las pruebas de RF-4 pasan a la tarea que escribe la transacción |
+| 2 | Las cargas simultáneas (RF-3) solo se probaban en PGlite, que ejecuta las transacciones de una en una | D-5, §8.1, §8.3 y §8.4: prueba del orden de los bloqueos y dos cargas a la vez contra PostgreSQL real en Pulido |
