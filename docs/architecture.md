@@ -170,6 +170,7 @@ Adoptadas en [`specs/001-acceso/plan.md`](../specs/001-acceso/plan.md) y, donde 
 - Solo `apps/api/src/shared/database` habla con PostgreSQL, mediante la interfaz `Database` (`query`, `transaction`), con un adaptador de `pg` en producción y otro de PGlite en pruebas.
 - Las migraciones son archivos SQL numerados en `apps/api/src/shared/database/migrations/` (`NNN_<nombre>.sql`). `migrate.ts` aplica en orden las pendientes y las registra en `schema_migrations`.
 - La hora de la API sale solo de `shared/clock.ts`, que las pruebas reemplazan por un reloj falso.
+- Un comando que la persona ejecuta desde su computadora contra una base (por ejemplo, `load:demo-sales`) toma «ahora» de PostgreSQL (`SELECT now()`), no del reloj de la computadora. Adoptado en SPEC-007 (D-3).
 
 ### 6.5 Despliegue
 
