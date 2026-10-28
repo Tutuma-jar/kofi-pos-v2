@@ -4,3 +4,4 @@ export { menuPlugin } from './menu.routes.ts';
 export { saveCategory } from './categories.service.ts';
 export { saveProduct } from './products.service.ts';
 export { loadOfficialMenu } from './official-menu.service.ts';
+export { OFFICIAL_MENU, type OfficialCategory } from './official-menu.data.ts';
