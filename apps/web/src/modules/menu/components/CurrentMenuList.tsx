@@ -25,7 +25,7 @@ export function CurrentMenuList({ categories }: { categories: readonly CurrentMe
                   ring="var(--color-weave-green)"
                   eye="var(--color-weave-light)"
                 />
-                <h2>{category.name}</h2>
+                <h2 tabIndex={-1}>{category.name}</h2>
               </div>
             </header>
             <ul className="menu__products">

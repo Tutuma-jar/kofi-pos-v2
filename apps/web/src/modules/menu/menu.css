@@ -87,6 +87,11 @@
   background: var(--color-cream-deep);
 }
 
+.menu__index a[aria-current] {
+  color: var(--color-brand-deep);
+  background: var(--color-brand-tint);
+}
+
 .menu__index a.menu__index-inactive {
   color: var(--color-ink-muted);
   font-weight: 600;

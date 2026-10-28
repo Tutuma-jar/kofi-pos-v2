@@ -41,7 +41,7 @@ export function MenuAdminList({
                   ring="var(--color-weave-green)"
                   eye="var(--color-weave-light)"
                 />
-                <h2>{category.name}</h2>
+                <h2 tabIndex={-1}>{category.name}</h2>
                 {!category.active && <span className="menu__inactive">Inactiva</span>}
               </div>
               <div className="menu__actions">
