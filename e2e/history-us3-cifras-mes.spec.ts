@@ -10,6 +10,16 @@ test('US3: cifras reales del mes, límites, navegación, estados y teclado (RF-5
   context,
 }) => {
   test.setTimeout(60000);
+  const historyText = (text: string) => {
+    const totals = page.getByRole('region', { name: 'Cifras del período' });
+    return /^(Efectivo|QR):/.test(text)
+      ? totals.getByRole('paragraph').filter({ hasText: text })
+      : /^Bs |^\d+ ventas?$/.test(text)
+        ? totals.getByRole('definition').filter({
+            hasText: new RegExp('^' + text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'),
+          })
+        : (text.startsWith('Datos al ') ? page : totals).getByText(text, { exact: true });
+  };
   let now = new Date('2026-10-24T12:00:00Z');
   const advanceTo = async (instant: string) => {
     const next = new Date(instant);
@@ -119,7 +129,7 @@ test('US3: cifras reales del mes, límites, navegación, estados y teclado (RF-5
     'QR: Bs 0,00 · 0 ventas',
     'Datos al 05/11/2026 10:00',
   ])
-    await expect(page.getByText(text, { exact: true })).toBeVisible();
+    await expect(historyText(text)).toBeVisible();
   await expect(page.getByRole('row')).toHaveCount(6);
   await expect(page.getByRole('button', { name: 'Mes siguiente' })).toBeDisabled();
   await expect(page.getByLabel('Mes', { exact: true })).toHaveAttribute('min', '0001-01');
@@ -135,7 +145,7 @@ test('US3: cifras reales del mes, límites, navegación, estados y teclado (RF-5
     'Efectivo: Bs 8,00 · 1 venta',
     'QR: Bs 25,00 · 1 venta',
   ])
-    await expect(page.getByText(text, { exact: true })).toBeVisible();
+    await expect(historyText(text)).toBeVisible();
   await expect(page.getByRole('row')).toHaveCount(32);
   await expect(
     page.getByRole('link', { name: '24/10/2026 · Bs 8,00 · 1 venta', exact: true }),
@@ -186,7 +196,7 @@ test('US3: cifras reales del mes, límites, navegación, estados y teclado (RF-5
     'Efectivo: Bs 0,00 · 0 ventas',
     'QR: Bs 0,00 · 0 ventas',
   ])
-    await expect(page.getByText(text, { exact: true })).toBeVisible();
+    await expect(historyText(text)).toBeVisible();
   await expect(page.getByRole('row')).toHaveCount(31);
   await expect(page.getByRole('link', { name: / · Bs 0,00 · 0 ventas$/ })).toHaveCount(30);
 

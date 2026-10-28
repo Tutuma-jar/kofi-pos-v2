@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router';
 import { describe, it, expect, vi } from 'vitest';
@@ -44,7 +44,17 @@ describe('pantalla mensual (T025, RF-5, RF-6, RF-9, RF-11 a RF-13, RNF-4)', () =
       'Efectivo: Bs 37,50 · 2 ventas',
       'QR: Bs 33,00 · 2 ventas',
     ])
-      expect(screen.getByText(text, { exact: true })).toBeVisible();
+      expect(
+        within(screen.getByRole('region', { name: 'Cifras del período' })).getByText(
+          (content, element) =>
+            element?.tagName === 'P'
+              ? element.textContent === text
+              : element?.tagName === 'DD' && content === text,
+          {
+            exact: true,
+          },
+        ),
+      ).toBeVisible();
     expect(screen.getAllByRole('row')).toHaveLength(26);
     expect(screen.getByRole('link', { name: '24/10/2026 · Bs 45,50 · 2 ventas' })).toHaveAttribute(
       'href',
@@ -73,7 +83,17 @@ describe('pantalla mensual (T025, RF-5, RF-6, RF-9, RF-11 a RF-13, RNF-4)', () =
       'Efectivo: Bs 0,00 · 0 ventas',
       'QR: Bs 0,00 · 0 ventas',
     ])
-      expect(screen.getByText(text, { exact: true })).toBeVisible();
+      expect(
+        within(screen.getByRole('region', { name: 'Cifras del período' })).getByText(
+          (content, element) =>
+            element?.tagName === 'P'
+              ? element.textContent === text
+              : element?.tagName === 'DD' && content === text,
+          {
+            exact: true,
+          },
+        ),
+      ).toBeVisible();
     expect(screen.getAllByRole('row')).toHaveLength(31);
     expect(screen.getByRole('link', { name: '30/09/2026 · Bs 0,00 · 0 ventas' })).toBeVisible();
   });
@@ -189,6 +209,14 @@ describe('pantalla mensual (T025, RF-5, RF-6, RF-9, RF-11 a RF-13, RNF-4)', () =
     await user.tab();
     expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveFocus();
     await user.tab();
+    expect(screen.getByRole('link', { name: 'Ver por día' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Mes anterior' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByLabelText('Mes')).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Actualizar' })).toHaveFocus();
+    await user.tab();
     expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
     await user.type(screen.getByLabelText('Buscar venta por número'), '007{Enter}');
     expect(screen.getByLabelText('consulta actual')).toHaveTextContent('/ventas/7');
@@ -197,14 +225,20 @@ describe('pantalla mensual (T025, RF-5, RF-6, RF-9, RF-11 a RF-13, RNF-4)', () =
     mount();
     await screen.findByRole('heading', { name: 'Octubre de 2026' });
     const user = userEvent.setup();
-    for (let i = 0; i < 5; i++) await user.tab();
+    for (let i = 0; i < 3; i++) await user.tab();
     expect(screen.getByRole('button', { name: 'Mes anterior' })).toHaveFocus();
     await user.keyboard('{Enter}');
     await screen.findByRole('heading', { name: 'Septiembre de 2026' });
     await user.tab();
+    expect(screen.getByLabelText('Mes')).toHaveFocus();
+    await user.tab();
     expect(screen.getByRole('button', { name: 'Mes siguiente' })).toHaveFocus();
     await user.tab();
-    expect(screen.getByLabelText('Mes')).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Actualizar' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByLabelText('Buscar venta por número')).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Buscar' })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole('link', { name: '01/09/2026 · Bs 0,00 · 0 ventas' })).toHaveFocus();
     await user.keyboard('{Enter}');
