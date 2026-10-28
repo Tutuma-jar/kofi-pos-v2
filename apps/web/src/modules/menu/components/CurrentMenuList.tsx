@@ -1,14 +1,15 @@
 import { formatPrice } from '@kofi/contracts';
 import type { CurrentMenuCategory } from '../api/menu-client.ts';
 import { SteppedDiamond } from '../../../shared/components/SteppedDiamond.tsx';
-import { CategoryIndex, categoryAnchor } from './CategoryIndex.tsx';
+import { CategoryIndex } from '../../../shared/components/CategoryIndex.tsx';
+import { categoryAnchor } from './category-anchor.ts';
 
 export function CurrentMenuList({ categories }: { categories: readonly CurrentMenuCategory[] }) {
   if (!categories.length)
     return <p className="menu__empty">El menú todavía no tiene productos disponibles</p>;
   return (
     <>
-      <CategoryIndex categories={categories} />
+      <CategoryIndex className="menu__index" categories={categories} anchor={categoryAnchor} />
       <div className="menu__sections">
         {categories.map((category) => (
           <section

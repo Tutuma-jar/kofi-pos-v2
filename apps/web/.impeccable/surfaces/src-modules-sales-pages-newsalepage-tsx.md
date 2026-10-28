@@ -53,3 +53,11 @@ Las capturas inspeccionadas son evidencia de la interfaz con datos ficticios de 
 El revisor final independiente comunicó `disposition: ship`, `material_fixes: []` y fidelidad `match`; el detector comunicó `[]`. La ejecución de Vitest registrada en `.impeccable/review/vitest.log` confirma 1216 pruebas aprobadas. La coordinación del cierre comunicó también 22 pruebas E2E aprobadas. Esta documentación no vuelve a ejecutar esas comprobaciones.
 
 Drift global observado y no reparado: el párrafo «Alcance actual» de `DESIGN.md` y su copia en `narrative.overview` de `.impeccable/design.json` aún afirman que Menú y Ventas no tienen diseño propio. Esa descripción de cobertura está anticuada; los tokens y las reglas visuales contrastados siguen siendo aplicables. Se registra sin refrescar documentos globales en esta extensión ordinaria. No se canoniza ningún defecto ni se amplía el sistema con decisiones particulares de esta pantalla.
+
+## Índice de categorías
+
+El catálogo usa el `CategoryIndex` compartido con Menú (`src/shared/components/`), entre «Productos para vender» y la primera categoría, con el mismo umbral de tres categorías. Cada sección del catálogo lleva su ancla (`venta-categoria-<id>`) y el foco pasa a su `h3` (`tabIndex={-1}`); el siguiente Tab llega al primer producto de esa categoría. Los marcadores toman el naranja del módulo (`--category-index-mark`) en lugar del verde de Menú.
+
+El índice es fijo solo dentro de la columna del catálogo: en escritorio comparte la altura con el pedido sin cruzarse con él, y en la columna apilada se va con el final del catálogo antes de que aparezca el pedido. No añade carga ni retrasos a los productos: se pinta con el menú ya recibido, el salto es inmediato (sin desplazamiento suave, a diferencia de Menú) y `scroll-margin-top` usa la altura real del índice. Para verlo en desarrollo, el menú simulado de Ventas incluye una tercera categoría, «Jugos».
+
+Se revisó en Chromium con `?escenarios=acceso,ventas` a 1440 px (y 1440 × 700 para el fijado) y a 375 px, con ratón y teclado: sin desbordamiento del documento, salto sin cambiar la URL ni el historial, foco en el encabezado y producto añadido con Intro justo después.

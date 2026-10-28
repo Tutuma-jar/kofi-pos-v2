@@ -65,6 +65,16 @@
   margin-bottom: var(--space-4);
 }
 
+.sale-catalog__index {
+  --category-index-mark: var(--color-weave-orange);
+  margin-bottom: var(--space-3);
+}
+
+/* Al saltar desde el índice, la categoría queda bajo él y no detrás. */
+.sale-catalog__category {
+  scroll-margin-top: calc(var(--category-index-height, 4rem) + var(--space-2));
+}
+
 .sale-catalog__category + .sale-catalog__category {
   margin-top: var(--space-4);
 }

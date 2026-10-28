@@ -1,4 +1,8 @@
 import { formatPrice, type MenuProduct, type SaleQuote } from '@kofi/contracts';
+import { CategoryIndex } from '../../../shared/components/CategoryIndex.tsx';
+
+// Id de la sección de cada categoría del catálogo, al que salta su enlace del índice.
+const categoryAnchor = (id: string) => `venta-categoria-${id}`;
 
 export function ProductPicker({
   menu,
@@ -12,16 +16,25 @@ export function ProductPicker({
   return (
     <section aria-label="Productos para vender" className="sale-catalog">
       <h2>Productos para vender</h2>
+      <CategoryIndex
+        className="sale-catalog__index"
+        categories={menu}
+        anchor={categoryAnchor}
+        heading="h3"
+      />
       {menu.length === 0 && (
         <p className="sale-catalog__empty">El menú todavía no tiene productos para vender</p>
       )}
       {menu.map((category) => (
         <section
           key={category.id}
+          id={categoryAnchor(category.id)}
           aria-labelledby={`sale-category-${category.id}`}
           className="sale-catalog__category"
         >
-          <h3 id={`sale-category-${category.id}`}>{category.name}</h3>
+          <h3 id={`sale-category-${category.id}`} tabIndex={-1}>
+            {category.name}
+          </h3>
           <ul className="sale-catalog__products">
             {category.products.map((product) => (
               <li key={product.id}>

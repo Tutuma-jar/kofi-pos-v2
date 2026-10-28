@@ -1,0 +1,71 @@
+/* Índice de categorías fijo arriba (CategoryIndex). Cada página fija su separación, el
+   `scroll-margin-top` de sus secciones con `--category-index-height` y, con
+   `--category-index-mark`, el color de su módulo en los marcadores (verde de Menú por omisión). */
+.category-index {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: var(--space-1);
+  background: var(--color-cream);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.category-index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 -0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.category-index a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  color: var(--color-ink);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--radius);
+}
+
+.category-index a::before {
+  content: '';
+  width: 0.625rem;
+  height: 0.625rem;
+  flex: none;
+  background: var(--category-index-mark, var(--color-weave-green));
+}
+
+.category-index a:hover {
+  color: var(--color-ink);
+  background: var(--color-cream-deep);
+}
+
+.category-index a[aria-current] {
+  color: var(--color-brand-deep);
+  background: var(--color-brand-tint);
+}
+
+.category-index a.category-index__inactive {
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}
+
+.category-index a.category-index__inactive::before {
+  background: transparent;
+  border: 2px solid var(--color-line-strong);
+}
+
+/* En pantallas estrechas el índice es una sola fila que se desplaza de lado. */
+@media (max-width: 44rem) {
+  .category-index ul {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+}

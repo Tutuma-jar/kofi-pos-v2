@@ -1,7 +1,8 @@
 import { formatPrice, type Category, type AdminProduct } from '@kofi/contracts';
 import type { AdminMenuCategory } from '../api/menu-client.ts';
 import { SteppedDiamond } from '../../../shared/components/SteppedDiamond.tsx';
-import { CategoryIndex, categoryAnchor } from './CategoryIndex.tsx';
+import { CategoryIndex } from '../../../shared/components/CategoryIndex.tsx';
+import { categoryAnchor } from './category-anchor.ts';
 
 export function MenuAdminList({
   categories,
@@ -24,7 +25,7 @@ export function MenuAdminList({
     return <p className="menu__empty">Todavía no hay categorías. Crea la primera</p>;
   return (
     <>
-      <CategoryIndex categories={categories} />
+      <CategoryIndex className="menu__index" categories={categories} anchor={categoryAnchor} />
       <div className="menu__sections">
         {categories.map((category) => (
           <section
