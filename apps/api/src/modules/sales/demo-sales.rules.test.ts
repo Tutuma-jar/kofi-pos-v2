@@ -353,3 +353,101 @@ describe('checkDemoSales: horas y contenido (RF-4, RF-5, RNF-2)', () => {
     expect(checkDemoSales(sales, context())).toContain('lines');
   });
 });
+
+const by =
+  (account: DemoAccount) =>
+  (sale: NewSale): NewSale => ({
+    ...sale,
+    registeredBy: { userId: account.id, displayName: account.displayName, role: account.role },
+  });
+const paid =
+  (paymentMethod: NewSale['paymentMethod']) =>
+  (sale: NewSale): NewSale => ({
+    ...sale,
+    paymentMethod,
+  });
+// Las primeras `count` ventas que cumplen `match`.
+function first(count: number, match: (sale: NewSale) => boolean) {
+  let found = 0;
+  return (sale: NewSale) => match(sale) && found++ < count;
+}
+
+describe('checkDemoSales: pago, cuentas y número (RF-6, RF-7, RF-8)', () => {
+  it('acepta del 55 % al 65 % en efectivo y rechaza el 66 % y el 54 %', () => {
+    const small = (sale: NewSale) => sale.totalCents < 6000;
+    const qrSmall = (sale: NewSale) => small(sale) && sale.paymentMethod === 'qr';
+    const cashSmall = (sale: NewSale) => small(sale) && sale.paymentMethod === 'cash';
+    // El conjunto válido tiene 62 ventas en efectivo.
+    expect(checkDemoSales(changed(first(3, qrSmall), paid('cash')), context())).not.toContain(
+      'cash-share',
+    );
+    expect(checkDemoSales(changed(first(4, qrSmall), paid('cash')), context())).toContain(
+      'cash-share',
+    );
+    expect(checkDemoSales(changed(first(7, cashSmall), paid('qr')), context())).not.toContain(
+      'cash-share',
+    );
+    expect(checkDemoSales(changed(first(8, cashSmall), paid('qr')), context())).toContain(
+      'cash-share',
+    );
+  });
+
+  it('detecta un día sin ventas con QR', () => {
+    const noQr = changed((sale) => sale.draftId.startsWith(days[1]!), paid('cash'));
+    expect(checkDemoSales(noQr, context())).toContain('daily-payments');
+  });
+
+  it('detecta menos QR en las ventas desde Bs 60,00 que en las menores', () => {
+    const largeCash = changed((sale) => sale.totalCents >= 6000, paid('cash'));
+    expect(checkDemoSales(largeCash, context())).toContain('qr-large');
+  });
+
+  it('acepta del 70 % al 85 % de ventas de cajero y rechaza el 90 % y el 65 %', () => {
+    const owner = (sale: NewSale) => sale.registeredBy.role === 'owner';
+    const cashier = (sale: NewSale) => sale.registeredBy.role === 'cashier';
+    // El conjunto válido tiene 20 ventas del dueño.
+    expect(checkDemoSales(changed(first(5, owner), by(accounts[1]!)), context())).not.toContain(
+      'cashier-share',
+    );
+    expect(checkDemoSales(changed(first(10, owner), by(accounts[1]!)), context())).toContain(
+      'cashier-share',
+    );
+    expect(checkDemoSales(changed(first(10, cashier), by(accounts[0]!)), context())).not.toContain(
+      'cashier-share',
+    );
+    expect(checkDemoSales(changed(first(15, cashier), by(accounts[0]!)), context())).toContain(
+      'cashier-share',
+    );
+  });
+
+  it('con cuentas de un solo rol, exige que todas las ventas sean de ese rol', () => {
+    const cashiers = { ...context(), accounts: accounts.slice(1) };
+    expect(checkDemoSales(validSales(), cashiers)).toContain('single-role');
+    const allCashier = changed((sale) => sale.registeredBy.role === 'owner', by(accounts[2]!));
+    expect(checkDemoSales(allCashier, cashiers)).toEqual([]);
+  });
+
+  it('detecta una cuenta sin ventas', () => {
+    const withoutRosa = changed((sale) => sale.registeredBy.userId === 'c2', by(accounts[1]!));
+    expect(checkDemoSales(withoutRosa, context())).toContain('all-accounts');
+  });
+
+  it('detecta una venta a nombre de una cuenta que no existe o con otro nombre o rol', () => {
+    const sales = validSales();
+    sales[0] = { ...sales[0]!, registeredBy: { ...sales[0]!.registeredBy, displayName: 'Otra' } };
+    expect(checkDemoSales(sales, context())).toContain('accounts');
+  });
+
+  it('detecta números repetidos, con saltos, fuera de orden o que no empiezan en el primero', () => {
+    const repeated = validSales();
+    repeated[1] = { ...repeated[1]!, number: 1 };
+    expect(checkDemoSales(repeated, context())).toContain('numbers');
+    const swapped = validSales();
+    [swapped[0], swapped[1]] = [
+      { ...swapped[0]!, number: 2 },
+      { ...swapped[1]!, number: 1 },
+    ];
+    expect(checkDemoSales(swapped, context())).toContain('numbers');
+    expect(checkDemoSales(validSales(), { ...context(), firstNumber: 5 })).toContain('numbers');
+  });
+});

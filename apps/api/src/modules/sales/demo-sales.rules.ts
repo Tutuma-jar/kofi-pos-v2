@@ -144,7 +144,17 @@ export type DemoSalesRule =
   | 'pastries-afternoon' // el 60 % de la repostería desde las 14:00 (RF-5)
   | 'unique-products' // un producto en una sola línea (RF-5)
   | 'amounts' // subtotal = precio × cantidad y total = suma (RF-5, RNF-2)
-  | 'lines'; // nombre, categoría y precio del menú recibido (RF-5)
+  | 'lines' // nombre, categoría y precio del menú recibido (RF-5)
+  | 'cash-share' // del 55 % al 65 % en efectivo (RF-6)
+  | 'daily-payments' // los dos medios de pago cada día con ventas (RF-6)
+  | 'qr-large' // más QR desde Bs 60,00 que en las ventas menores (RF-6)
+  | 'cashier-share' // con los dos roles, del 70 % al 85 % de cajero (RF-7)
+  | 'single-role' // con un solo rol, todas de ese rol (RF-7)
+  | 'all-accounts' // cada cuenta, al menos una venta (RF-7)
+  | 'accounts' // nombre visible y rol de una cuenta de la base (RF-7)
+  | 'numbers'; // consecutivos desde el primero, en orden de fecha y hora (RF-8)
+
+export const LARGE_SALE_CENTS = 6000; // Bs 60,00 (RF-6)
 
 export function checkDemoSales(
   sales: readonly NewSale[],
@@ -267,5 +277,53 @@ export function checkDemoSales(
     })
   )
     failed.add('lines');
+
+  // Medio de pago (RF-6).
+  const cash = sales.filter((sale) => sale.paymentMethod === 'cash').length / sales.length;
+  if (cash < 0.55 || cash > 0.65) failed.add('cash-share');
+  for (const day of context.calendar.days.filter((day) => day.salesCount > 0)) {
+    const methods = new Set(
+      local.filter(({ date }) => date === day.date).map(({ sale }) => sale.paymentMethod),
+    );
+    if (methods.size < 2) failed.add('daily-payments');
+  }
+  const qrShare = (of: NewSale[]) =>
+    of.length === 0 ? 0 : of.filter((sale) => sale.paymentMethod === 'qr').length / of.length;
+  if (
+    qrShare(sales.filter((sale) => sale.totalCents >= LARGE_SALE_CENTS)) <=
+    qrShare(sales.filter((sale) => sale.totalCents < LARGE_SALE_CENTS))
+  )
+    failed.add('qr-large');
+
+  // Quién registró cada venta (RF-7).
+  const roles = new Set(context.accounts.map((account) => account.role));
+  const cashier =
+    sales.filter((sale) => sale.registeredBy.role === 'cashier').length / sales.length;
+  if (roles.size === 2 && (cashier < 0.7 || cashier > 0.85)) failed.add('cashier-share');
+  if (roles.size === 1 && sales.some((sale) => !roles.has(sale.registeredBy.role)))
+    failed.add('single-role');
+  if (
+    context.accounts.some(
+      (account) => !sales.some((sale) => sale.registeredBy.userId === account.id),
+    )
+  )
+    failed.add('all-accounts');
+  const accounts = new Map(context.accounts.map((account) => [account.id, account]));
+  if (
+    sales.some(({ registeredBy }) => {
+      const account = accounts.get(registeredBy.userId);
+      return (
+        !account ||
+        account.displayName !== registeredBy.displayName ||
+        account.role !== registeredBy.role
+      );
+    })
+  )
+    failed.add('accounts');
+
+  // Número y orden (RF-8).
+  const ordered = [...sales].sort((a, b) => a.registeredAt.getTime() - b.registeredAt.getTime());
+  if (ordered.some((sale, index) => sale.number !== context.firstNumber + index))
+    failed.add('numbers');
   return [...failed];
 }
