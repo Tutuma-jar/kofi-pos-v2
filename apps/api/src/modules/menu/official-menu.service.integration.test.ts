@@ -3,7 +3,15 @@ import { createEmptyTestDatabase, createTestDatabase } from '../../../test/test-
 import type { Database } from '../../shared/database/database.ts';
 import { createAccountsService } from '../auth/index.ts';
 import { OFFICIAL_MENU } from './official-menu.data.ts';
-import { getAdminMenu, getCurrentMenu, loadOfficialMenu } from './index.ts';
+import {
+  getAdminMenu,
+  getCurrentMenu,
+  loadOfficialMenu,
+  saveCategory,
+  saveProduct,
+} from './index.ts';
+import { OfficialMenuNotEmptyError } from './official-menu.service.ts';
+import { seedMenu } from '../../../test/seed-menu.ts';
 
 // Precio de la tabla en centavos, calculado aparte de priceSchema (RNF-2): «15,00» → 1500.
 const cents = (price: string) => Math.round(Number(price.replace(',', '.')) * 100);
@@ -117,5 +125,103 @@ describe('loadOfficialMenu (RF-2, RF-4, RNF-2)', () => {
        WHERE table_schema = 'public' AND table_name IN ('categories', 'products', 'schema_migrations')`,
     );
     expect(tables.rows).toEqual([]);
+  });
+});
+
+describe('loadOfficialMenu en una base con menú (RF-3)', () => {
+  let db: Database;
+  afterEach(async () => {
+    await db.close();
+  });
+
+  async function expectRejectedWithoutChanges() {
+    const before = await getAdminMenu(db);
+    await expect(loadOfficialMenu(db)).rejects.toBeInstanceOf(OfficialMenuNotEmptyError);
+    expect(await getAdminMenu(db)).toEqual(before);
+  }
+
+  it('rechaza una base con una sola categoría sin productos', async () => {
+    db = await createTestDatabase();
+    await saveCategory(db, { name: 'Propia' });
+    await expectRejectedWithoutChanges();
+  });
+
+  it('rechaza una base con categorías y productos todos inactivos', async () => {
+    db = await createTestDatabase();
+    const category = await saveCategory(db, { name: 'Propia' });
+    await saveProduct(db, { name: 'Existente', categoryId: category.id, price: '12' });
+    await db.query('UPDATE products SET active = false');
+    await db.query('UPDATE categories SET active = false');
+    await expectRejectedWithoutChanges();
+  });
+
+  it('rechaza una base con los 200 productos de prueba', async () => {
+    db = await createTestDatabase();
+    await seedMenu(db);
+    await expectRejectedWithoutChanges();
+  }, 15_000);
+
+  it('rechaza una segunda carga', async () => {
+    db = await createTestDatabase();
+    await loadOfficialMenu(db);
+    await expectRejectedWithoutChanges();
+  });
+
+  it('completa solo una de dos cargas simultáneas sobre una base vacía', async () => {
+    db = await createTestDatabase();
+    const results = await Promise.allSettled([loadOfficialMenu(db), loadOfficialMenu(db)]);
+    expect(results.filter((result) => result.status === 'fulfilled')).toEqual([
+      { status: 'fulfilled', value: { categories: 6, products: 37 } },
+    ]);
+    const rejected = results.filter((result) => result.status === 'rejected');
+    expect(rejected).toHaveLength(1);
+    expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(OfficialMenuNotEmptyError);
+    const count = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM products');
+    expect(count.rows[0]!.count).toBe(37);
+  });
+
+  it('bloquea antes de migrar y antes de comprobar si hay menú', async () => {
+    db = await createEmptyTestDatabase();
+    const statements: string[] = [];
+    const recording: Database = {
+      ...db,
+      transaction: (work) =>
+        db.transaction((tx) =>
+          work({
+            query: async (sql, params) => {
+              statements.push(sql);
+              return tx.query(sql, params);
+            },
+            exec: async (sql) => {
+              statements.push(sql);
+              return tx.exec(sql);
+            },
+          }),
+        ),
+    };
+    await loadOfficialMenu(recording);
+    const advisory = statements.findIndex((sql) => sql.includes('pg_advisory_xact_lock'));
+    const firstMigration = statements.findIndex((sql) => sql.includes('schema_migrations'));
+    const tableLock = statements.indexOf(
+      'LOCK TABLE categories, products IN SHARE ROW EXCLUSIVE MODE',
+    );
+    // La comprobación de RF-3 lee las dos tablas en una sola consulta.
+    const menuCheck = statements.findIndex(
+      (sql, index) =>
+        index > tableLock && /FROM\s+categories\b/.test(sql) && /FROM\s+products\b/.test(sql),
+    );
+    const firstInsert = statements.findIndex((sql) => sql.startsWith('INSERT INTO categories'));
+    expect(advisory).toBe(0);
+    expect(advisory).toBeLessThan(firstMigration);
+    expect(firstMigration).toBeLessThan(tableLock);
+    expect(tableLock).toBeGreaterThan(-1);
+    expect(menuCheck).toBeGreaterThan(tableLock);
+    expect(menuCheck).toBeLessThan(firstInsert);
+    // Nada lee el menú entre la migración y el bloqueo de las tablas.
+    expect(
+      statements
+        .slice(0, tableLock)
+        .some((sql) => /^SELECT[\s\S]*FROM\s+(categories|products)\b/.test(sql)),
+    ).toBe(false);
   });
 });

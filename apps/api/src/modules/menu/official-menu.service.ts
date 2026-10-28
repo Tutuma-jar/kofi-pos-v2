@@ -4,6 +4,13 @@ import { saveCategory } from './categories.service.ts';
 import { OFFICIAL_MENU, type OfficialCategory } from './official-menu.data.ts';
 import { saveProduct } from './products.service.ts';
 
+export class OfficialMenuNotEmptyError extends Error {
+  constructor() {
+    super('La base ya tiene categorías o productos');
+    this.name = 'OfficialMenuNotEmptyError';
+  }
+}
+
 // Carga el menú oficial en una base nueva (SPEC-006, plan §5.1): migraciones, comprobación y alta
 // en una sola transacción, así que un fallo o una cancelación dejan la base como estaba (RF-4).
 export async function loadOfficialMenu(
@@ -19,6 +26,11 @@ export async function loadOfficialMenu(
     await migrate(batch);
     // Nadie crea categorías ni productos mientras se comprueba y se carga (D-5).
     await tx.query('LOCK TABLE categories, products IN SHARE ROW EXCLUSIVE MODE');
+    // Solo en una base sin menú: los inactivos también cuentan, y nada se reemplaza (RF-3).
+    const existing = await tx.query<{ hasMenu: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM categories) OR EXISTS (SELECT 1 FROM products) AS "hasMenu"`,
+    );
+    if (existing.rows[0]!.hasMenu) throw new OfficialMenuNotEmptyError();
     let products = 0;
     for (const category of menu) {
       const saved = await saveCategory(batch, { name: category.name });
