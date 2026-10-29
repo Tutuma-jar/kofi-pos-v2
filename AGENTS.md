@@ -179,6 +179,7 @@ Requisitos: Node 24 y npm 11.
 | Medir Dashboard en el despliegue de prueba³ | `npm run measure:dashboard` |
 | Medir Historial automáticamente en el despliegue de comprobación⁴ | `npm run measure:history -- --date YYYY-MM-DD --web-commit SHA --api-commit SHA` |
 | Cargar el menú oficial en una base nueva⁵ | `npm run load:menu -w @kofi/api` |
+| Cargar ventas de demostración en una base con el menú oficial⁶ | `npm run load:demo-sales -w @kofi/api` |
 
 ¹ Compila antes `@kofi/contracts`.
 ² Compila también `@kofi/web` y necesita Chromium de Playwright: `npx playwright install chromium`.
@@ -190,3 +191,5 @@ Dashboard (T022) pide ingresar directamente en Chromium con cada rol, mide veint
 ⁴ Historial (SPEC-005 T028) solo requiere autenticación en el navegador cuando no hay sesión reutilizable. Automatiza veinte aperturas de día, mes y detalle, con calentamiento separado y muestras originales. Verifica el rol real de dueño, 400 ventas del día y 6000 del mes. No cronometra personas ni acredita T028-H. Los SHA se obtienen del despliegue real de cada servicio; no se reciben credenciales por argumentos, archivos ni chat.
 
 ⁵ Menú inicial (SPEC-006). Lo ejecuta a mano, una sola vez, la persona que prepara el sistema, fuera de las comprobaciones automáticas. Lee la base de `DATABASE_URL` (en `apps/api/.env`, que no se versiona), aplica las migraciones pendientes y carga las 6 categorías y los 37 productos del menú oficial en una sola transacción. Solo carga en una base sin categorías ni productos: si hay alguno, activo o inactivo, se rechaza sin cambiar nada. No se ejecuta al desplegar ni al arrancar la API.
+
+⁶ Ventas de demostración (SPEC-007). Lo ejecuta a mano, una sola vez, la persona que prepara el sistema, fuera de las comprobaciones automáticas. Lee la base de `DATABASE_URL` (en `apps/api/.env`, que no se versiona) y genera ventas variadas desde el mismo día de hace tres meses hasta ayer, en hora de Bolivia, con los precios actuales y las cuentas existentes. Solo carga en una base con el menú oficial completo y activo, al menos una cuenta y ninguna venta; si no, se rechaza sin cambiar nada. Antes de cargar muestra cuántas ventas se crearán y pide escribir «CARGAR». La carga es todo o nada, y las ventas cargadas no se pueden borrar: para empezar otra demostración se usa una base nueva.
