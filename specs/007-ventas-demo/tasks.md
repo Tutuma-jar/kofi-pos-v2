@@ -49,9 +49,9 @@ Rama: `feat/007-ventas-demo-us1`.
 
 Rama: `feat/007-ventas-demo-pulido`.
 
-- [ ] **T011 [integración]** Añadir a «Comandos» de `AGENTS.md` la fila «Cargar ventas de demostración en una base con el menú oficial» con `npm run load:demo-sales -w @kofi/api` y una nota propia (plan §9). Depende de: T010
+- [x] **T011 [integración]** Añadir a «Comandos» de `AGENTS.md` la fila «Cargar ventas de demostración en una base con el menú oficial» con `npm run load:demo-sales -w @kofi/api` y una nota propia (plan §9). Depende de: T010
   Hecho cuando: la fila está en la tabla y su nota explica que la ejecuta a mano la persona que prepara el sistema, que lee la base de `DATABASE_URL`, que solo carga en una base con el menú oficial completo y activo y sin ventas, que pide escribir «CARGAR» y que las ventas cargadas no se pueden borrar; y `npm run format:check` pasa.
-- [ ] **T012 [integración]** Comprobar el comando contra PostgreSQL real en dos bases de Neon de comprobación con el menú oficial y sin ventas: en la primera, la persona lo ejecuta desde su computadora, responde «CARGAR», cronometra la carga, lo repite para ver el rechazo y revisa el Historial; en la segunda, lanza dos cargas a la vez y responde «CARGAR» en las dos. Anotar los resultados en el PR de pulido (plan §8.3; RNF-3, RF-2, RF-10). Requiere a una persona con acceso a Neon. Depende de: T011
+- [x] **T012 [integración]** Comprobar el comando contra PostgreSQL real en dos bases de Neon de comprobación con el menú oficial y sin ventas: en la primera, la persona lo ejecuta desde su computadora, responde «CARGAR», cronometra la carga, lo repite para ver el rechazo y revisa el Historial; en la segunda, lanza dos cargas a la vez y responde «CARGAR» en las dos. Anotar los resultados en el PR de pulido (plan §8.3; RNF-3, RF-2, RF-10). Requiere a una persona con acceso a Neon. Depende de: T011
   Hecho cuando: el PR de pulido registra que, en la primera base, la carga terminó en menos de 3 minutos después de «CARGAR» con el mensaje de RF-3, la segunda ejecución escribió el mensaje de base con ventas sin cambios y el Historial mostró ventas del día anterior y un mes completo; y que, en la segunda base, una carga escribió el mensaje de carga y la otra el de base con ventas, con un solo juego de ventas en la base.
 
 ## Cobertura
