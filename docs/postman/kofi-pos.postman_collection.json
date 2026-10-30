@@ -1,0 +1,740 @@
+{
+  "info": {
+    "name": "Kofi POS — API",
+    "description": "Endpoints de la API de Kofi POS (Fastify), agrupados por módulo. La sesión viaja en la cookie `kofi_session`, que Postman guarda al iniciar sesión.\n\nUsa el entorno `Kofi POS — prueba` (`kofi-pos-prueba.postman_environment.json`) contra una API de prueba con su propia base: las carpetas de Menú y Ventas crean categorías, productos y ventas que no se pueden eliminar. Ejecuta las carpetas en orden.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "categoryId", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "productName", "value": "" },
+    { "key": "unitPriceCents", "value": "" },
+    { "key": "saleNumber", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Salud",
+      "item": [
+        {
+          "name": "Comprobar la API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con status ok', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Acceso (SPEC-001)",
+      "item": [
+        {
+          "name": "Rechazar un ingreso sin datos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Iniciar sesión como dueño",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el rol owner', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().user.role).to.eql('owner');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{ownerUsername}}\",\n  \"password\": \"{{ownerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Consultar la sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Menú (SPEC-002)",
+      "item": [
+        {
+          "name": "Consultar el menú vigente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el menú para administrar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Crear una categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('categoryId', pm.response.json().category.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman {{$timestamp}}\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Editar la categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman editada {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar un producto sin precio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sin precio\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products"]
+            }
+          }
+        },
+        {
+          "name": "Crear un producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('productId', pm.response.json().product.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Café Postman {{$timestamp}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"15,00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products"]
+            }
+          }
+        },
+        {
+          "name": "Editar el producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Café Postman editado {{$timestamp}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"18,50\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar el producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda inactivo', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().product.active).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Reactivar el producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda activo', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().product.active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}", "reactivate"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar la categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda inactiva', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().category.active).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Reactivar la categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda activa', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().category.active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}", "reactivate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Ventas (SPEC-003)",
+      "item": [
+        {
+          "name": "Calcular la venta en preparación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el total calculado', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().totalCents).to.be.above(0);",
+                  "});",
+                  "const line = pm.response.json().lines[0];",
+                  "pm.collectionVariables.set('productName', line.productName);",
+                  "pm.collectionVariables.set('unitPriceCents', line.unitPriceCents);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    { \"productId\": \"{{productId}}\", \"productName\": \"Café Postman\", \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales/quote",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales", "quote"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar una venta sin productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"{{$guid}}\",\n  \"paymentMethod\": \"cash\",\n  \"lines\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales"]
+            }
+          }
+        },
+        {
+          "name": "Registrar una venta pagada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201 con el número de venta', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.expect(pm.response.json().sale.number).to.be.above(0);",
+                  "});",
+                  "pm.collectionVariables.set('saleNumber', pm.response.json().sale.number);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"{{$guid}}\",\n  \"paymentMethod\": \"qr\",\n  \"lines\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"{{productName}}\",\n      \"quantity\": 2,\n      \"unitPriceCents\": {{unitPriceCents}}\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Dashboard (SPEC-004)",
+      "item": [
+        {
+          "name": "Consultar el resumen de hoy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "today"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el resumen del mes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "month"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Historial (SPEC-005)",
+      "item": [
+        {
+          "name": "Consultar las ventas de hoy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/day",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "day"]
+            }
+          }
+        },
+        {
+          "name": "Consultar las cifras de un mes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "month"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el detalle de la venta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/sales/{{saleNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "sales", "{{saleNumber}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Permisos del cajero",
+      "item": [
+        {
+          "name": "Iniciar sesión como cajero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el rol cashier', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().user.role).to.eql('cashier');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{cashierUsername}}\",\n  \"password\": \"{{cashierPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que administre el menú",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que vea el resumen del mes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "month"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que vea el historial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/day",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "day"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Cierre de sesión",
+      "item": [
+        {
+          "name": "Cerrar sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar el menú sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 401', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
