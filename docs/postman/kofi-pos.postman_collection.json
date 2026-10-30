@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "bf7b90ca-058a-4322-88a9-c1b947a1eae3",
     "name": "Kofi POS — API",
-    "description": "Endpoints de la API de Kofi POS (Fastify), agrupados por módulo. La sesión viaja en la cookie `kofi_session`, que Postman guarda al iniciar sesión.\n\nUsa el entorno `Kofi POS — prueba` (`kofi-pos-prueba.postman_environment.json`) contra una API de prueba con su propia base: las carpetas de Menú y Ventas crean categorías, productos y ventas que no se pueden eliminar. Ejecuta las carpetas en orden.",
+    "description": "Endpoints de la API de Kofi POS (Fastify) desplegada en Render, agrupados por módulo. La sesión viaja en la cookie `kofi_session`, que Postman guarda al iniciar sesión.\n\nUsa el entorno `Kofi POS — despliegue` (`https://kofi-api.onrender.com`) y ejecuta las carpetas en orden. Atención: las carpetas de Menú y Ventas crean una categoría, un producto y una venta reales en la base del despliegue, que no se pueden eliminar.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
