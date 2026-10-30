@@ -1,0 +1,854 @@
+{
+  "info": {
+    "_postman_id": "bf7b90ca-058a-4322-88a9-c1b947a1eae3",
+    "name": "Kofi POS — API",
+    "description": "Endpoints de la API de Kofi POS (Fastify) desplegada en Render, agrupados por módulo. La sesión viaja en la cookie `kofi_session`, que Postman guarda al iniciar sesión.\n\nUsa el entorno `Kofi POS — despliegue` (`https://kofi-api.onrender.com`) y ejecuta las carpetas en orden. Atención: las carpetas de Menú y Ventas crean una categoría, un producto y una venta reales en la base del despliegue, que no se pueden eliminar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "productName",
+      "value": ""
+    },
+    {
+      "key": "unitPriceCents",
+      "value": ""
+    },
+    {
+      "key": "saleNumber",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Salud",
+      "id": "7b53425c-e300-48e7-a233-d6ee5e5cda26",
+      "item": [
+        {
+          "name": "Comprobar la API",
+          "id": "1dc680e9-1224-4eac-abdb-ded9a29a22f1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con status ok', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Acceso (SPEC-001)",
+      "id": "fff98964-9b8c-4876-afe1-0aedb1d3ca6c",
+      "item": [
+        {
+          "name": "Rechazar un ingreso sin datos",
+          "id": "4a013962-2422-4501-8193-526b58703306",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Iniciar sesión como dueño",
+          "id": "df61dcbb-8d20-47f7-9943-9939a40b3944",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el rol owner', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().user.role).to.eql('owner');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{ownerUsername}}\",\n  \"password\": \"{{ownerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Consultar la sesión",
+          "id": "1d5f0350-f8f5-4a74-8f0a-a2223d058fe5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Menú (SPEC-002)",
+      "id": "7474e72b-6dd1-4e2e-8792-d9c3b9080d9c",
+      "item": [
+        {
+          "name": "Consultar el menú vigente",
+          "id": "d3384e1d-1396-4fca-9d63-1cefe69187c7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el menú para administrar",
+          "id": "1e05715d-7597-4109-8ba9-12955662050e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Crear una categoría",
+          "id": "d55c7f95-f924-4c39-8f78-b622f5617382",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('categoryId', pm.response.json().category.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Editar la categoría",
+          "id": "98bd994b-44e9-402a-a3d2-10d4f9a5785d",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman editada {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar un producto sin precio",
+          "id": "5e576d74-5810-420f-8f83-80d1e17f66ff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sin precio\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products"]
+            }
+          }
+        },
+        {
+          "name": "Crear un producto",
+          "id": "2a0c2a5d-037d-46a2-9bbd-594ebda67f93",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('productId', pm.response.json().product.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Café Postman {{$timestamp}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"15,00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products"]
+            }
+          }
+        },
+        {
+          "name": "Editar el producto",
+          "id": "dc0f2dff-0458-47e4-8b8b-0b6a25c9c2f3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Café Postman editado {{$timestamp}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"price\": \"18,50\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar el producto",
+          "id": "1e5b9f1f-22e7-457a-9370-1f63ff78bf08",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda inactivo', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().product.active).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Reactivar el producto",
+          "id": "1f293bd3-4690-41d8-b5fe-42a39c1c739e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda activo', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().product.active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/products/{{productId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "products", "{{productId}}", "reactivate"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar la categoría",
+          "id": "3651c941-4552-4c44-8b3b-4694881d49c7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda inactiva', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().category.active).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Reactivar la categoría",
+          "id": "3de5d37e-f5c3-45f7-9272-0deba13d2e54",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('queda activa', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().category.active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/categories/{{categoryId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "categories", "{{categoryId}}", "reactivate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Ventas (SPEC-003)",
+      "id": "849db4f6-d98b-44af-ae9d-58d378f95a54",
+      "item": [
+        {
+          "name": "Calcular la venta en preparación",
+          "id": "5b7ecde2-8a17-4c77-bade-0fbfa342e7f2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el total calculado', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().totalCents).to.be.above(0);",
+                  "});",
+                  "const line = pm.response.json().lines[0];",
+                  "pm.collectionVariables.set('productName', line.productName);",
+                  "pm.collectionVariables.set('unitPriceCents', line.unitPriceCents);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    { \"productId\": \"{{productId}}\", \"productName\": \"Café Postman\", \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales/quote",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales", "quote"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar una venta sin productos",
+          "id": "589ec10e-3af4-471f-9f05-6ac38e0eaeb2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"{{$guid}}\",\n  \"paymentMethod\": \"cash\",\n  \"lines\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales"]
+            }
+          }
+        },
+        {
+          "name": "Registrar una venta pagada",
+          "id": "16539eaa-1c31-47e8-944c-f6d04490baa6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201 con el número de venta', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.expect(pm.response.json().sale.number).to.be.above(0);",
+                  "});",
+                  "pm.collectionVariables.set('saleNumber', pm.response.json().sale.number);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"{{$guid}}\",\n  \"paymentMethod\": \"qr\",\n  \"lines\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"{{productName}}\",\n      \"quantity\": 2,\n      \"unitPriceCents\": {{unitPriceCents}}\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Dashboard (SPEC-004)",
+      "id": "37a01c81-f3e5-402d-a8ba-3319f0adb9bd",
+      "item": [
+        {
+          "name": "Consultar el resumen de hoy",
+          "id": "72a8b766-4bba-4e6c-ba2a-223a36519c3c",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "today"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el resumen del mes",
+          "id": "6c0e1fa5-55bb-4209-baf4-4d40064a4e79",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "month"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Historial (SPEC-005)",
+      "id": "3cabf060-deb1-4b7f-82cf-2608fd6be772",
+      "item": [
+        {
+          "name": "Consultar las ventas de hoy",
+          "id": "ae83347f-98fd-4fc7-b32c-e6c794f3301a",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/day",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "day"]
+            }
+          }
+        },
+        {
+          "name": "Consultar las cifras de un mes",
+          "id": "e7e02aa6-66be-4b1e-8d25-5556e37e7e41",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "month"]
+            }
+          }
+        },
+        {
+          "name": "Consultar el detalle de la venta",
+          "id": "2206feda-5083-43f1-a3d3-24ffab5aeca9",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/sales/{{saleNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "sales", "{{saleNumber}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Permisos del cajero",
+      "id": "d670a5dc-149d-4872-95f6-b708f0b166e7",
+      "item": [
+        {
+          "name": "Iniciar sesión como cajero",
+          "id": "20cd518c-9d4e-4dd6-91bb-2110a037deab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con el rol cashier', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().user.role).to.eql('cashier');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{cashierUsername}}\",\n  \"password\": \"{{cashierPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que administre el menú",
+          "id": "6dbd883e-96fd-46d6-92c2-7e94a0cd87d3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que vea el resumen del mes",
+          "id": "3becc5da-2396-44d3-9aec-26a54fb87225",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "month"]
+            }
+          }
+        },
+        {
+          "name": "Impedir que vea el historial",
+          "id": "1c6c3310-1eb5-4714-aab5-e53025f8ca6d",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 403', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/history/day",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "day"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Cierre de sesión",
+      "id": "23a01c8c-4cc5-4b26-9e31-a0cb07e11071",
+      "item": [
+        {
+          "name": "Cerrar sesión",
+          "id": "d0e3cb45-15a6-4aed-a244-d1f596914ecc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar el menú sin sesión",
+          "id": "1358072d-87a4-4660-b2e7-e6bb5ee26540",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('responde 401', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
